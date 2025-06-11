@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-      target: development
+      target: dev
       # The entrypoint script handles the runtime matching regardless.
       args:
         # expect there to be either a .env or suitable env vars
