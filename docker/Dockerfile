@@ -1,7 +1,7 @@
 ARG PYTHON_MAJOR=3
 ARG PYTHON_MINOR=10
 
-FROM python:${PYTHON_MAJOR}.${PYTHON_MINOR}-slim-bookworm AS runner
+FROM python:${PYTHON_MAJOR}.${PYTHON_MINOR}-slim-bookworm AS base
 
 ARG PYTHON_MAJOR
 ARG PYTHON_MINOR
@@ -125,9 +125,8 @@ ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 
 RUN echo ${NEST_INSTALL_DIR}/lib/${PYTHON_MAJOR_MINOR}/site-packages >> ${VIRTUAL_ENV}/lib/${PYTHON_MAJOR_MINOR}/site-packages/nest.pth
 
-# no default: this must be handled by builder
-ARG USER_UID
-ARG USER_GID
+ARG USER_UID=1000
+ARG USER_GID=1000
 ENV USERNAME=simuser
 RUN groupadd --gid $USER_GID $USERNAME && \
     useradd --uid $USER_UID --gid $USER_GID --create-home --shell /bin/bash $USERNAME
@@ -171,4 +170,13 @@ RUN chown -R $USERNAME:$USERNAME $VIRTUAL_ENV /home/$USERNAME $SHARED_DATA_DIR $
 EXPOSE 5901
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
-# CMD [ "python", "/usr/local/bin/run_interactive.py" ]
+
+FROM base AS dev
+# In dev, the controller directory is mounted from the host and the user is the same as the host user.
+ENV SIMULATION_MODE=dev
+
+FROM base AS hpc
+# In HPC, the controller directory is copied into the image and the user is the default simuser.
+ENV SIMULATION_MODE=hpc
+COPY . /sim/controller
+RUN chown -R simuser:simuser /sim/controller
