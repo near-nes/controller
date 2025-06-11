@@ -862,7 +862,6 @@ CMakeFiles/custom_stdp_module_module.dir/custom_stdp_module.o: \
  /sim/install/nest/include/nest/universal_data_logger.h \
  /sim/install/nest/include/nest/recordables_map.h \
  /sim/controller/cerebellum/custom_stdp/eglif_pc_nestml.h \
- /sim/controller/cerebellum/custom_stdp/eglif_gr_nestml.h \
  /sim/controller/cerebellum/custom_stdp/eglif_mli.h \
  /sim/controller/cerebellum/custom_stdp/eglif_dcnp.h \
  /sim/controller/cerebellum/custom_stdp/stdp_synapse_sinexp.h \
@@ -877,4 +876,5 @@ CMakeFiles/custom_stdp_module_module.dir/custom_stdp_module.o: \
  /sim/controller/cerebellum/custom_stdp/diff_neuron_nestml.h \
  /sim/controller/cerebellum/custom_stdp/rb_neuron_nestml.h \
  /sim/controller/cerebellum/custom_stdp/tracking_neuron_planner_nestml.h \
- /sim/controller/cerebellum/custom_stdp/state_neuron_nestml.h
+ /sim/controller/cerebellum/custom_stdp/state_neuron_nestml.h \
+ /sim/controller/cerebellum/custom_stdp/eglif_cond_alpha_multisyn.h

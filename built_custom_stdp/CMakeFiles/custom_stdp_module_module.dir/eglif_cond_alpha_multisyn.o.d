@@ -1,5 +1,5 @@
-CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o: \
- /sim/controller/cerebellum/custom_stdp/eglif_gr_nestml.cpp \
+CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o: \
+ /sim/controller/cerebellum/custom_stdp/eglif_cond_alpha_multisyn.cpp \
  /usr/include/stdc-predef.h /usr/include/c++/12/limits \
  /usr/include/x86_64-linux-gnu/c++/12/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/12/bits/os_defines.h \
@@ -810,7 +810,7 @@ CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o: \
  /sim/install/nest/include/nest/doubledatum.h \
  /sim/install/nest/include/nest/integerdatum.h \
  /sim/install/nest/include/nest/lockptrdatum.h \
- /sim/controller/cerebellum/custom_stdp/eglif_gr_nestml.h \
+ /sim/controller/cerebellum/custom_stdp/eglif_cond_alpha_multisyn.h \
  /sim/install/nest/include/nest/config.h /usr/include/gsl/gsl_errno.h \
  /usr/include/gsl/gsl_types.h /usr/include/gsl/gsl_matrix.h \
  /usr/include/gsl/gsl_matrix_complex_long_double.h \
@@ -847,14 +847,6 @@ CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o: \
  /sim/install/nest/include/nest/archiving_node.h \
  /sim/install/nest/include/nest/structural_plasticity_node.h \
  /sim/install/nest/include/nest/synaptic_element.h \
- /sim/controller/cerebellum/custom_stdp/extended_post_history_archiving_node.h \
- /sim/controller/cerebellum/custom_stdp/extended_hist_entry.h \
- /sim/install/nest/include/nest/structural_plasticity_node.h \
- /sim/install/nest/include/nest/nest_time.h \
- /sim/install/nest/include/nest/nest_types.h \
- /sim/install/nest/include/nest/node.h \
- /sim/install/nest/include/nest/dictdatum.h \
- /sim/install/nest/include/nest/nest_datums.h \
  /sim/install/nest/include/nest/connection.h \
  /sim/install/nest/include/nest/connector_base_impl.h \
  /sim/install/nest/include/nest/weight_recorder.h \
@@ -862,5 +854,8 @@ CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o: \
  /sim/install/nest/include/nest/syn_id_delay.h \
  /sim/install/nest/include/nest/dict_util.h \
  /sim/install/nest/include/nest/event.h \
+ /sim/install/nest/include/nest/nest_types.h \
  /sim/install/nest/include/nest/ring_buffer.h \
- /sim/install/nest/include/nest/universal_data_logger.h
+ /sim/install/nest/include/nest/universal_data_logger.h \
+ /sim/install/nest/include/nest/dictdatum.h \
+ /sim/install/nest/include/nest/nest_time.h

@@ -253,6 +253,21 @@ diff_neuron_nestml.s:
 .PHONY : diff_neuron_nestml.s
 
 # target to build an object file
+eglif_cond_alpha_multisyn.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/custom_stdp_module_module.dir/build.make CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o
+.PHONY : eglif_cond_alpha_multisyn.o
+
+# target to preprocess a source file
+eglif_cond_alpha_multisyn.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/custom_stdp_module_module.dir/build.make CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.i
+.PHONY : eglif_cond_alpha_multisyn.i
+
+# target to generate assembly for a file
+eglif_cond_alpha_multisyn.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/custom_stdp_module_module.dir/build.make CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.s
+.PHONY : eglif_cond_alpha_multisyn.s
+
+# target to build an object file
 eglif_dcnp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/custom_stdp_module_module.dir/build.make CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o
 .PHONY : eglif_dcnp.o
@@ -266,21 +281,6 @@ eglif_dcnp.i:
 eglif_dcnp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/custom_stdp_module_module.dir/build.make CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.s
 .PHONY : eglif_dcnp.s
-
-# target to build an object file
-eglif_gr_nestml.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/custom_stdp_module_module.dir/build.make CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o
-.PHONY : eglif_gr_nestml.o
-
-# target to preprocess a source file
-eglif_gr_nestml.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/custom_stdp_module_module.dir/build.make CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.i
-.PHONY : eglif_gr_nestml.i
-
-# target to generate assembly for a file
-eglif_gr_nestml.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/custom_stdp_module_module.dir/build.make CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.s
-.PHONY : eglif_gr_nestml.s
 
 # target to build an object file
 eglif_io_nestml.o:
@@ -472,12 +472,12 @@ help:
 	@echo "... diff_neuron_nestml.o"
 	@echo "... diff_neuron_nestml.i"
 	@echo "... diff_neuron_nestml.s"
+	@echo "... eglif_cond_alpha_multisyn.o"
+	@echo "... eglif_cond_alpha_multisyn.i"
+	@echo "... eglif_cond_alpha_multisyn.s"
 	@echo "... eglif_dcnp.o"
 	@echo "... eglif_dcnp.i"
 	@echo "... eglif_dcnp.s"
-	@echo "... eglif_gr_nestml.o"
-	@echo "... eglif_gr_nestml.i"
-	@echo "... eglif_gr_nestml.s"
 	@echo "... eglif_io_nestml.o"
 	@echo "... eglif_io_nestml.i"
 	@echo "... eglif_io_nestml.s"
