@@ -111,24 +111,10 @@ CMakeFiles/custom_stdp_module_module.dir/eglif_pc_nestml.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/custom_stdp_module_module.dir/eglif_pc_nestml.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /sim/controller/cerebellum/custom_stdp/eglif_pc_nestml.cpp -o CMakeFiles/custom_stdp_module_module.dir/eglif_pc_nestml.s
 
-CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o: CMakeFiles/custom_stdp_module_module.dir/flags.make
-CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o: /sim/controller/cerebellum/custom_stdp/eglif_gr_nestml.cpp
-CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o: CMakeFiles/custom_stdp_module_module.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o -MF CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o.d -o CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o -c /sim/controller/cerebellum/custom_stdp/eglif_gr_nestml.cpp
-
-CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /sim/controller/cerebellum/custom_stdp/eglif_gr_nestml.cpp > CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.i
-
-CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /sim/controller/cerebellum/custom_stdp/eglif_gr_nestml.cpp -o CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.s
-
 CMakeFiles/custom_stdp_module_module.dir/eglif_mli.o: CMakeFiles/custom_stdp_module_module.dir/flags.make
 CMakeFiles/custom_stdp_module_module.dir/eglif_mli.o: /sim/controller/cerebellum/custom_stdp/eglif_mli.cpp
 CMakeFiles/custom_stdp_module_module.dir/eglif_mli.o: CMakeFiles/custom_stdp_module_module.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/eglif_mli.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/eglif_mli.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/custom_stdp_module_module.dir/eglif_mli.o -MF CMakeFiles/custom_stdp_module_module.dir/eglif_mli.o.d -o CMakeFiles/custom_stdp_module_module.dir/eglif_mli.o -c /sim/controller/cerebellum/custom_stdp/eglif_mli.cpp
 
 CMakeFiles/custom_stdp_module_module.dir/eglif_mli.i: cmake_force
@@ -142,7 +128,7 @@ CMakeFiles/custom_stdp_module_module.dir/eglif_mli.s: cmake_force
 CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o: CMakeFiles/custom_stdp_module_module.dir/flags.make
 CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o: /sim/controller/cerebellum/custom_stdp/eglif_dcnp.cpp
 CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o: CMakeFiles/custom_stdp_module_module.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o -MF CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o.d -o CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o -c /sim/controller/cerebellum/custom_stdp/eglif_dcnp.cpp
 
 CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.i: cmake_force
@@ -156,7 +142,7 @@ CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.s: cmake_force
 CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.o: CMakeFiles/custom_stdp_module_module.dir/flags.make
 CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.o: /sim/controller/cerebellum/custom_stdp/stdp_synapse_sinexp.cpp
 CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.o: CMakeFiles/custom_stdp_module_module.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.o -MF CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.o.d -o CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.o -c /sim/controller/cerebellum/custom_stdp/stdp_synapse_sinexp.cpp
 
 CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.i: cmake_force
@@ -170,7 +156,7 @@ CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.s: cmake_force
 CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.o: CMakeFiles/custom_stdp_module_module.dir/flags.make
 CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.o: /sim/controller/cerebellum/custom_stdp/stdp_synapse_alpha.cpp
 CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.o: CMakeFiles/custom_stdp_module_module.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.o -MF CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.o.d -o CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.o -c /sim/controller/cerebellum/custom_stdp/stdp_synapse_alpha.cpp
 
 CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.i: cmake_force
@@ -184,7 +170,7 @@ CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.s: cmake_force
 CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.o: CMakeFiles/custom_stdp_module_module.dir/flags.make
 CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.o: /sim/controller/cerebellum/custom_stdp/extended_post_history_archiving_node.cpp
 CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.o: CMakeFiles/custom_stdp_module_module.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.o -MF CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.o.d -o CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.o -c /sim/controller/cerebellum/custom_stdp/extended_post_history_archiving_node.cpp
 
 CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.i: cmake_force
@@ -198,7 +184,7 @@ CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.s:
 CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.o: CMakeFiles/custom_stdp_module_module.dir/flags.make
 CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.o: /sim/controller/cerebellum/custom_stdp/extended_hist_entry.cpp
 CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.o: CMakeFiles/custom_stdp_module_module.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.o -MF CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.o.d -o CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.o -c /sim/controller/cerebellum/custom_stdp/extended_hist_entry.cpp
 
 CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.i: cmake_force
@@ -208,6 +194,20 @@ CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.i: cmake_force
 CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /sim/controller/cerebellum/custom_stdp/extended_hist_entry.cpp -o CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.s
+
+CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o: CMakeFiles/custom_stdp_module_module.dir/flags.make
+CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o: /sim/controller/cerebellum/custom_stdp/eglif_cond_alpha_multisyn.cpp
+CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o: CMakeFiles/custom_stdp_module_module.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/sim/controller/built_custom_stdp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o -MF CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o.d -o CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o -c /sim/controller/cerebellum/custom_stdp/eglif_cond_alpha_multisyn.cpp
+
+CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /sim/controller/cerebellum/custom_stdp/eglif_cond_alpha_multisyn.cpp > CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.i
+
+CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /sim/controller/cerebellum/custom_stdp/eglif_cond_alpha_multisyn.cpp -o CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.s
 
 CMakeFiles/custom_stdp_module_module.dir/tracking_neuron_nestml.o: CMakeFiles/custom_stdp_module_module.dir/flags.make
 CMakeFiles/custom_stdp_module_module.dir/tracking_neuron_nestml.o: /sim/controller/cerebellum/custom_stdp/tracking_neuron_nestml.cpp
@@ -298,13 +298,13 @@ custom_stdp_module_module_OBJECTS = \
 "CMakeFiles/custom_stdp_module_module.dir/custom_stdp_module.o" \
 "CMakeFiles/custom_stdp_module_module.dir/eglif_io_nestml.o" \
 "CMakeFiles/custom_stdp_module_module.dir/eglif_pc_nestml.o" \
-"CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o" \
 "CMakeFiles/custom_stdp_module_module.dir/eglif_mli.o" \
 "CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o" \
 "CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.o" \
 "CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.o" \
 "CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.o" \
 "CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.o" \
+"CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o" \
 "CMakeFiles/custom_stdp_module_module.dir/tracking_neuron_nestml.o" \
 "CMakeFiles/custom_stdp_module_module.dir/basic_neuron_nestml.o" \
 "CMakeFiles/custom_stdp_module_module.dir/diff_neuron_nestml.o" \
@@ -318,13 +318,13 @@ custom_stdp_module_module_EXTERNAL_OBJECTS =
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/custom_stdp_module.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/eglif_io_nestml.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/eglif_pc_nestml.o
-custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/eglif_gr_nestml.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/eglif_mli.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/eglif_dcnp.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_sinexp.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/stdp_synapse_alpha.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/extended_post_history_archiving_node.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/extended_hist_entry.o
+custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/eglif_cond_alpha_multisyn.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/tracking_neuron_nestml.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/basic_neuron_nestml.o
 custom_stdp_module.so: CMakeFiles/custom_stdp_module_module.dir/diff_neuron_nestml.o
