@@ -96,11 +96,6 @@ else
     echo "Uncompressed network file ${BSB_NETWORK_FILE} already exists. Skipping decompression."
 fi
 
-##### temporary patch for cerebmodule
-echo "Installing cerebmodule as it is not included in custom_stdp yet"
-gosu "$USERNAME" /sim/venv/bin/python ${CEREBELLUM_PATH}/cerebellum/nest_models/build_models.py
-
-##### temporary patch end
 
 echo "Installing custom stdp"
 cd $CONTROLLER_DIR/built_custom_stdp
