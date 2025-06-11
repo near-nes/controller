@@ -1,6 +1,6 @@
 name: DBBS Mouse cerebellum w/ DCN and IO NEST basal activity and mf stimulus w/ microzones
 storage:
-  root: mouse_cereb_microzones_complete_nest.hdf5
+  root: /sim/controller/fake_storage.hdf5
 # packages:
 #   - bsb-nest~=4.2
 # components:
@@ -10,9 +10,7 @@ simulations:
     simulator: nest
     resolution: 0.1
     duration: 50
-    modules:
-    - cerebmodule
-    # - custom_stdp_module
+    modules: # - custom_stdp_module
     seed: 1234
     cell_models:
       mossy_fibers:
