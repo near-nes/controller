@@ -109,7 +109,7 @@ RUN mkdir -p $BULLET_MUSCLE_DIR $SDF_MODELS_DIR
 
 # cerebellum
 ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5.gz
-ENV BSB_NETWORK_FILE=${CEREBELLUM_PATH}/cerebellum_plastic_base.hdf5
+ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5
 
 
 # Install bullet muscle simulation
