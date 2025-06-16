@@ -97,18 +97,8 @@ else
 fi
 
 
-echo "Installing custom stdp"
-cd $CONTROLLER_DIR/built_custom_stdp
-make install
-cd $CONTROLLER_DIR
 
 # --- Prerequisite Scripts ---
-# Run the editable install script
-echo "Running python dependencies script as user '$USERNAME'..."
-export VIRTUAL_ENV CONTROLLER_DIR USERNAME BULLET_MUSCLE_DIR
-gosu "$USERNAME" /usr/local/bin/prepare_python_env.sh
-
-
 # Start VNC in the background AS THE USER first using the dedicated script.
 echo "Entrypoint: Launching VNC background process via gosu..."
 # Export variables needed by the background script

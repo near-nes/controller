@@ -1,13 +1,8 @@
 # manually copied from cerebellum deps (cerebellum/pyproject.toml):
 # because can't include cerebellum in the docker build
 # (installing it as pip install -e => not available until volume is mounted at runtime)
-bsb-core[parallel]~=4.5.5
-bsb-hdf5~=4.1.1
-bsb-yaml~=4.2.1
-bsb-json~=4.2.1
-bsb-neuron~=4.2.1
-bsb-nest~=4.3.1
-nestml~=7.0
+bsb~=6.0.0
+bsb-nest~=6.0.0
 # extras
 # README: if you're editing this file, run `docker compose down -v` to remove all containers
 # read INSTALL.md for more info
