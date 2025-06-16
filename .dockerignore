@@ -1,0 +1,12 @@
+# from gitignore
+__pycache__
+**/*.hdf5
+logs
+.env
+runs/*
+
+# docker-specific
+.git
+.gitignore
+*.md
+.dockerignore
