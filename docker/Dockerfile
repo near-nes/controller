@@ -56,7 +56,7 @@ ENV SHARED_DATA_DIR=/sim/shared_data
 ENV NEST_MODULE_PATH=/sim/install/nest/lib/nest
 RUN mkdir -p $CONTROLLER_DIR $SHARED_DATA_DIR $NEST_MODULE_PATH
 
-ENV CEREBELLUM_PATH=/sim/controller/cerebellum
+ENV CEREBELLUM_PATH=/sim/cerebellum
 ENV LD_LIBRARY_PATH="${MUSIC_INSTALL_DIR}/lib"
 
 RUN mkdir -p $INSTALL_DIR $DEPS_DIR $NEST_INSTALL_DIR $MUSIC_INSTALL_DIR
@@ -116,6 +116,19 @@ ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5
 RUN git clone https://github.com/near-nes/bullet_muscle_sim.git $BULLET_MUSCLE_DIR \
     && git clone https://github.com/near-nes/embodiment_sdf_models.git $SDF_MODELS_DIR
 
+
+ENV PATH="${VIRTUAL_ENV}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${PATH}"
+
+
+RUN git clone https://github.com/dbbs-lab/cerebellar-models $CEREBELLUM_PATH \
+    && cd $CEREBELLUM_PATH \
+    && git checkout 53656eea5c5dd671371ff3b4f1ac0be9cadf32e9\
+    && cd custom_stdp \
+    && cmake . \
+    && make \
+    && make install
+
+
 WORKDIR ${DEPS_DIR}
 COPY ./docker/requirements.txt . 
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -134,8 +147,6 @@ RUN groupadd --gid $USER_GID $USERNAME && \
 COPY ./docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-COPY scripts/prepare_python_env.sh /usr/local/bin/prepare_python_env.sh
-RUN chmod +x /usr/local/bin/prepare_python_env.sh
 
 # >>>>>>>>>> VNC SETUP >>>>>>>>>>>>>>
 ENV VNC_DISPLAY=":1"
@@ -154,8 +165,6 @@ COPY scripts/aliases.sh /tmp/aliases.sh
 RUN cat /tmp/aliases.sh >> /etc/bash.bashrc && rm /tmp/aliases.sh
 # Set display for terminals opened in VNC
 RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc 
-
-ENV PATH="${VIRTUAL_ENV}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${PATH}"
 
 ENV PYTHONPATH="${CONTROLLER_DIR}:${BULLET_MUSCLE_DIR}:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"

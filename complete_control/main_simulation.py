@@ -34,34 +34,14 @@ nest.set_verbosity("M_ERROR")  # M_WARNING
 def setup_environment(nestml_build_dir=paths.NESTML_BUILD_DIR):
     log = structlog.get_logger("main.env_setup")
     """Sets up environment variables if needed (e.g., for NESTML)."""
-    # This is fragile. Better to manage environments or installation paths.
-    ld_lib_path = os.environ.get("LD_LIBRARY_PATH", "")
-    nestml_path_str = str(nestml_build_dir)
-    # TODO do we really need this? can we delete this whole section?
-    # keep the install but everything else should go i think.
-    if nestml_path_str not in ld_lib_path:
-        # Check if the path exists before adding
-        if nestml_build_dir.exists():
-            new_path = (
-                ld_lib_path + ":" + nestml_path_str if ld_lib_path else nestml_path_str
-            )
-            os.environ["LD_LIBRARY_PATH"] = new_path
-            log.info("Updated LD_LIBRARY_PATH", path_added=nestml_path_str)
-        else:
-            log.warning(
-                "NESTML path not found, skipping LD_LIBRARY_PATH update",
-                path=nestml_path_str,
-            )
-    # Import NESTML models after path setup
     try:
         # Check if module is already installed to prevent errors on reset
-        if "custom_stdp_module" not in nest.Models(mtype="nodes"):
+        if "eglif_cond_alpha_multisyn" not in nest.Models(mtype="nodes"):
             nest.Install("custom_stdp_module")
             log.info("Installed NESTML module", module="custom_stdp_module")
         else:
             log.debug("NESTML module already installed", module="custom_stdp_module")
     except nest.NESTError as e:
-        # Handle cases where installation fails even if not previously installed
         log.error(
             "Error installing NESTML module",
             module="custom_stdp_module",
