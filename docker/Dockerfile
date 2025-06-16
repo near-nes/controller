@@ -120,7 +120,7 @@ RUN git clone https://github.com/near-nes/bullet_muscle_sim.git $BULLET_MUSCLE_D
 ENV PATH="${VIRTUAL_ENV}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${PATH}"
 
 
-RUN git clone https://github.com/dbbs-lab/cerebellar-models $CEREBELLUM_PATH \
+RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
     && git checkout 53656eea5c5dd671371ff3b4f1ac0be9cadf32e9\
     && cd custom_stdp \
