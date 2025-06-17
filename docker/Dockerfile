@@ -40,7 +40,7 @@ RUN python -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip install --upgrade pip setuptools wheel
-ENV CFLAGS=-O2 
+ENV CFLAGS=-O2
 # ^ for https://github.com/mpi4py/mpi4py/issues/652
 COPY ./docker/requirements_base.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -64,7 +64,12 @@ ENV LD_LIBRARY_PATH="${MUSIC_INSTALL_DIR}/lib"
 
 RUN mkdir -p $INSTALL_DIR $DEPS_DIR $NEST_INSTALL_DIR $MUSIC_INSTALL_DIR
 
+# openmpi, music and nest
+FROM base AS builder
 
+ENV PATH="${VIRTUAL_ENV}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${LD_LIBRARY_PATH}"
+ENV PKG_CONFIG_PATH="${OMPI_INSTALL_DIR}/lib64/pkgconfig"
 
 ####################### openMPI #####################
 WORKDIR ${DEPS_DIR}
@@ -78,9 +83,6 @@ RUN tar xfz $OMPI_GZ \
     && make -j$(nproc) \
     && make install
 
-ENV PATH="${VIRTUAL_ENV}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
-
-ENV LD_LIBRARY_PATH=${OMPI_INSTALL_DIR}/lib64:$LD_LIBRARY_PATH
 ####################### MUSIC #######################
 # Install MUSIC - pinned to last commit to ensure compatibility
 WORKDIR $DEPS_DIR
@@ -93,7 +95,6 @@ RUN git clone https://github.com/INCF/MUSIC \
     && make -j$(nproc) \
     && make install
 
-ENV PKG_CONFIG_PATH=${OMPI_INSTALL_DIR}/lib64/pkgconfig
 ####################### NEST 3.7 #######################
 ENV NEST_VERSION=3.7
 
@@ -110,21 +111,32 @@ RUN mkdir -p nest-build \
     -Dwith-music=$MUSIC_INSTALL_DIR \
     -Dwith-python=ON \
     # just to make extra extra sure
-    -DPYTHON_EXECUTABLE=$VIRTUAL_ENV/bin/python \ 
+    -DPYTHON_EXECUTABLE=$VIRTUAL_ENV/bin/python \
     -Dwith-openmp=ON \
     -Dwith-ltdl=ON \
     # -Dstatic-libraries=ON \ i tried this, but it didn't work. i don't think it's maintained
     # -DCMAKE_C_COMPILER=mpicc -DCMAKE_CXX_COMPILER=mpicxx \
     $DEPS_DIR/nest-simulator \
     && make -j$(nproc) \
-    && make install 
+    && make install
+
+# final runtime image
+FROM base AS runtime
+
+ENV PATH="${VIRTUAL_ENV}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${LD_LIBRARY_PATH}"
+
+COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+# openMPI needs this if no ssh/rsh available
+ENV OMPI_MCA_plm=^rsh
 
 # suppress nest startup message
 ENV PYNEST_QUIET=1
 
 ENV BULLET_MUSCLE_DIR=$DEPS_DIR/bullet_muscle_sim
 ENV SDF_MODELS_DIR=/sim/embodiment_sdf_models
-RUN mkdir -p $BULLET_MUSCLE_DIR $SDF_MODELS_DIR 
+RUN mkdir -p $BULLET_MUSCLE_DIR $SDF_MODELS_DIR
 
 # cerebellum
 ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5.gz
@@ -147,7 +159,7 @@ RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
 
 
 WORKDIR ${DEPS_DIR}
-COPY ./docker/requirements.txt . 
+COPY ./docker/requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements.txt
 
@@ -166,6 +178,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 
 # >>>>>>>>>> VNC SETUP >>>>>>>>>>>>>>
+ARG VNC_PASSWORD="vncpass"
+ENV VNC_PASSWORD=${VNC_PASSWORD}
 ENV VNC_DISPLAY=":1"
 ENV DISPLAY="${VNC_DISPLAY}"
 COPY scripts/start-vnc.sh /usr/local/bin/start-vnc.sh
@@ -181,7 +195,7 @@ RUN chmod 700 /home/$USERNAME/.vnc/xstartup
 COPY scripts/aliases.sh /tmp/aliases.sh
 RUN cat /tmp/aliases.sh >> /etc/bash.bashrc && rm /tmp/aliases.sh
 # Set display for terminals opened in VNC
-RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc 
+RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc
 
 ENV PYTHONPATH="${CONTROLLER_DIR}:${BULLET_MUSCLE_DIR}:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
@@ -197,11 +211,11 @@ EXPOSE 5901
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
 
-FROM base AS dev
+FROM runtime AS dev
 # In dev, the controller directory is mounted from the host and the user is the same as the host user.
 ENV SIMULATION_MODE=dev
 
-FROM base AS hpc
+FROM runtime AS hpc
 # In HPC, the controller directory is copied into the image and the user is the default simuser.
 ENV SIMULATION_MODE=hpc
 COPY . /sim/controller
