@@ -8,8 +8,6 @@ ARG PYTHON_MINOR
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    openmpi-bin \
-    libopenmpi-dev \
     ca-certificates \
     git \
     # nest-simulator dependencies, partly from https://nest-simulator.readthedocs.io/en/stable/installation/noenv_install.html#noenv
@@ -25,6 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gosu \
     vim \
     gzip \
+    tar \
+    wget \
     # --- VNC Dependencies ---
     tigervnc-standalone-server \
     tigervnc-common \
@@ -52,6 +52,7 @@ ENV INSTALL_DIR=/sim/install
 ENV DEPS_DIR=/sim/dependencies
 ENV NEST_INSTALL_DIR=$INSTALL_DIR/nest
 ENV MUSIC_INSTALL_DIR=$INSTALL_DIR/music
+ENV OMPI_INSTALL_DIR=$INSTALL_DIR/openmpi
 
 ENV CONTROLLER_DIR=/sim/controller
 ENV SHARED_DATA_DIR=/sim/shared_data
@@ -64,6 +65,22 @@ ENV LD_LIBRARY_PATH="${MUSIC_INSTALL_DIR}/lib"
 RUN mkdir -p $INSTALL_DIR $DEPS_DIR $NEST_INSTALL_DIR $MUSIC_INSTALL_DIR
 
 
+
+####################### openMPI #####################
+WORKDIR ${DEPS_DIR}
+ENV OMPI_DIR=${DEPS_DIR}/openmpi-4.1.6
+ENV OMPI_GZ=openmpi-4.1.6.tar.gz
+RUN wget --output-document $OMPI_GZ https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.gz
+RUN tar xfz $OMPI_GZ \
+    && cd $OMPI_DIR \
+    # --enable-mpi-cxx enables old c++ bindings for nest 3.7
+    && ./configure --prefix=$OMPI_INSTALL_DIR --enable-mpi-cxx\
+    && make -j$(nproc) \
+    && make install
+
+ENV PATH="${VIRTUAL_ENV}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
+
+ENV LD_LIBRARY_PATH=${OMPI_INSTALL_DIR}/lib64:$LD_LIBRARY_PATH
 ####################### MUSIC #######################
 # Install MUSIC - pinned to last commit to ensure compatibility
 WORKDIR $DEPS_DIR
@@ -76,7 +93,7 @@ RUN git clone https://github.com/INCF/MUSIC \
     && make -j$(nproc) \
     && make install
 
-
+ENV PKG_CONFIG_PATH=${OMPI_INSTALL_DIR}/lib64/pkgconfig
 ####################### NEST 3.7 #######################
 ENV NEST_VERSION=3.7
 
@@ -118,8 +135,6 @@ ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5
 RUN git clone https://github.com/near-nes/bullet_muscle_sim.git $BULLET_MUSCLE_DIR \
     && git clone https://github.com/near-nes/embodiment_sdf_models.git $SDF_MODELS_DIR
 
-
-ENV PATH="${VIRTUAL_ENV}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${PATH}"
 
 
 RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
