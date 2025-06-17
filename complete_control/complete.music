@@ -1,10 +1,10 @@
 # Applications
 [from]
-  binary=./main_simulation.py
+  binary=/sim/controller/complete_control/main_simulation.py
   np=6
 
 [to]
-  binary=./receiver_plant.py
+  binary=/sim/controller/complete_control/receiver_plant.py
   np=1
 
 # How ports are connected
