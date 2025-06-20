@@ -40,13 +40,6 @@ RUN python -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip install --upgrade pip setuptools wheel
-ENV CFLAGS=-O2
-# ^ for https://github.com/mpi4py/mpi4py/issues/652
-COPY ./docker/requirements_base.txt .
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip setuptools wheel && \
-    pip install -r requirements_base.txt
-ENV CFLAGS=
 
 ENV INSTALL_DIR=/sim/install
 ENV DEPS_DIR=/sim/dependencies
@@ -82,6 +75,14 @@ RUN tar xfz $OMPI_GZ \
     && ./configure --prefix=$OMPI_INSTALL_DIR --enable-mpi-cxx\
     && make -j$(nproc) \
     && make install
+
+ENV CFLAGS=-O2
+# ^ for https://github.com/mpi4py/mpi4py/issues/652
+COPY ./docker/requirements_base.txt .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip setuptools wheel && \
+    pip install -r requirements_base.txt
+ENV CFLAGS=
 
 ####################### MUSIC #######################
 # Install MUSIC - pinned to last commit to ensure compatibility
