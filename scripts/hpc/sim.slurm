@@ -7,7 +7,7 @@
 #SBATCH --out=slurm.%j.out
 #SBATCH --err=slurm.%j.err
 #SBATCH --account=<Account_name>
-#SBATCH --partition=<??>
+#SBATCH --partition=g100_usr_prod
 export OMP_NUM_THREADS=7
 
 module purge
