@@ -14,3 +14,9 @@ matplotlib~=3.9
 pybullet==3.2.7
 structlog~=25.3.0
 pydantic~=2.11
+# TODO pin these
+Flask
+flask-cors
+gunicorn
+requests
+RestrictedPython

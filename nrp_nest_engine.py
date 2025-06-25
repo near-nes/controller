@@ -2,14 +2,6 @@ import numpy
 import nest
 import os
 
-# Here comes the initialization of the nest
-# All the modules and files should be available on nest container/VM/host
-
-# Adjust env vars to be able to import the NESTML-generated module
-# ld_lib_path = os.environ.get('LD_LIBRARY_PATH', '')
-# new_path = ld_lib_path + ":"+"../nestml/target"
-# os.environ['LD_LIBRARY_PATH'] = new_path
-#
 
 import json
 
@@ -42,7 +34,7 @@ nest.ResetKernel()
 nest.SetKernelStatus({"resolution": res})
 
 ### Install NESTML-generated module
-nest.Install("controller_module")
+nest.Install("custom_stdp_module")
 
 ### PLANNER: create and initialize the Planner population
 # Input: target --> minimum jerk trajectory

@@ -24,9 +24,11 @@ services:
     environment:
       TZ: ${TZ:-Europe/Rome}
       VNC_PASSWORD: ${VNC_PASSWORD} # this is not a secret.
+      NEST_MODE: "normal"
     ports:
       # Map host port 5901 (localhost only) to container port 5901 (VNC display :1)
       - "127.0.0.1:5901:5901"
+      - 9000:9000
     # If you want to run a specific script, use 'docker-compose run simulation python your_script.py'
     command: bash
 

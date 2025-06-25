@@ -15,6 +15,7 @@ VENV_PATH="${VIRTUAL_ENV}"
 NEST_MODULE_PATH="${NEST_MODULE_PATH}"
 COMPRESSED_BSB_NETWORK_FILE="${COMPRESSED_BSB_NETWORK_FILE}"
 BSB_NETWORK_FILE="${BSB_NETWORK_FILE}"
+NEST_SERVER_BIN="${NEST_INSTALL_DIR}/bin/nest-server"
 
 PYTHON_MAJOR_MINOR=$(python -c "import sys; print(f'python{sys.version_info.major}.{sys.version_info.minor}')")
 SITE_PACKAGES_PATH="$VENV_PATH/lib/${PYTHON_MAJOR_MINOR}/site-packages"
@@ -119,7 +120,21 @@ echo "Final LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 echo "Final PATH: $PATH"
 echo "Final PYTHONPATH: $PYTHONPATH"
 
-exec gosu "$USERNAME" "$@"
+if [ "$NEST_MODE" = "nest-server" ]; then
+    export NEST_SERVER_HOST="${NEST_SERVER_HOST:-0.0.0.0}"
+    export NEST_SERVER_PORT="${NEST_SERVER_PORT:-9000}"
+    export NEST_SERVER_STDOUT="${NEST_SERVER_STDOUT:-1}"
+
+    export NEST_SERVER_ACCESS_TOKEN="${NEST_SERVER_ACCESS_TOKEN}"
+    export NEST_SERVER_CORS_ORIGINS="${NEST_SERVER_CORS_ORIGINS:-*}"
+    export NEST_SERVER_DISABLE_AUTH="${NEST_SERVER_DISABLE_AUTH:-1}"
+    export NEST_SERVER_DISABLE_RESTRICTION="${NEST_SERVER_DISABLE_RESTRICTION:-1}"
+    export NEST_SERVER_ENABLE_EXEC_CALL="${NEST_SERVER_ENABLE_EXEC_CALL:-1}"
+    export NEST_SERVER_MODULES="${NEST_SERVER_MODULES:-import nest; import numpy; import os; import json; import sys}"
+    exec $NEST_SERVER_BIN start
+else
+    exec gosu "$USERNAME" "$@"
+fi
 # exec gosu "$USERNAME" bash -c 'run_as_user "$@"' bash "$@"
 # python controller/complete_control/brain.py
 # bash --rcfile <(python controller/complete_control/brain.py)
