@@ -93,8 +93,9 @@ def run_simulation(
     log.info("collected all popviews")
     controller = controllers[0]
     log.info("Starting Simulation")
-    PF_to_purkinje = controller.cerebellum_handler.get_purkinje_from_pf()
-    weights_over_trials = []
+    PF_to_purkinje_conns = controller.cerebellum_handler.get_purkinje_from_pf()
+    weights_over_trials = {k: [] for k in PF_to_purkinje_conns}
+
     with nest.RunManager():
         for trial in range(n_trials):
             current_sim_start_time = nest.GetKernelStatus("biological_time")
@@ -109,8 +110,11 @@ def run_simulation(
             nest.Run(single_trial_ms)
 
             # --- Record weights after each trial ---
-            weights = nest.GetStatus(PF_to_purkinje, ["source", "weight"])
-            weights_over_trials.append(weights)
+            # After each trial:
+            for key, conns in PF_to_purkinje_conns.items():
+                conn_info = nest.GetStatus(conns, ["source", "target", "weight"])
+                trial_weights = [(entry[0], entry[1], entry[2]) for entry in conn_info]
+                weights_over_trials[key].append(trial_weights)
 
             end_trial_time = timer()
             trial_wall_time = timedelta(seconds=end_trial_time - start_trial_time)
@@ -134,7 +138,7 @@ def run_simulation(
     save_pf_to_purkinje_weights_gdf(
         weights_over_trials,
         path_data,
-        "PF_to_purkinje_weights.gdf",
+        "PF_to_purkinje_weights",
     )
 
     end_collapse_time = timer()

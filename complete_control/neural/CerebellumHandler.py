@@ -139,15 +139,30 @@ class CerebellumHandler:
 
     def get_purkinje_from_pf(self):
         """
-        Returns the NEST connection handles from Parallel Fibers (PF) to Purkinje cells.
+        Returns a dict of NEST connection handles for all PF→Purkinje types.
         """
-        pf_population = self.cerebellum.populations.forw_grc_view.pop
-        purkinje_population = self.cerebellum.populations.forw_pc_p_view.pop
-        # Get all connections from PF to Purkinje
-        pf_to_purkinje_conns = nest.GetConnections(
-            source=pf_population, target=purkinje_population
+        conns = {}
+        # Forward Positive
+        conns["forw_p"] = nest.GetConnections(
+            source=self.cerebellum.populations.forw_grc_view.pop,
+            target=self.cerebellum.populations.forw_pc_p_view.pop,
         )
-        return pf_to_purkinje_conns
+        # Forward Negative
+        conns["forw_n"] = nest.GetConnections(
+            source=self.cerebellum.populations.forw_grc_view.pop,
+            target=self.cerebellum.populations.forw_pc_n_view.pop,
+        )
+        # Inverse Negative
+        conns["inv_n"] = nest.GetConnections(
+            source=self.cerebellum.populations.inv_grc_view.pop,
+            target=self.cerebellum.populations.inv_pc_n_view.pop,
+        )
+        # Inverse Positive
+        conns["inv_p"] = nest.GetConnections(
+            source=self.cerebellum.populations.inv_grc_view.pop,
+            target=self.cerebellum.populations.inv_pc_p_view.pop,
+        )
+        return conns
 
     def _create_interface_populations(self):
         """Creates the intermediate populations connecting to the cerebellum."""
@@ -597,7 +612,7 @@ class CerebellumHandler:
             self.cerebellum.populations.forw_dcnp_n_view.pop,
             self.controller_pops.pred_p.pop,
             "all_to_all",
-            syn_spec=syn_spec_n,
+            syn_spec_n,
         )
         # DCN minus drives Negative Prediction
         nest.Connect(
@@ -611,7 +626,7 @@ class CerebellumHandler:
             self.cerebellum.populations.forw_dcnp_p_view.pop,
             self.controller_pops.pred_n.pop,
             "all_to_all",
-            syn_spec=syn_spec_n,
+            syn_spec_n,
         )
 
         # --- Connections TO Cerebellum Controller Interfaces (FROM controller_pops) ---

@@ -59,17 +59,15 @@ def collapse_files(dir: Path, pops: list[PopView], comm: Comm = None):
 
 
 def save_pf_to_purkinje_weights_gdf(
-    weights_over_trials, dir: Path, filename: str = "PF_to_purkinje_weights.gdf"
+    weights_over_trials_dict, dir: Path, base_filename: str = "PF_to_purkinje"
 ):
     """
-    Save PF→Purkinje weights for every run/trial as a GDF file.
-    Each row: sender, time_ms, weight.
+    Save PF→Purkinje weights for each connection group as separate GDF files.
     """
-    gdf_file = dir / filename
-    with open(gdf_file, "w") as wfd:
-        wfd.write("sender\ttime_ms\tweight\n")
-        for trial_idx, trial_weights in enumerate(weights_over_trials):
-            time_ms = trial_idx
-            for sender, weight in trial_weights:
-                wfd.write(f"{sender}\t{time_ms}\t{weight}\n")
-    _log.info("PF to Purkinje weights saved", file=gdf_file)
+    for key, trials in weights_over_trials_dict.items():
+        gdf_file = dir / f"{base_filename}_{key}.gdf"
+        with open(gdf_file, "w") as wfd:
+            wfd.write("source\ttarget\ttrial\tweight\n")
+            for trial_idx, trial_weights in enumerate(trials):
+                for source, target, weight in trial_weights:
+                    wfd.write(f"{source}\t{target}\t{trial_idx}\t{weight}\n")
