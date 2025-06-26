@@ -14,9 +14,9 @@ matplotlib~=3.9
 pybullet==3.2.7
 structlog~=25.3.0
 pydantic~=2.11
-# TODO pin these
-Flask
-flask-cors
-gunicorn
-requests
+# nest-server
+Flask==3.1.1
+flask-cors==6.0.1
+gunicorn==23.0.0
+requests==2.32.4
 RestrictedPython

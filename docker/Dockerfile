@@ -1,7 +1,8 @@
 ARG PYTHON_MAJOR=3
 ARG PYTHON_MINOR=10
 
-FROM python:${PYTHON_MAJOR}.${PYTHON_MINOR}-slim-bookworm AS base
+# FROM python:${PYTHON_MAJOR}.${PYTHON_MINOR}-slim-bookworm AS base
+FROM ubuntu:jammy AS base
 
 ARG PYTHON_MAJOR
 ARG PYTHON_MINOR
@@ -19,6 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libboost-dev \
     libreadline-dev \
     libhdf5-dev \
+    python3-dev \
+    python-is-python3 \
     gcc \
     gosu \
     vim \
@@ -30,9 +33,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tigervnc-common \
     tigervnc-tools \
     fluxbox \
-    xterm \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    xterm 
+    # && apt-get clean \
+    # && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-venv
 
 WORKDIR /sim
 ENV VIRTUAL_ENV=/sim/venv
@@ -211,7 +216,27 @@ RUN chown -R $USERNAME:$USERNAME $VIRTUAL_ENV /home/$USERNAME $SHARED_DATA_DIR $
 EXPOSE 5901
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
+# FROM docker-registry.ebrains.eu/neurorobotics/nrp/nrp-core/nrp-vanilla-ubuntu20:latest AS nrp-image
 
+# FROM runtime AS nrp-runtime
+# ENV NRP_HOME=/home/nrpuser/.local/
+# ENV NRP_INSTALL_DIR=${NRP_HOME}/nrp
+# ENV NRP_DEPS_INSTALL_DIR=${NRP_HOME}/nrp_deps
+
+# RUN mkdir -p $NRP_HOME && chown $USERNAME:$USERNAME $NRP_HOME
+# RUN mkdir -p $INSTALL_DIR/nrp $DEPS_DIR/nrp_deps \
+#         && chown $USERNAME:$USERNAME $INSTALL_DIR/nrp \
+#         && chown $USERNAME:$USERNAME $DEPS_DIR/nrp_deps
+
+# USER $USERNAME
+
+# COPY --chown=$USERNAME:$USERNAME --from=nrp-image /home/nrpuser/.local/nrp/ $INSTALL_DIR/nrp/
+# COPY --chown=$USERNAME:$USERNAME --from=nrp-image /home/nrpuser/.local/nrp_deps/ $DEPS_DIR/nrp_deps/
+# RUN ln -sf $INSTALL_DIR/nrp $NRP_INSTALL_DIR
+# RUN ln -sf $DEPS_DIR/nrp_deps $NRP_DEPS_INSTALL_DIR
+# USER 0
+
+# FROM nrp-runtime AS dev
 FROM runtime AS dev
 # In dev, the controller directory is mounted from the host and the user is the same as the host user.
 ENV SIMULATION_MODE=dev
