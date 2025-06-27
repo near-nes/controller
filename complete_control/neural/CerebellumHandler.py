@@ -123,10 +123,6 @@ class CerebellumHandler:
         self.log.info("Connecting interface populations to core cerebellum")
         self._connect_interfaces_to_core()
 
-        # --- Connect Populations for Error Calculation ---
-        self.log.info("Connecting populations for error calculation")
-        self._connect_error_calculation()
-
         self.log.info("CerebellumHandler initialization complete.")
 
     def _create_pop_view(
@@ -562,6 +558,10 @@ class CerebellumHandler:
             )
 
         self.log.info("Connecting CerebellumHandler to main controller populations")
+
+        # --- Connect Populations for Error Calculation ---
+        self.log.info("Connecting populations for error calculation")
+        self._connect_error_calculation()
 
         # --- Connections FROM Cerebellum Controller (Fwd DCN) TO controller_pops.pred_p/n ---
         dcn_f_pred_spec = self.conn_params.dcn_forw_prediction
