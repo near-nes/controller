@@ -108,6 +108,7 @@ def plot_population(
             va="top",
             ha="right",
         )
+        axs.grid(True, which="both", linestyle="--", linewidth=0.5)
 
     # Plotting rates
     plot_rate(
@@ -124,6 +125,39 @@ def plot_population(
         label="Negative",
     )
     ax[1].legend(fontsize=16)
+
+    if filepath:
+        fig.savefig(filepath)
+        _log.debug(f"Saved plot at {filepath}")
+        plt.close(fig)
+
+    return fig, ax
+
+
+def plot_population_single(
+    time_v,
+    pop_path: Path,
+    pop_size: int,
+    title="",
+    buffer_size=15,
+    filepath=None,
+):
+    """Plots raster and PSTH for a population pair from data files."""
+    evs_p, ts_p = load_spike_data_from_file(pop_path)
+
+    # Normalize sender GIDs to be relative to the population start
+    # Get the base neuron ID by getting minimum ID for each population
+    base_id_p = np.min(evs_p) if evs_p.size > 0 else 0
+    y_p = evs_p - base_id_p + 1 if evs_p.size > 0 else np.array([])
+
+    fig, ax = plt.subplots(1, 1, sharex=True, figsize=(10, 6))
+
+    ax.scatter(ts_p, y_p, marker=".", s=1, c="r")
+    ax.set_ylabel("raster", fontsize=15)
+    ax.set_title(title, fontsize=16)
+    ax.set_ylim(bottom=-(pop_size + 1), top=pop_size + 1)
+    ax.legend(fontsize=16)
+    ax.grid(True, which="both", linestyle="--", linewidth=0.5)
 
     if filepath:
         fig.savefig(filepath)
@@ -184,6 +218,24 @@ def plot_controller_outputs(run_paths: RunPaths):
             total_time_vect_concat,
             pop_p_path,
             pop_n_path,
+            pop_size=pop_size,
+            title=f"{plot_name.replace('_', ' ').title()} {lgd}",
+            buffer_size=15,
+            filepath=path_fig / f"{plot_name}_{i}.png",
+        )
+    populations_to_plot_single = {
+        "motor_commands": "cereb_motor_commands",
+        "plan_to_inv": "cereb_plan_to_inv",
+        # "planner": "planner_p",
+    }
+    for plot_name, file_prefix in populations_to_plot_single.items():
+        _log.debug(f"Plotting for {plot_name}...")
+
+        pop_p_path = path_data / f"{file_prefix}.gdf"
+
+        plot_population_single(
+            total_time_vect_concat,
+            pop_p_path,
             pop_size=pop_size,
             title=f"{plot_name.replace('_', ' ').title()} {lgd}",
             buffer_size=15,

@@ -33,7 +33,9 @@ class PlantSimulator:
             pybullet_instance: The initialized PyBullet instance (e.g., p from `import pybullet as p`).
             connect_gui: Whether the RoboticPlant should connect to the PyBullet GUI.
         """
-        self.log = structlog.get_logger(type(self).__name__)
+        self.log: structlog.stdlib.BoundLogger = structlog.get_logger(
+            type(self).__name__
+        )
         self.log.info("Initializing PlantSimulator...")
         self.config: PlantConfig = config
         self.p = pybullet_instance
@@ -237,6 +239,7 @@ class PlantSimulator:
             while current_sim_time_s < self.config.TOTAL_SIM_DURATION_S - (
                 self.config.RESOLUTION_S / 2.0
             ):
+                # self.log.warning(f"starting receiver loop for step {step}...")
                 current_sim_time_s = music_runtime.time()  # Current time from MUSIC
 
                 if step >= self.num_total_steps:
