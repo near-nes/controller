@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -8,33 +9,34 @@ from config.MasterParams import MasterParams
 from config.paths import RunPaths
 from mpi4py import MPI
 
+from .neural_models import PopulationSpikes
+
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
+FIGURE_EXT = "png"
 
 
-def load_spike_data_from_file(filepath: Path) -> tuple[np.ndarray, np.ndarray]:
+def load_spike_data_from_file(filepath: Path) -> PopulationSpikes:
     if not filepath.exists():
         _log.warning(
-            "Spike data file not found, returning empty arrays.", path=str(filepath)
+            "Spike data file not found, returning empty PopulationSpikes object.",
+            path=str(filepath),
         )
-        return np.array([]), np.array([])
-    # Skip header by finding the first line not starting with #
-    with open(filepath, "r") as f:
-        first_line = 0
-        for line in f:
-            if line.startswith("#") or line.startswith("s"):
-                first_line += 1
-            else:
-                break
-    try:
-        df = pd.read_csv(filepath, sep="\t", header=0, skiprows=first_line)
-    except pd.errors.EmptyDataError:
-        _log.warning("empty results file", file=filepath)
-        return np.array([]), np.array([])
+        return PopulationSpikes(
+            label=filepath.stem,
+            gids=np.array([]),
+            senders=np.array([]),
+            times=np.array([]),
+            population_size=0,
+            neuron_model="unknown",
+        )
 
-    df.columns = ["sender", "time_ms"]
-    senders = df["sender"].values
-    times = df["time_ms"].values
-    return senders, times
+    try:
+        with open(filepath, "r") as f:
+            data = json.load(f)
+        return PopulationSpikes.model_validate(data)
+    except Exception as e:
+        _log.error(f"Error loading PopulationSpikes from {filepath}: {e}")
+        raise
 
 
 def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", **kwargs):
@@ -57,29 +59,31 @@ def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", **kwargs):
         ax.set_ylabel(title, fontsize=15)
     ax.set_xlabel("Time [ms]")
     ax.set_xlim(left=0, right=time_end)
+    ax.set_ylim(bottom=0)
+
+
+def global_to_local_ids(x: PopulationSpikes, hist_logscale=False):
+    old2newid = {oldid: i for i, oldid in enumerate(x.gids)}
+    return np.array([old2newid[i] for i in x.senders])
 
 
 def plot_population(
     time_v,
     pop_p_path: Path,
     pop_n_path: Path,
-    pop_size: int,
     title="",
     buffer_size=15,
     filepath=None,
 ):
     """Plots raster and PSTH for a population pair from data files."""
-    evs_p, ts_p = load_spike_data_from_file(pop_p_path)
-    evs_n, ts_n = load_spike_data_from_file(pop_n_path)
+    pop_p_data = load_spike_data_from_file(pop_p_path)
+    pop_n_data = load_spike_data_from_file(pop_n_path)
 
-    # Normalize sender GIDs to be relative to the population start
-    # Get the base neuron ID by getting minimum ID for each population
-    base_id_p = np.min(evs_p) if evs_p.size > 0 else 0
-    base_id_n = np.min(evs_n) if evs_n.size > 0 else 0
+    ts_p = pop_p_data.times
+    ts_n = pop_n_data.times
 
-    # Normalize IDs relative to the base ID for each population
-    y_p = evs_p - base_id_p + 1 if evs_p.size > 0 else np.array([])
-    y_n = -(evs_n - base_id_n + 1) if evs_n.size > 0 else np.array([])
+    y_p = global_to_local_ids(pop_p_data)
+    y_n = -global_to_local_ids(pop_n_data)
 
     fig, ax = plt.subplots(2, 1, sharex=True, figsize=(10, 6))
 
@@ -88,7 +92,9 @@ def plot_population(
     ax[0].scatter(ts_n, y_n, marker=".", s=1, c="b", label="Negative")
     ax[0].set_ylabel("raster", fontsize=15)
     ax[0].set_title(title, fontsize=16)
-    ax[0].set_ylim(bottom=-(pop_size + 1), top=pop_size + 1)
+    ax[0].set_ylim(
+        bottom=-(pop_n_data.population_size + 1), top=pop_p_data.population_size + 1
+    )
     ax[0].legend(fontsize=16)
 
     # Configure spines and subplot labels for both plots
@@ -112,12 +118,18 @@ def plot_population(
 
     # Plotting rates
     plot_rate(
-        time_v, ts_p, pop_size, buffer_size, ax=ax[1], color="r", label="Positive"
+        time_v,
+        ts_p,
+        pop_p_data.population_size,
+        buffer_size,
+        ax=ax[1],
+        color="r",
+        label="Positive",
     )
     plot_rate(
         time_v,
         ts_n,
-        pop_size,
+        pop_n_data.population_size,
         buffer_size,
         ax=ax[1],
         color="b",
@@ -125,6 +137,7 @@ def plot_population(
         label="Negative",
     )
     ax[1].legend(fontsize=16)
+    fig.tight_layout()
 
     if filepath:
         fig.savefig(filepath)
@@ -137,27 +150,48 @@ def plot_population(
 def plot_population_single(
     time_v,
     pop_path: Path,
-    pop_size: int,
     title="",
     buffer_size=15,
     filepath=None,
 ):
     """Plots raster and PSTH for a population pair from data files."""
-    evs_p, ts_p = load_spike_data_from_file(pop_path)
+    pop_data = load_spike_data_from_file(pop_path)
+    local_ids = global_to_local_ids(pop_data)
 
-    # Normalize sender GIDs to be relative to the population start
-    # Get the base neuron ID by getting minimum ID for each population
-    base_id_p = np.min(evs_p) if evs_p.size > 0 else 0
-    y_p = evs_p - base_id_p + 1 if evs_p.size > 0 else np.array([])
+    fig, ax = plt.subplots(2, 1, sharex=True, figsize=(10, 6))
 
-    fig, ax = plt.subplots(1, 1, sharex=True, figsize=(10, 6))
+    ax[0].scatter(pop_data.times, local_ids, marker=".", s=1, c="r")
+    ax[0].set_ylabel("raster", fontsize=15)
+    ax[0].set_title(title, fontsize=16)
+    ax[0].set_ylim(bottom=0, top=pop_data.population_size + 1)
+    for i, axs in enumerate(ax):
+        axs.spines["top"].set_visible(False)
+        axs.spines["right"].set_visible(False)
+        axs.spines["bottom"].set_visible(True)
+        axs.spines["left"].set_visible(True)
+        # Add subplot labels (A, B)
+        axs.text(
+            -0.1,
+            1.1,
+            chr(65 + i),  # ASCII 65 is 'A'
+            transform=axs.transAxes,
+            fontsize=16,
+            fontweight="bold",
+            va="top",
+            ha="right",
+        )
+        axs.grid(True, which="both", linestyle="--", linewidth=0.5)
 
-    ax.scatter(ts_p, y_p, marker=".", s=1, c="r")
-    ax.set_ylabel("raster", fontsize=15)
-    ax.set_title(title, fontsize=16)
-    ax.set_ylim(bottom=-(pop_size + 1), top=pop_size + 1)
-    ax.legend(fontsize=16)
-    ax.grid(True, which="both", linestyle="--", linewidth=0.5)
+    plot_rate(
+        time_v,
+        pop_data.times,
+        pop_data.population_size,
+        buffer_size,
+        ax=ax[1],
+        color="r",
+        title="PSTH (Hz)",
+    )
+    fig.tight_layout()
 
     if filepath:
         fig.savefig(filepath)
@@ -183,7 +217,7 @@ def plot_controller_outputs(run_paths: RunPaths):
 
     # Get parameters from config
     njt = master_config.NJT
-    pop_size = master_config.brain.population_size
+    # pop_size = master_config.brain.population_size # No longer needed, obtained from PopulationSpikes
     res = master_config.simulation.resolution
     total_sim_duration = master_config.simulation.total_duration_all_trials_ms
     total_time_vect_concat = np.linspace(
@@ -199,7 +233,7 @@ def plot_controller_outputs(run_paths: RunPaths):
     i = 0
     lgd = f"DoF {i}"
 
-    # Maps the final plot name to the prefix used for the .gdf data files
+    # Maps the final plot name to the prefix used for the .json data files
     populations_to_plot = {
         "planner": "planner",
         "brainstem": "brainstem",
@@ -211,18 +245,18 @@ def plot_controller_outputs(run_paths: RunPaths):
     for plot_name, file_prefix in populations_to_plot.items():
         _log.debug(f"Plotting for {plot_name}...")
 
-        pop_p_path = path_data / f"{file_prefix}_p.gdf"
-        pop_n_path = path_data / f"{file_prefix}_n.gdf"
+        pop_p_path = path_data / f"{file_prefix}_p.json"
+        pop_n_path = path_data / f"{file_prefix}_n.json"
 
         plot_population(
             total_time_vect_concat,
             pop_p_path,
             pop_n_path,
-            pop_size=pop_size,
             title=f"{plot_name.replace('_', ' ').title()} {lgd}",
             buffer_size=15,
-            filepath=path_fig / f"{plot_name}_{i}.png",
+            filepath=path_fig / f"{plot_name}_{i}.{FIGURE_EXT}",
         )
+
     populations_to_plot_single = {
         "motor_commands": "cereb_motor_commands",
         "plan_to_inv": "cereb_plan_to_inv",
@@ -231,15 +265,14 @@ def plot_controller_outputs(run_paths: RunPaths):
     for plot_name, file_prefix in populations_to_plot_single.items():
         _log.debug(f"Plotting for {plot_name}...")
 
-        pop_p_path = path_data / f"{file_prefix}.gdf"
+        pop_p_path = path_data / f"{file_prefix}.json"
 
         plot_population_single(
             total_time_vect_concat,
             pop_p_path,
-            pop_size=pop_size,
             title=f"{plot_name.replace('_', ' ').title()} {lgd}",
             buffer_size=15,
-            filepath=path_fig / f"{plot_name}_{i}.png",
+            filepath=path_fig / f"{plot_name}_{i}.{FIGURE_EXT}",
         )
 
     _log.debug("Plot generation finished.")

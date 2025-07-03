@@ -3,7 +3,8 @@ from typing import List, Tuple
 import numpy as np
 import structlog
 from pydantic import BaseModel
-from utils_common.custom_types import NdArray
+
+from complete_control.utils_common.custom_types import NdArray
 
 _log = structlog.get_logger(__name__)
 
