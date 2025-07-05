@@ -95,7 +95,7 @@ class Controller:
         self.trajectory_slice = trajectory_slice
         self.motor_cmd_slice = motor_cmd_slice
 
-        self.weights_history = {}
+        self.weights_history = defaultdict(lambda: defaultdict(list))
         # Store parameters (consider dedicated dataclasses per module if very stable)
         self.mc_params = mc_params
         self.plan_params = plan_params
@@ -161,7 +161,6 @@ class Controller:
             self.cerebellum_handler.get_synapse_connections_PF_to_PC()
         )
         for (pre_pop, post_pop), conns in PF_to_purkinje_conns.items():
-            self.weights_history[(pre_pop, post_pop)] = defaultdict(list)
             for conn in conns:
                 source_neur, target_neur, synapse_id, delay, synapse_model, weight = (
                     nest.GetStatus(
