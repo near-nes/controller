@@ -60,7 +60,7 @@ def plot_synaptic_weight_evolution(
         syn_block = SynapseBlock.model_validate_json(f.read())
 
     plt.figure(figsize=(8, 5))
-    count = 0
+
     for i, rec in enumerate(syn_block.synapse_recordings):
         if rec.syn_type == "stdp_synapse_sinexp":
             if i >= max_synapses:
@@ -73,8 +73,8 @@ def plot_synaptic_weight_evolution(
     plt.title(
         f"Weight evolution: {syn_block.source_pop_label} → {syn_block.target_pop_label}"
     )
-    if count > 0:
-        plt.legend(fontsize="small")
+
+    plt.legend(fontsize="small")
     plt.tight_layout()
 
     if save_fig and fig_path:
