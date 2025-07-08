@@ -272,15 +272,30 @@ def plot_controller_outputs(run_paths: RunPaths):
     lgd = f"DoF {i}"
 
     # Maps the final plot name to the prefix used for the .json data files
-    populations_to_plot = {
-        "planner": "planner",
-        "brainstem": "brainstem",
-        "mc_out": "mc_out",
-        "state": "state",
-        "sensoryneuron": "sensoryneur",
-    }
+    populations_to_plot = [
+        "planner",
+        "brainstem",
+        "mc_out",
+        "state",
+        "sensoryneur",
+        "cereb_core_forw_dcnp",
+        "cereb_core_forw_io",
+        "cereb_core_forw_pc",
+        "cereb_core_inv_dcnp",
+        "cereb_core_inv_io",
+        "cereb_core_inv_pc",
+        "cereb_error",
+        "cereb_error_inv",
+        "cereb_feedback",
+        "cereb_feedback_inv",
+        "cereb_motor_prediction",
+        "cereb_state_to_inv",
+        "fbk_smooth",
+        "pred",
+    ]
 
-    for plot_name, file_prefix in populations_to_plot.items():
+    for file_prefix in populations_to_plot:
+        plot_name = file_prefix
         _log.debug(f"Plotting for {plot_name}...")
 
         pop_p_path = path_data / f"{file_prefix}_p.json"
@@ -295,12 +310,24 @@ def plot_controller_outputs(run_paths: RunPaths):
             filepath=path_fig / f"{plot_name}_{i}.{FIGURE_EXT}",
         )
 
-    populations_to_plot_single = {
-        "motor_commands": "cereb_motor_commands",
-        "plan_to_inv": "cereb_plan_to_inv",
-        # "planner": "planner_p",
-    }
-    for plot_name, file_prefix in populations_to_plot_single.items():
+    populations_to_plot_single = [
+        "cereb_motor_commands",
+        "cereb_plan_to_inv",
+        "cereb_core_forw_bc",
+        "cereb_core_forw_glom",
+        "cereb_core_forw_goc",
+        "cereb_core_forw_grc",
+        "cereb_core_forw_mf",
+        "cereb_core_forw_sc",
+        "cereb_core_inv_bc",
+        "cereb_core_inv_glom",
+        "cereb_core_inv_goc",
+        "cereb_core_inv_grc",
+        "cereb_core_inv_mf",
+        "cereb_core_inv_sc",
+    ]
+    for file_prefix in populations_to_plot_single:
+        plot_name = file_prefix
         _log.debug(f"Plotting for {plot_name}...")
 
         pop_p_path = path_data / f"{file_prefix}.json"
