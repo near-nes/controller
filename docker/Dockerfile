@@ -34,12 +34,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tigervnc-tools \
     fluxbox \
     xterm 
-    # && apt-get clean \
-    # && rm -rf /var/lib/apt/lists/*
+# && apt-get clean \
+# && rm -rf /var/lib/apt/lists/*
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3-venv \
     python3-numpy \
-    python3-matplotlib \
+    # python3-matplotlib \
     python3-scipy
 
 ARG USER_UID=1000
