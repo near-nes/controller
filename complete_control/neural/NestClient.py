@@ -22,9 +22,8 @@
 import requests
 from werkzeug.exceptions import BadRequest
 
-
 __all__ = [
-    'NESTClient',
+    "NESTClient",
 ]
 
 
@@ -37,32 +36,35 @@ def encode(response):
 
 class NESTClient:
 
-    def __init__(self, host='localhost', port=52425):
-        self.url = 'http://{}:{}/'.format(host, port)
-        self.headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    def __init__(self, host="localhost", port=9000):
+        self.url = "http://{}:{}/".format(host, port)
+        self.headers = {"Content-type": "application/json", "Accept": "text/plain"}
 
     def __getattr__(self, call):
         def method(*args, **kwargs):
-            kwargs.update({'args': args})
-            response = requests.post(self.url + 'api/' + call, json=kwargs, headers=self.headers)
+            kwargs.update({"args": args})
+            response = requests.post(
+                self.url + "api/" + call, json=kwargs, headers=self.headers
+            )
             return encode(response)
+
         return method
 
     def exec_script(self, source, return_vars=None):
         params = {
-            'source': source,
-            'return': return_vars,
+            "source": source,
+            "return": return_vars,
         }
-        response = requests.post(self.url + 'exec', json=params, headers=self.headers)
+        response = requests.post(self.url + "exec", json=params, headers=self.headers)
         return encode(response)
 
     def from_file(self, filename, return_vars=None):
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             lines = f.readlines()
-        script = ''.join(lines)
-        print('Execute script code of {}'.format(filename))
-        print('Return variables: {}'.format(return_vars))
-        print(20 * '-')
+        script = "".join(lines)
+        print("Execute script code of {}".format(filename))
+        print("Return variables: {}".format(return_vars))
+        print(20 * "-")
         print(script)
-        print(20 * '-')
+        print(20 * "-")
         return self.exec_script(script, return_vars)
