@@ -2,13 +2,6 @@
 
 import datetime
 
-import music
-
-music_setup = music.Setup()
-# i know, this is weird. it's the only order in which i could manage to make music
-# play nice with nest and mpi. if you want to change it, go ahead, but make sure it
-# works before pushing
-
 import config.paths as project_paths
 import pybullet as p
 import structlog
