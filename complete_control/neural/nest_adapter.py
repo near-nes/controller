@@ -14,7 +14,7 @@ def initialize_nest(coordinator_type):
 
         _nest = nest
     else:
-        _nest = NESTClient
+        _nest = NESTClient()
 
     _initialized = True
 

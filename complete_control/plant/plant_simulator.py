@@ -2,7 +2,6 @@ from typing import Any, List, Tuple
 
 import structlog
 from config.plant_config import PlantConfig
-from utils_common.generate_analog_signals import generate_signals
 from utils_common.log import tqdm
 
 from . import plant_utils
@@ -49,7 +48,7 @@ class PlantSimulator:
             self._setup_music_communication()
             self._setup_sensory_system()
 
-        self.log.debug("MUSIC communication and SensorySystem setup complete.")
+            self.log.debug("MUSIC communication and SensorySystem setup complete.")
 
         self.num_total_steps = len(self.config.time_vector_total_s)
         self.joint_data = [

@@ -1,6 +1,5 @@
 """NRP Neural Engine for the complete control simulation."""
 
-print("is_any_import_running?")
 import datetime
 
 import structlog
@@ -28,6 +27,7 @@ class Script(EngineScript):
 
     def initialize(self):
         self.log.info("NRP Neural Engine: Initializing...")
+        print(nest.GetKernelStatus())
 
         # TOCHECK: How to get master_config and run_paths in NRP context
         # For now, a simplified loading or placeholder
@@ -81,6 +81,7 @@ class Script(EngineScript):
             self.master_config.experiment, self.master_config.simulation
         )
         self.log.info("Input data (trajectory, motor_commands) generated.")
+        motor_commands = [float(i) for i in motor_commands]
 
         # Create controllers
         self.controllers = create_controllers(
@@ -149,7 +150,7 @@ class Script(EngineScript):
         # for controller in self.controllers:
         #     pop_views.extend(controller.get_all_recorded_views())
         # collapse_files(self.run_paths.data_nest, pop_views) # TOCHECK: comm is not available
-        nest.Cleanup()
+        # nest.Cleanup()
 
     # def reset(self):
     #     self.log.info("NRP Neural Engine: Resetting.")
