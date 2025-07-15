@@ -6,7 +6,7 @@ __credits__ = ["Cristiano Alessandro"]
 __license__ = "GPL"
 __version__ = "1.0.1"
 
-import nest
+from neural.nest_adapter import nest
 
 from .population_view import PopView
 

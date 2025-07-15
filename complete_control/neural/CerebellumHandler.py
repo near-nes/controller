@@ -1,6 +1,5 @@
 from typing import Any, Dict, Optional
 
-import nest
 import numpy as np
 import structlog
 from config.bsb_models import BSBConfigPaths
@@ -8,9 +7,10 @@ from config.connection_params import ConnectionsParams
 from config.core_models import SimulationParams
 from config.population_params import PopulationsParams
 from mpi4py.MPI import Comm
+from neural.nest_adapter import nest
 
 from .Cerebellum import Cerebellum
-from .CerebellumHandlerPopulations import CerebellumHandlerPopulations  # Added import
+from .CerebellumHandlerPopulations import CerebellumHandlerPopulations
 from .ControllerPopulations import ControllerPopulations
 from .population_view import PopView
 

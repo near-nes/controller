@@ -4,7 +4,11 @@ import os
 from pathlib import Path
 from timeit import default_timer as timer
 
-import nest
+from neural.nest_adapter import initialize_nest, nest
+
+initialize_nest("MUSIC")
+
+
 import structlog
 from config.paths import RunPaths
 from mpi4py import MPI
@@ -16,7 +20,6 @@ from complete_control.config.core_models import SimulationParams
 from complete_control.config.MasterParams import MasterParams
 from complete_control.neural.Controller import Controller
 from complete_control.neural.data_handling import collapse_files
-from complete_control.neural.NestClient import NESTClient
 from complete_control.neural_simulation_lib import (
     create_controllers,
     setup_environment,
@@ -25,7 +28,6 @@ from complete_control.neural_simulation_lib import (
 
 
 def run_simulation(
-    nest_client: NESTClient,
     simulation_config: SimulationParams,
     path_data: Path,
     controllers: list[Controller],
@@ -42,9 +44,9 @@ def run_simulation(
         pop_views.extend(controller.get_all_recorded_views())
 
     log.info("collected all popviews")
-    nest_client.Prepare()
+    nest.Prepare()
     for trial in range(n_trials):
-        current_sim_start_time = nest_client.GetKernelStatus("biological_time")
+        current_sim_start_time = nest.GetKernelStatus("biological_time")
         log.info(
             f"Starting Trial {trial + 1}/{n_trials}",
             duration_ms=single_trial_ms,
@@ -53,16 +55,16 @@ def run_simulation(
         log.info(f"Current simulation time: {current_sim_start_time} ms")
         start_trial_time = timer()
 
-        nest_client.Run(single_trial_ms)
+        nest.Run(single_trial_ms)
 
         end_trial_time = timer()
         trial_wall_time = datetime.timedelta(seconds=end_trial_time - start_trial_time)
         log.info(
             f"Finished Trial {trial + 1}/{n_trials}",
-            sim_time_end_ms=nest_client.GetKernelStatus("biological_time"),
+            sim_time_end_ms=nest.GetKernelStatus("biological_time"),
             wall_time=str(trial_wall_time),
         )
-    nest_client.Cleanup()
+    nest.Cleanup()
     log.info("--- All Trials Finished ---")
 
     # --- Data Collapsing (after all trials) ---
@@ -104,7 +106,6 @@ def coordinate_paths_with_receiver() -> tuple[str, RunPaths]:
 
 
 if __name__ == "__main__":
-    # entrypoint for running with MUSIC
 
     comm = MPI.COMM_WORLD.Create_group(
         MPI.COMM_WORLD.group.Excl([MPI.COMM_WORLD.Get_size() - 1])
@@ -137,9 +138,6 @@ if __name__ == "__main__":
 
     start_script_time = timer()
 
-    # when standalone, expect to be in an MPI env with nest installed
-    nest_client = nest
-
     # Load master config
     master_config = MasterParams.from_runpaths(run_paths=run_paths)
     with open(run_paths.params_json, "w") as f:
@@ -147,9 +145,8 @@ if __name__ == "__main__":
     main_log.info("MasterParams initialized in main_simulation (Standalone).")
 
     # Setup environment and NEST kernel
-    setup_environment(nest_client)
+    setup_environment()
     setup_nest_kernel(
-        nest_client,
         master_config.simulation,
         master_config.simulation.seed,
         run_paths.data_nest,
@@ -162,16 +159,13 @@ if __name__ == "__main__":
 
     # Create controllers
     controllers = create_controllers(
-        nest_client,
         master_config,
         trj,
         motor_commands,
     )
 
     # Run simulation
-    run_simulation(
-        nest_client, master_config.simulation, run_paths.data_nest, controllers, comm
-    )
+    run_simulation(master_config.simulation, run_paths.data_nest, controllers, comm)
 
     # Plotting (Rank 0 Only)
     if rank == 0 and master_config.PLOT_AFTER_SIMULATE:

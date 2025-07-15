@@ -2,8 +2,7 @@ from pathlib import Path
 
 import structlog
 from mpi4py.MPI import Comm
-
-from complete_control.neural.population_view import PopView
+from neural.population_view import PopView
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(str(__file__))
 

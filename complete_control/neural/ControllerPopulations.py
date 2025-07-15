@@ -2,7 +2,6 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-import nest
 import numpy as np
 
 # Assuming PopView is imported from population_view.py
@@ -59,7 +58,7 @@ class ControllerPopulations:
         return views
 
     # Helper to get underlying NEST nodes for all views
-    def get_all_nest_nodes(self) -> List[nest.NodeCollection]:
+    def get_all_nest_nodes(self) -> List[Any]:
         nodes = []
         for view in self.get_all_views():
             if view.pop:  # Check if pop exists

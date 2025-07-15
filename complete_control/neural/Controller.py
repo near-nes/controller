@@ -1,6 +1,5 @@
 from typing import Any, Dict, Optional, Tuple
 
-import nest as nest_lib
 import numpy as np
 import structlog
 from config.bsb_models import BSBConfigPaths
@@ -13,9 +12,7 @@ from config.module_params import (
     StateModuleConfig,
 )
 from config.population_params import PopulationsParams
-from mpi4py.MPI import Comm
-
-from complete_control.neural.NestClient import NESTClient as nestclient
+from neural.nest_adapter import nest
 
 from .CerebellumHandler import CerebellumHandler
 from .ControllerPopulations import ControllerPopulations
@@ -76,7 +73,6 @@ class Controller:
         label_prefix: str = "",
         use_cerebellum: bool = False,
         cerebellum_paths: Optional[BSBConfigPaths] = None,
-        nest_client=nestclient,
     ):
         """
         Initializes the controller for one Degree of Freedom.
@@ -110,7 +106,6 @@ class Controller:
         self.use_cerebellum = use_cerebellum
         self.cerebellum_paths = cerebellum_paths
         # self.comm = comm
-        self.nest_client = nest_client
         self.label = f"{label_prefix}"
 
         self.log.debug(
@@ -262,7 +257,7 @@ class Controller:
             base_rate=p_params.base_rate,
             kp=p_params.kp,
         )
-        tmp_pop_p = self.nest_client.Create(
+        tmp_pop_p = nest.Create(
             "tracking_neuron_nestml",
             n=N,
             params={
@@ -273,7 +268,7 @@ class Controller:
                 "simulation_steps": len(self.trajectory_slice),
             },
         )
-        tmp_pop_n = self.nest_client.Create(
+        tmp_pop_n = nest.Create(
             "tracking_neuron_nestml",
             n=N,
             params={
@@ -340,9 +335,9 @@ class Controller:
 
     def _build_sensory_neurons(self, to_file=False):
         """Parrot neurons for sensory feedback input"""
-        pop_p = self.nest_client.Create("parrot_neuron", self.N)
+        pop_p = nest.Create("parrot_neuron", self.N)
         self.pops.sn_p = self._create_pop_view(pop_p, "sensoryneur_p", to_file)
-        pop_n = self.nest_client.Create("parrot_neuron", self.N)
+        pop_n = nest.Create("parrot_neuron", self.N)
         self.pops.sn_n = self._create_pop_view(pop_n, "sensoryneur_n", to_file)
 
     def _build_prediction_neurons(self, to_file=False):
@@ -361,12 +356,12 @@ class Controller:
             "simulation_steps": len(self.total_time_vect),
         }
 
-        pop_p = self.nest_client.Create("diff_neuron_nestml", self.N)
-        self.nest_client.SetStatus(pop_p, {**pop_params, "pos": True})
+        pop_p = nest.Create("diff_neuron_nestml", self.N)
+        nest.SetStatus(pop_p, {**pop_params, "pos": True})
         self.pops.pred_p = self._create_pop_view(pop_p, "pred_p", to_file)
 
-        pop_n = self.nest_client.Create("diff_neuron_nestml", self.N)
-        self.nest_client.SetStatus(pop_n, {**pop_params, "pos": False})
+        pop_n = nest.Create("diff_neuron_nestml", self.N)
+        nest.SetStatus(pop_n, {**pop_params, "pos": False})
         self.pops.pred_n = self._create_pop_view(pop_n, "pred_n", to_file)
 
     def _build_fbk_smoothed_neurons(self, to_file=False):
@@ -380,12 +375,12 @@ class Controller:
         }
         self.log.debug("Creating feedback neurons", **pop_params)
 
-        pop_p = self.nest_client.Create("basic_neuron_nestml", self.N)
-        self.nest_client.SetStatus(pop_p, {**pop_params, "pos": True})
+        pop_p = nest.Create("basic_neuron_nestml", self.N)
+        nest.SetStatus(pop_p, {**pop_params, "pos": True})
         self.pops.fbk_smooth_p = self._create_pop_view(pop_p, "fbk_smooth_p", to_file)
 
-        pop_n = self.nest_client.Create("basic_neuron_nestml", self.N)
-        self.nest_client.SetStatus(pop_n, {**pop_params, "pos": False})
+        pop_n = nest.Create("basic_neuron_nestml", self.N)
+        nest.SetStatus(pop_n, {**pop_params, "pos": False})
         self.pops.fbk_smooth_n = self._create_pop_view(pop_n, "fbk_smooth_n", to_file)
 
     def _build_brainstem(self, to_file=False):
@@ -399,12 +394,12 @@ class Controller:
         }
         self.log.debug("Creating output neurons (brainstem)", **pop_params)
 
-        pop_p = self.nest_client.Create("basic_neuron_nestml", self.N)
-        self.nest_client.SetStatus(pop_p, {**pop_params, "pos": True})
+        pop_p = nest.Create("basic_neuron_nestml", self.N)
+        nest.SetStatus(pop_p, {**pop_params, "pos": True})
         self.pops.brainstem_p = self._create_pop_view(pop_p, "brainstem_p", to_file)
 
-        pop_n = self.nest_client.Create("basic_neuron_nestml", self.N)
-        self.nest_client.SetStatus(pop_n, {**pop_params, "pos": False})
+        pop_n = nest.Create("basic_neuron_nestml", self.N)
+        nest.SetStatus(pop_n, {**pop_params, "pos": False})
         self.pops.brainstem_n = self._create_pop_view(pop_n, "brainstem_n", to_file)
 
     # --- 2. Block Connection ---
@@ -424,25 +419,25 @@ class Controller:
             syn_spec_p=syn_spec_p,
             syn_spec_n=syn_spec_n,
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.planner_p.pop,
             self.pops.mc_fbk_p.pop,
             "one_to_one",
             syn_spec=syn_spec_p,
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.planner_p.pop,
             self.pops.mc_fbk_n.pop,
             "one_to_one",
             syn_spec=syn_spec_p,
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.planner_n.pop,
             self.pops.mc_fbk_p.pop,
             "one_to_one",
             syn_spec=syn_spec_n,
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.planner_n.pop,
             self.pops.mc_fbk_n.pop,
             "one_to_one",
@@ -456,13 +451,13 @@ class Controller:
             "Connecting StateEst to MC Fbk (Inhibitory)",
             conn_spec=conn_spec_state_mc_fbk,
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.state_p.pop,
             self.pops.mc_fbk_p.pop,
             "one_to_one",
             syn_spec=conn_spec_state_mc_fbk.model_dump(exclude_none=True),
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.state_p.pop,
             self.pops.mc_fbk_n.pop,
             "one_to_one",
@@ -472,13 +467,13 @@ class Controller:
         conn_spec_state_mc_fbk_neg = conn_spec_state_mc_fbk.model_copy(
             update={"weight": -conn_spec_state_mc_fbk.weight}
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.state_n.pop,
             self.pops.mc_fbk_p.pop,
             "one_to_one",
             syn_spec=conn_spec_state_mc_fbk_neg.model_dump(exclude_none=True),
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.state_n.pop,
             self.pops.mc_fbk_n.pop,
             "one_to_one",
@@ -488,7 +483,7 @@ class Controller:
         # Motor Cortex Output -> Brainstem
         conn_spec_mc_out_bs = self.conn_params.mc_out_brain_stem
         self.log.debug("Connecting MC out to brainstem", conn_spec=conn_spec_mc_out_bs)
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.mc_out_p.pop,
             self.pops.brainstem_p.pop,
             "all_to_all",
@@ -497,7 +492,7 @@ class Controller:
         conn_spec_mc_out_bs_neg = conn_spec_mc_out_bs.model_copy(
             update={"weight": -conn_spec_mc_out_bs.weight}
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.mc_out_n.pop,
             self.pops.brainstem_n.pop,
             "all_to_all",
@@ -515,13 +510,13 @@ class Controller:
             syn_spec_p=syn_spec_p,
             syn_spec_n=syn_spec_n,
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.sn_p.pop,
             self.pops.fbk_smooth_p.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.pops.sn_n.pop,
             self.pops.fbk_smooth_n.pop,
             "all_to_all",
@@ -537,14 +532,14 @@ class Controller:
         )
         self.log.debug("Connecting smoothed sensory to state", spec=fbk_sm_state_spec)
         for i, pre in enumerate(self.pops.fbk_smooth_p.pop):
-            self.nest_client.Connect(
+            nest.Connect(
                 pre,
                 st_p,
                 "all_to_all",
                 syn_spec={**fbk_sm_state_spec, "receptor_type": i + 1},
             )
         for i, pre in enumerate(self.pops.fbk_smooth_n.pop):
-            self.nest_client.Connect(
+            nest.Connect(
                 pre,
                 st_n,
                 "all_to_all",
@@ -558,14 +553,14 @@ class Controller:
             "Connecting self.pops.pred_p/n to state estimator", spec=pred_state_spec
         )
         for i, pre in enumerate(self.pops.pred_p.pop):
-            self.nest_client.Connect(
+            nest.Connect(
                 pre,
                 st_p,
                 "all_to_all",
                 syn_spec={**pred_state_spec, "receptor_type": i + offset},
             )
         for i, pre in enumerate(self.pops.pred_n.pop):
-            self.nest_client.Connect(
+            nest.Connect(
                 pre,
                 st_n,
                 "all_to_all",
@@ -586,7 +581,7 @@ class Controller:
 
         # Output proxy
         self.log.info("Creating MUSIC out proxy", port=out_port_name)
-        self.proxy_out = self.nest_client.Create(
+        self.proxy_out = nest.Create(
             "music_event_out_proxy", 1, params={"port_name": out_port_name}
         )
         self.log.info(
@@ -594,14 +589,14 @@ class Controller:
         )
 
         # Input proxy
-        self.proxy_in = self.nest_client.Create(
+        self.proxy_in = nest.Create(
             "music_event_in_proxy", n_total_neurons, params={"port_name": in_port_name}
         )
         self.log.info(
             "Creating MUSIC in proxy", port=in_port_name, channels=n_total_neurons
         )
         for i, n in enumerate(self.proxy_in):
-            self.nest_client.SetStatus(n, {"music_channel": i})
+            nest.SetStatus(n, {"music_channel": i})
         self.log.info(
             f"Created MUSIC in proxy: port '{in_port_name}' with {n_total_neurons} channels"
         )
@@ -618,7 +613,7 @@ class Controller:
         #     )
         #     latency = nest.GetKernelStatus("min_delay")
 
-        self.nest_client.SetAcceptableLatency(in_port_name, latency)
+        nest.SetAcceptableLatency(in_port_name, latency)
         self.log.info(
             "Set MUSIC acceptable latency", port=in_port_name, latency=latency
         )
@@ -639,14 +634,14 @@ class Controller:
             num_neurons=self.N,
         )
         for i, neuron in enumerate(bs_p.pop):
-            self.nest_client.Connect(
+            nest.Connect(
                 neuron,
                 self.proxy_out,
                 "one_to_one",
                 {"music_channel": start_channel_out + i},
             )
         for i, neuron in enumerate(bs_n.pop):
-            self.nest_client.Connect(
+            nest.Connect(
                 neuron,
                 self.proxy_out,
                 "one_to_one",
@@ -668,13 +663,13 @@ class Controller:
             delay=delay,
             weight=wgt,
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.proxy_in[idx_start_p:idx_end_p],
             sn_p.pop,
             "one_to_one",
             {"weight": wgt, "delay": delay},
         )
-        self.nest_client.Connect(
+        nest.Connect(
             self.proxy_in[idx_start_n:idx_end_n],
             sn_n.pop,
             "one_to_one",

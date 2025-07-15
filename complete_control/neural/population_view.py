@@ -10,10 +10,10 @@ __version__ = "1.0.1"
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import nest
 import numpy as np
 import pandas as pd
 import structlog
+from neural.nest_adapter import nest
 
 _log = structlog.get_logger(__name__)
 

@@ -1,44 +1,27 @@
-import datetime
-import json
-import os
 import random
-import shutil
 import sys
-from collections import defaultdict
-from datetime import timedelta
 from pathlib import Path
 from timeit import default_timer as timer
 
 import config.paths as paths
 import numpy as np
 import structlog
-from config.paths import RunPaths
-
-# from mpi4py import MPI # TOCHECK: MPI removed
-# from mpi4py.MPI import Comm # TOCHECK: MPI removed
+from config.core_models import SimulationParams
+from config.MasterParams import MasterParams
 from neural.Controller import Controller
-from neural.data_handling import collapse_files
-from neural.plot_utils import plot_controller_outputs
-from utils_common.generate_analog_signals import generate_signals
-from utils_common.log import setup_logging, tqdm
-
-from complete_control.config.core_models import MetaInfo, SimulationParams
-from complete_control.config.MasterParams import MasterParams
-from complete_control.neural.NestClient import NESTClient  # New import for NRP
+from neural.nest_adapter import nest
 
 # nest.set_verbosity("M_ERROR") # TOCHECK: Verbosity might be set by NEST server
 
 
 # --- Configuration and Setup ---
-def setup_environment(nest_client: NESTClient, nestml_build_dir=paths.NESTML_BUILD_DIR):
+def setup_environment():
     log = structlog.get_logger("main.env_setup")
     """Sets up environment variables if needed (e.g., for NESTML)."""
     try:
         # Check if module is already installed to prevent errors on reset
-        if "eglif_cond_alpha_multisyn" not in nest_client.Models(
-            mtype="nodes"
-        ):  # TOCHECK: Using nest_client
-            nest_client.Install("custom_stdp_module")  # TOCHECK: Using nest_client
+        if "eglif_cond_alpha_multisyn" not in nest.Models(mtype="nodes"):
+            nest.Install("custom_stdp_module")
             log.info("Installed NESTML module", module="custom_stdp_module")
         else:
             log.debug("NESTML module already installed", module="custom_stdp_module")
@@ -59,7 +42,6 @@ def setup_environment(nest_client: NESTClient, nestml_build_dir=paths.NESTML_BUI
 
 # --- NEST Kernel Setup ---
 def setup_nest_kernel(
-    nest_client: NESTClient,
     simulation_config: SimulationParams,
     seed: int,
     path_data: Path,
@@ -74,7 +56,7 @@ def setup_nest_kernel(
         # "print_time": True, # Optional: Print simulation progress
     }
     kernel_status["rng_seed"] = seed  # Set seed via kernel status
-    nest_client.SetKernelStatus(kernel_status)  # TOCHECK: Using nest_client
+    nest.SetKernelStatus(kernel_status)
     log.info(
         f"NEST Kernel: Resolution: {simulation_config.resolution}ms, Seed: {seed}, Data path: {str(path_data)}"
     )
@@ -83,7 +65,6 @@ def setup_nest_kernel(
 
 
 def create_controllers(
-    nest_client: NESTClient,  # or module
     master_config: MasterParams,
     trj: np.ndarray,
     motor_commands: np.ndarray,
@@ -141,8 +122,6 @@ def create_controllers(
             music_cfg=master_config.music,
             use_cerebellum=master_config.USE_CEREBELLUM,
             cerebellum_paths=master_config.bsb_config_paths,
-            # comm=comm,
-            nest_client=nest_client,
         )
         controllers.append(controller)
     return controllers

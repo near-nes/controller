@@ -1,26 +1,17 @@
 """NRP Neural Engine for the complete control simulation."""
 
 import datetime
-import os
-from pathlib import Path
 
 import structlog
-from complete_control.config.core_models import SimulationParams
-from complete_control.config.MasterParams import MasterParams
-from complete_control.neural.NestClient import NESTClient
-from complete_control.neural_simulation_lib import (
-    run_simulation,  # TOCHECK: run_simulation will be adapted for runLoop
-)
-from complete_control.neural_simulation_lib import (
+from config.MasterParams import MasterParams
+from neural.nest_adapter import initialize_nest, nest
+from neural_simulation_lib import (
     create_controllers,
     setup_environment,
     setup_nest_kernel,
 )
 from nrp_core.engines.python_json import EngineScript
 from utils_common.generate_analog_signals import generate_signals
-from utils_common.log import (
-    setup_logging,  # TOCHECK: Logging setup might be handled by NRP
-)
 
 NANO_SEC = 1e-9
 
@@ -29,11 +20,10 @@ class Script(EngineScript):
     def __init__(self):
         super().__init__()
         self.log = structlog.get_logger("nrp_neural_engine")
-        self.nest_client = None
+        initialize_nest("NRP")
         self.master_config = None
         self.controllers = []
         self.run_paths = None  # TOCHECK: How run_paths are handled in NRP context
-        self.initialize()
 
     def initialize(self):
         self.log.info("NRP Neural Engine: Initializing...")
@@ -65,11 +55,6 @@ class Script(EngineScript):
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger("nrp_neural")
         self.log.info(f"Engine Log Path: {self.run_paths.logs}")
 
-        # Initialize NESTClient
-        # TOCHECK: 'nest-server' is the hostname for the NEST server in a dockerized NRP setup
-        self.nest_client = NESTClient(host="nest-server", port=9000)
-        self.log.info("NESTClient initialized", host="nest-server", port=9000)
-
         # Load MasterParams
         # TOCHECK: This needs to be loaded from NRP's experiment configuration
         # For now, we'll create a dummy one or load from a known path if available
@@ -82,9 +67,8 @@ class Script(EngineScript):
         self.log.info("MasterParams loaded successfully.")
 
         # Setup environment and NEST kernel using the library functions
-        setup_environment(self.nest_client)
+        setup_environment()
         setup_nest_kernel(
-            self.nest_client,
             self.master_config.simulation,
             self.master_config.simulation.seed,
             self.run_paths.data_nest,
@@ -99,7 +83,6 @@ class Script(EngineScript):
 
         # Create controllers
         self.controllers = create_controllers(
-            self.nest_client,
             self.master_config,
             trj,
             motor_commands,
@@ -117,7 +100,7 @@ class Script(EngineScript):
         )  # Initial dummy data
         self.log.info("Datapacks registered: motor_commands_out, feedback_in")
 
-        self.nest_client.Prepare()  # Added Prepare as per feedback
+        nest.Prepare()  # Added Prepare as per feedback
         self.log.info("NRP Neural Engine: Initialization complete.")
 
     def runLoop(self, timestep_ns):
@@ -137,9 +120,7 @@ class Script(EngineScript):
         # Example: self.controllers[0].update_sensory_input(feedback_data["joint_angles"])
 
         # Advance the NEST simulation by one step
-        self.nest_client.Run(
-            timestep_ns * NANO_SEC
-        )  # Changed from Simulate to Run as per feedback
+        nest.Run(timestep_ns * NANO_SEC)  # Changed from Simulate to Run as per feedback
         # self.log.debug(f"NEST simulated for {timestep_ns * NANO_SEC} seconds.")
         # TOCHECK: In runLoop, you cannot run nest_client.SetStatus()
 
@@ -167,16 +148,13 @@ class Script(EngineScript):
         # for controller in self.controllers:
         #     pop_views.extend(controller.get_all_recorded_views())
         # collapse_files(self.run_paths.data_nest, pop_views) # TOCHECK: comm is not available
-        self.nest_client.Cleanup()  # Added Cleanup as per feedback
+        nest.Cleanup()
 
-    def reset(self):
-        self.log.info("NRP Neural Engine: Resetting.")
-        self.nest_client.Cleanup()
-        # Implement reset logic for the NEST simulation and controllers.
-        # This typically involves resetting the NEST kernel and re-initializing
-        # the controllers to their initial state.
-        if self.nest_client:
-            self.nest_client.ResetKernel()
-        # Re-initialize controllers if necessary.
-        # This will re-run the setup logic, ensuring a clean state for the next simulation.
-        self.initialize()
+    # def reset(self):
+    #     self.log.info("NRP Neural Engine: Resetting.")
+    #     self.nest_client.Cleanup()
+
+    #     if self.nest_client:
+    #         self.nest_client.ResetKernel()
+
+    #     self.initialize()
