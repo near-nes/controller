@@ -1,7 +1,6 @@
 """ """
 
 import datetime
-import os
 
 import music
 
@@ -22,7 +21,6 @@ class Script(EngineScript):
 
     def __init__(self):
         super().__init__()
-        self.initialize()
 
     def initialize(self):
         print("PyBullet Engine Server is initializing.")
