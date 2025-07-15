@@ -1,6 +1,5 @@
 from typing import Any, List, Tuple
 
-import music
 import structlog
 from config.plant_config import PlantConfig
 from utils_common.generate_analog_signals import generate_signals
@@ -29,21 +28,27 @@ class PlantSimulator:
         Initializes the PlantSimulator.
 
         Args:
-            run_paths: A RunPaths object with paths for the current run.
+            config: a PlantConfig object.
             pybullet_instance: The initialized PyBullet instance (e.g., p from `import pybullet as p`).
-            connect_gui: Whether the RoboticPlant should connect to the PyBullet GUI.
+            music_setup: when None, assume Music is not being used (i.e. NRP).
         """
         self.log = structlog.get_logger(type(self).__name__)
         self.log.info("Initializing PlantSimulator...")
         self.config: PlantConfig = config
         self.p = pybullet_instance
-        self.music_setup = music_setup
+        self.music_enabled = music_setup is not None
 
         self.plant = RoboticPlant(config=self.config, pybullet_instance=self.p)
         self.log.debug("RoboticPlant initialized.")
 
-        self._setup_music_communication()
-        self._setup_sensory_system()
+        if self.music_enabled:
+            import music
+
+            self.music = music
+            self.music_setup = music_setup
+            self._setup_music_communication()
+            self._setup_sensory_system()
+
         self.log.debug("MUSIC communication and SensorySystem setup complete.")
 
         self.num_total_steps = len(self.config.time_vector_total_s)
@@ -78,7 +83,7 @@ class PlantSimulator:
         n_music_channels_in = self.config.N_NEURONS * 2 * self.config.NJT
         self.music_input_port.map(
             self._music_inhandler,
-            music.Index.GLOBAL,
+            self.music.Index.GLOBAL,
             base=0,
             size=n_music_channels_in,
             accLatency=self.config.MUSIC_ACCEPTABLE_LATENCY_S,
@@ -94,7 +99,7 @@ class PlantSimulator:
         # Sensory neurons will connect to this port. Mapping is global, base 0, size N*2*njt.
         n_music_channels_out = self.config.N_NEURONS * 2 * self.config.NJT
         self.music_output_port.map(
-            music.Index.GLOBAL,
+            self.music.Index.GLOBAL,
             base=self.config.SENS_NEURON_ID_START,  # Global ID start for these sensory neurons
             size=n_music_channels_out,
         )
@@ -342,7 +347,7 @@ class PlantSimulator:
             resolution_s=self.config.RESOLUTION_S,
         )
 
-        music_runtime = music.Runtime(self.music_setup, self.config.RESOLUTION_S)
+        music_runtime = self.music.Runtime(self.music_setup, self.config.RESOLUTION_S)
         current_sim_time_s = 0.0
         step = 0
 
