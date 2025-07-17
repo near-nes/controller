@@ -14,7 +14,6 @@ from config.module_params import (
 from config.population_params import PopulationsParams
 from neural.nest_adapter import nest
 
-from .CerebellumHandler import CerebellumHandler
 from .ControllerPopulations import ControllerPopulations
 from .motorcortex import MotorCortex
 from .population_view import PopView
@@ -69,7 +68,7 @@ class Controller:
         sim_params: SimulationParams,
         path_data: str,
         comm,  # MPI.Comm
-        music_cfg: MusicParams,
+        music_cfg: MusicParams = None,
         label_prefix: str = "",
         use_cerebellum: bool = False,
         cerebellum_paths: Optional[BSBConfigPaths] = None,
@@ -126,7 +125,7 @@ class Controller:
         )
 
         self.pops = ControllerPopulations()
-        self.cerebellum_handler: Optional[CerebellumHandler] = None
+        self.cerebellum_handler = None
 
         if use_cerebellum:
             self.cerebellum_handler = self._instantiate_cerebellum_handler(self.pops)
@@ -147,14 +146,16 @@ class Controller:
 
         self.log.info("Creating music interface...")
         # --- MUSIC Setup and Connection ---
-        self.create_and_setup_music_interface()
-        self.log.info(f"Connecting controller to MUSIC")
-        self.connect_controller_to_music()
+        self.enable_music = music_cfg is not None
+        if self.enable_music:
+            self.create_and_setup_music_interface()
+            self.log.info(f"Connecting controller to MUSIC")
+            self.connect_controller_to_music()
         self.log.info("Controller initialization complete.")
 
-    def _instantiate_cerebellum_handler(
-        self, controller_pops: ControllerPopulations
-    ) -> CerebellumHandler:
+    def _instantiate_cerebellum_handler(self, controller_pops: ControllerPopulations):
+        from .CerebellumHandler import CerebellumHandler
+
         """Instantiates the internal CerebellumHandler."""
         self.log.info("Instantiating internal CerebellumHandler")
         if self.cerebellum_paths is None:

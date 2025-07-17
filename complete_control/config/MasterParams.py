@@ -27,6 +27,7 @@ class MasterParams(BaseModel):
     PLOT_AFTER_SIMULATE: bool = False
     USE_CEREBELLUM: bool = False
     GUI_PYBULLET: bool = False
+    USE_MUSIC: bool = False
 
     NJT: int = 1
     simulation: SimulationParams = Field(default_factory=lambda: SimulationParams())
@@ -58,5 +59,7 @@ class MasterParams(BaseModel):
             f.write(self.model_dump_json(indent=indent))
 
     @classmethod
-    def from_runpaths(cls, run_paths: RunPaths):
-        return MasterParams(run_paths=RunPaths.from_run_id(run_paths.run.name))
+    def from_runpaths(cls, run_paths: RunPaths, **kwargs):
+        return MasterParams(
+            run_paths=RunPaths.from_run_id(run_paths.run.name), **kwargs
+        )

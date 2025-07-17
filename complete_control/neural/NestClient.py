@@ -20,23 +20,32 @@
 # along with NEST.  If not, see <http://www.gnu.org/licenses/>.
 
 import requests
+import structlog
 from werkzeug.exceptions import BadRequest
 
 __all__ = [
     "NESTClient",
 ]
 
+log = structlog.get_logger("nest-client")
 
-def encode(response):
+
+def encode(response, req, req_kwargs):
     if response.ok:
         return response.json()
-    elif response.status_code == 400:
-        raise BadRequest(response.text)
+    # elif response.status_code == 400:
+    #     raise BadRequest(response.text)
+    else:
+        log.error(
+            f"received response={response.status_code} to request {req} with args:",
+            kw=str(req_kwargs),
+        )
+        log.error(response.text, res=response)
 
 
 class NESTClient:
 
-    def __init__(self, host="localhost", port=9000):
+    def __init__(self, host="nest-server", port=9000):
         self.url = "http://{}:{}/".format(host, port)
         self.headers = {"Content-type": "application/json", "Accept": "text/plain"}
 
@@ -46,7 +55,7 @@ class NESTClient:
             response = requests.post(
                 self.url + "api/" + call, json=kwargs, headers=self.headers
             )
-            return encode(response)
+            return encode(response, call, kwargs)
 
         return method
 

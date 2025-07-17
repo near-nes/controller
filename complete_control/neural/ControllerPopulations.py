@@ -1,10 +1,6 @@
-# controller.py (Add this at the top or in a separate types.py)
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, List, Optional
 
-import numpy as np
-
-# Assuming PopView is imported from population_view.py
 from .population_view import PopView
 
 

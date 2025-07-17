@@ -138,10 +138,10 @@ if __name__ == "__main__":
     start_script_time = timer()
 
     # Load master config
-    master_config = MasterParams.from_runpaths(run_paths=run_paths)
+    master_config = MasterParams.from_runpaths(run_paths=run_paths, USE_MUSIC=True)
     with open(run_paths.params_json, "w") as f:
         f.write(master_config.model_dump_json(indent=2))
-    main_log.info("MasterParams initialized in main_simulation (Standalone).")
+    main_log.info("MasterParams initialized in main_simulation (MUSIC).")
 
     # Setup environment and NEST kernel
     setup_environment()
