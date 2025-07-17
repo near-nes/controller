@@ -25,9 +25,7 @@ def setup_environment():
             log.info("Installed NESTML module", module="custom_stdp_module")
         else:
             log.debug("NESTML module already installed", module="custom_stdp_module")
-    except (
-        Exception
-    ) as e:  # TOCHECK: Changed to generic Exception as nest.NESTError might not be available
+    except Exception as e:
         log.error(
             "Error installing NESTML module",
             module="custom_stdp_module",
@@ -98,6 +96,9 @@ def create_controllers(
         single_trial_duration=time_span_per_trial,
         num_steps_total=len(total_time_vect_concat),
     )
+    music_cfg = (
+        master_config.music if master_config.USE_MUSIC else None
+    )  # TODO what is this man find a better solution
 
     controllers = []
     log.info(f"Constructing Network", dof=njt, N_neurons_pop=N)
@@ -117,10 +118,11 @@ def create_controllers(
             pops_params=pops_params,
             conn_params=conn_params,
             sim_params=master_config.simulation,
-            path_data=master_config.run_paths.data_nest,  # TOCHECK: path_data from master_config
+            master_params=master_config,
+            path_data=master_config.run_paths.data_nest,
             label_prefix="",
             comm=comm,
-            music_cfg=master_config.music,
+            music_cfg=music_cfg,
             use_cerebellum=master_config.USE_CEREBELLUM,
             cerebellum_paths=master_config.bsb_config_paths,
         )

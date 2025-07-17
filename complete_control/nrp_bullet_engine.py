@@ -48,8 +48,9 @@ class Script(EngineScript):
     def runLoop(self, timestep):
         print("timestep = ", timestep)
         #  Receive control data
-        rate_pos = self._getDataPack("control_cmd").get("rate_pos")
-        rate_neg = self._getDataPack("control_cmd").get("rate_neg")
+        ctrl = self._getDataPack("control_cmd")
+        rate_pos = ctrl["rate_pos"]
+        rate_neg = ctrl["rate_neg"]
 
         joint_pos_rad, joint_vel, ee_pos, ee_vel = self.simulator.run_simulation_step(
             rate_pos, rate_neg, self.current_sim_time_s, self.step

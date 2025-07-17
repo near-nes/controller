@@ -41,6 +41,7 @@ def encode(response, req, req_kwargs):
             kw=str(req_kwargs),
         )
         log.error(response.text, res=response)
+        raise BadRequest(response.text)
 
 
 class NESTClient:
@@ -48,6 +49,25 @@ class NESTClient:
     def __init__(self, host="nest-server", port=9000):
         self.url = "http://{}:{}/".format(host, port)
         self.headers = {"Content-type": "application/json", "Accept": "text/plain"}
+
+    def Connect(self, *args, **kwargs):
+        args = [i if isinstance(i, list) else [i] for i in args[0:2]]
+        kwargs["args"] = args
+        response = requests.post(
+            self.url + "api/Connect", json=kwargs, headers=self.headers
+        )
+        if response.ok:
+            res = response.json()
+            if not isinstance(res, list):
+                return [res]
+            return res
+        else:
+            log.error(
+                f"received response={response.status_code} to Connect request with args:",
+                **kwargs,
+            )
+            log.error(response.text, res=response)
+            raise RuntimeError(response.text)
 
     def __getattr__(self, call):
         def method(*args, **kwargs):

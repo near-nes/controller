@@ -162,6 +162,8 @@ class PlantSimulator:
                 idStart=id_start_p,
                 bas_rate=self.config.SENS_NEURON_BASE_RATE,
                 kp=self.config.SENS_NEURON_KP,
+                res=self.config.RESOLUTION_S,
+                music_index_strategy=self.music.Index.GLOBAL,
             )
             sn_p.connect(self.music_output_port)
             self.sensory_neurons_p.append(sn_p)
@@ -174,6 +176,8 @@ class PlantSimulator:
                 idStart=id_start_n,
                 bas_rate=self.config.SENS_NEURON_BASE_RATE,
                 kp=self.config.SENS_NEURON_KP,
+                res=self.config.RESOLUTION_S,
+                music_index_strategy=self.music.Index.GLOBAL,
             )
             sn_n.connect(self.music_output_port)
             self.sensory_neurons_n.append(sn_n)

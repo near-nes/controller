@@ -36,7 +36,9 @@ class Script(EngineScript):
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger("nrp_neural")
         self.log.info(f"Engine Log Path: {self.run_paths.logs}")
 
-        self.master_config = MasterParams.from_runpaths(run_paths=self.run_paths)
+        self.master_config = MasterParams.from_runpaths(
+            run_paths=self.run_paths, USE_MUSIC=False
+        )
         self.log.info("MasterParams loaded successfully.")
 
         setup_environment()
@@ -60,32 +62,27 @@ class Script(EngineScript):
         )
         self.log.info(f"Created {len(self.controllers)} controllers.")
 
-        self._registerDataPack("motor_commands_out")
-        self._registerDataPack("feedback_in")
-        self._setDataPack(
-            "motor_commands_out", {"data": [0.0] * self.master_config.NJT}
-        )
-        self.log.info("Datapacks registered: motor_commands_out, feedback_in")
+        self._registerDataPack("control_cmd")
+        self._setDataPack("control_cmd", {"rate_pos": 0, "rate_neg": 0})
+        self.log.info("Datapacks registered: control_cmd")
 
         nest.Prepare()
         self.log.info("NRP Neural Engine: Initialization complete.")
 
     def runLoop(self, timestep_ns):
-        self.log.debug(f"NRP Neural Engine: runLoop at timestep {timestep_ns} ns")
+        self.log.debug(
+            f"NRP Neural Engine: runLoop at timestep {timestep_ns* NANO_SEC} sec"
+        )
 
         # Read sensory data from input datapack
-        feedback_data = self._getDataPack("feedback_in")
+        feedback_data = self._getDataPack("positions")
         self.log.debug(f"Received feedback: {feedback_data}")
 
-        self.controllers[0].update_sensory_input(feedback_data["joint_angles"])
-
+        self.controllers[0].update_sensory_info_from_NRP(feedback_data["joint_pos_rad"])
         nest.Run(timestep_ns * NANO_SEC)
-        motor_commands_to_send = [
-            controller.get_motor_command() for controller in self.controllers
-        ]
-        self.log.debug(f"Retrieved motor commands: {motor_commands_to_send}")
+        pos, neg = self.controllers[0].extract_motor_command_NRP(timestep_ns * NANO_SEC)
 
-        self._setDataPack("motor_commands_out", {"data": motor_commands_to_send})
+        self._setDataPack("control_cmd", {"rate_pos": pos, "rate_neg": neg})
         self.log.debug(f"Sent motor commands")
 
     def shutdown(self):

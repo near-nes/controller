@@ -1,10 +1,11 @@
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 import structlog
 from config.bsb_models import BSBConfigPaths
 from config.connection_params import ConnectionsParams
 from config.core_models import MusicParams, SimulationParams
+from config.MasterParams import MasterParams
 from config.module_params import (
     MotorCortexModuleConfig,
     PlannerModuleConfig,
@@ -13,6 +14,7 @@ from config.module_params import (
 )
 from config.population_params import PopulationsParams
 from neural.nest_adapter import nest
+from plant.sensoryneuron import SensoryNeuron
 
 from .ControllerPopulations import ControllerPopulations
 from .motorcortex import MotorCortex
@@ -66,6 +68,7 @@ class Controller:
         pops_params: PopulationsParams,
         conn_params: ConnectionsParams,
         sim_params: SimulationParams,
+        master_params: MasterParams,
         path_data: str,
         comm,  # MPI.Comm
         music_cfg: MusicParams = None,
@@ -91,15 +94,15 @@ class Controller:
         self.trajectory_slice = trajectory_slice
         self.motor_cmd_slice = motor_cmd_slice
 
-        # Store parameters (consider dedicated dataclasses per module if very stable)
+        # Store parameters
         self.mc_params = mc_params
         self.plan_params = plan_params
         self.spine_params = spine_params
         self.state_params = state_params
-        # self.state_se_params = state_se_params # Store if needed
         self.pops_params = pops_params
         self.conn_params = conn_params
         self.sim_params = sim_params
+        self.master_params = master_params
         self.music_cfg = music_cfg
         self.path_data = path_data
         self.use_cerebellum = use_cerebellum
@@ -151,6 +154,10 @@ class Controller:
             self.create_and_setup_music_interface()
             self.log.info(f"Connecting controller to MUSIC")
             self.connect_controller_to_music()
+        else:
+            self.create_and_connect_NRP_interface()
+            self.log.info(f"Connected controller to NRP proxies")
+
         self.log.info("Controller initialization complete.")
 
     def _instantiate_cerebellum_handler(self, controller_pops: ControllerPopulations):
@@ -676,6 +683,58 @@ class Controller:
             "one_to_one",
             {"weight": wgt, "delay": delay},
         )
+
+    def create_and_connect_NRP_interface(self):
+        self.proxy_out_p = nest.Create("spike_recorder", 1)
+        self.proxy_out_n = nest.Create("spike_recorder", 1)
+
+        nest.Connect(self.pops.brainstem_p.pop, self.proxy_out_p)
+        nest.Connect(self.pops.brainstem_n.pop, self.proxy_out_n)
+
+        # positive
+        self.proxy_in_p = SensoryNeuron(
+            self.N,
+            pos=True,
+            idStart=0,
+            bas_rate=self.master_params.modules.spine.sensNeur_base_rate,
+            kp=self.master_params.modules.spine.sensNeur_kp,
+            res=self.sim_params.resolution,
+        )
+        # negative
+        id_start_n = self.N
+        self.proxy_in_n = SensoryNeuron(
+            self.N,
+            pos=False,
+            idStart=id_start_n,
+            bas_rate=self.master_params.modules.spine.sensNeur_base_rate,
+            kp=self.master_params.modules.spine.sensNeur_kp,
+            res=self.sim_params.resolution,
+        )
+        self.proxy_in_gen = nest.Create("poisson_generator", 2)
+
+        self.log.info(
+            "Sensory neurons created and connected",
+            neurons_per_pop=self.N,
+        )
+        nest.Connect(self.proxy_in_gen[0], self.pops.sn_p.pop, "all_to_all")
+        nest.Connect(self.proxy_in_gen[1], self.pops.sn_n.pop, "all_to_all")
+
+    def update_sensory_info_from_NRP(self, angle: float):
+        pos = self.proxy_in_p.lam(angle)
+        neg = self.proxy_in_n.lam(angle)
+        nest.SetStatus(self.proxy_in_gen, {"rate": [pos, neg]})
+
+    def extract_motor_command_NRP(self, timestep):
+        rate_pos = (
+            len(self.proxy_out_p.get("events")["senders"][timestep:])
+            / self.sim_params.resolution
+        )
+        rate_neg = (
+            len(self.proxy_out_n.get("events")["senders"][timestep:])
+            / self.sim_params.resolution
+        )
+
+        return rate_pos, rate_neg
 
     def get_all_recorded_views(self) -> list[PopView]:
         """
