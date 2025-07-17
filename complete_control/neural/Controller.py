@@ -147,8 +147,7 @@ class Controller:
         if use_cerebellum:
             self.cerebellum_handler.connect_to_main_controller_populations()
 
-        self.log.info("Creating music interface...")
-        # --- MUSIC Setup and Connection ---
+        self.log.info("Creating coordinator interface...")
         self.enable_music = music_cfg is not None
         if self.enable_music:
             self.create_and_setup_music_interface()
