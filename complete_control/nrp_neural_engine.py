@@ -63,6 +63,7 @@ class Script(EngineScript):
         self.log.info(f"Created {len(self.controllers)} controllers.")
 
         self._registerDataPack("control_cmd")
+        self._registerDataPack("positions")
         self._setDataPack("control_cmd", {"rate_pos": 0, "rate_neg": 0})
         self.log.info("Datapacks registered: control_cmd")
 

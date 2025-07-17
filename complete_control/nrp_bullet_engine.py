@@ -37,6 +37,7 @@ class Script(EngineScript):
         log.info("PlantSimulator initialized.")
 
         self._registerDataPack("positions")
+        self._registerDataPack("control_cmd")
 
         log.info("DataPacks registered.")
 

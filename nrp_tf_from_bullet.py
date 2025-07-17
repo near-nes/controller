@@ -1,13 +1,14 @@
 from nrp_core import *
 from nrp_core.data.nrp_json import *
 
-car_speed = 5
 
-
-@EngineDataPack(keyword='positions', id=DataPackIdentifier('positions', 'bullet_simulator'))
-@PreprocessingFunction("bullet_simulator")
+@EngineDataPack(
+    keyword="positions", id=DataPackIdentifier("positions", "bullet_simulator")
+)
+@TransceiverFunction("nest_client")
 def from_bullet(positions):
-    
-    print(positions)
+    position = JsonDataPack("positions", "nest_client")
+    position.data["joint_pos_rad"] = positions.data["joint_pos_rad"]
+    print(position)
 
-    return [positions]
+    return [position]
