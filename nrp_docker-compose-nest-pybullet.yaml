@@ -27,10 +27,11 @@ services:
       NEST_MODE: "nest-server"
       NEST_SERVER_MODULES: 'import nest; import numpy; import os; import json; import sys'
       PYNEST_QUIET: 0
+      NEST_SERVER_STDOUT: 0
     ports:
       # Map host port 5901 (localhost only) to container port 5901 (VNC display :1)
-      - "127.0.0.1:5901:5901"
-      - 9000:9000 # nest-server port
+      - "127.0.0.1:5902:5901"
+      - 9001:9000 # nest-server port
     # If you want to run a specific script, use 'docker-compose run simulation python your_script.py'
     command: bash
     working_dir: /sim/controller
@@ -50,11 +51,11 @@ services:
       context: .
       dockerfile: docker/bullet_muscle_sim.Dockerfile
     volumes:
-      - ./:/experiment
+      - ./:/sim/controller
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/root/.Xauthority
-    command: NRPCoreSim -c /experiment/nrp_simulation_config_nest_docker_compose.json --cloglevel debug --logdir /home/nrpuser/logs
-    working_dir: /experiment
+    command: NRPCoreSim -c /sim/controller/nrp_simulation_config_nest_docker_compose.json --cloglevel info --logdir /home/nrpuser/logs
+    working_dir: /sim/controller
     # tty: true
     depends_on:
       - nest-server

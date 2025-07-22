@@ -1,7 +1,7 @@
 # Applications
 [from]
   binary=/sim/controller/complete_control/main_simulation.py
-  np=6
+  np=1
 
 [to]
   binary=/sim/controller/complete_control/receiver_plant.py
