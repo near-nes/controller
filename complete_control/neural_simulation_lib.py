@@ -41,25 +41,23 @@ def setup_environment():
 # --- NEST Kernel Setup ---
 def setup_nest_kernel(
     simulation_config: SimulationParams,
-    seed: int,
     path_data: Path,
 ):
-    log = structlog.get_logger("main.nest_setup")
     """Configures the NEST kernel."""
+    log = structlog.get_logger("main.nest_setup")
 
     kernel_status = {
         "resolution": simulation_config.resolution,
-        "overwrite_files": True,  # optional since different data paths
+        "overwrite_files": True,
         "data_path": str(path_data),
-        # "print_time": True, # Optional: Print simulation progress
+        "rng_seed": simulation_config.seed,
     }
-    kernel_status["rng_seed"] = seed  # Set seed via kernel status
     nest.SetKernelStatus(kernel_status)
     log.info(
-        f"NEST Kernel: Resolution: {simulation_config.resolution}ms, Seed: {seed}, Data path: {str(path_data)}"
+        f"NEST Kernel: Resolution: {nest.GetKernelStatus('resolution')}ms, Seed: {nest.GetKernelStatus('rng_seed')}, Data path: {nest.GetKernelStatus('data_path')}"
     )
-    random.seed(seed)
-    np.random.seed(seed)
+    random.seed(simulation_config.seed)
+    np.random.seed(simulation_config.seed)
 
 
 def create_controllers(

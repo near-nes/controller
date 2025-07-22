@@ -64,7 +64,7 @@ class PlantConfig:
 
         # Plant interaction parameters (remain as is for Stage 1)
         self.SCALE_TORQUE: float = 500000.0
-        self.BUFFER_SIZE_S: float = 10.0 / 1000.0
+        self.BUFFER_SIZE_S: float = 1.0 / 100.0
 
         # MUSIC configuration from MasterConfig
         self.MUSIC_CONST_S: float = (

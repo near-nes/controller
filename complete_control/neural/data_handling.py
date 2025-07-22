@@ -23,7 +23,7 @@ def collapse_files(dir: Path, pops: list[PopView], comm: Comm = None):
     Files are processed only by rank 0 process. For each population, files starting with
     the population name are combined, duplicates are removed, and original files are deleted.
     """
-    if comm.rank == 0:
+    if comm is None or comm.rank == 0:
         for pop in pops:
             name = pop.label
             file_list = [i for i in dir.iterdir() if i.name.startswith(name)]
@@ -53,5 +53,5 @@ def collapse_files(dir: Path, pops: list[PopView], comm: Comm = None):
             pop.filepath = complete_file
             for f in file_list:
                 f.unlink()
-
-    comm.barrier()
+    if comm is not None:
+        comm.barrier()

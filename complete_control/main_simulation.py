@@ -147,7 +147,6 @@ if __name__ == "__main__":
     setup_environment()
     setup_nest_kernel(
         master_config.simulation,
-        master_config.simulation.seed,
         run_paths.data_nest,
     )
 
