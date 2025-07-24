@@ -84,7 +84,7 @@ class Script(EngineScript):
 
         feedback_data = self._getDataPack("positions")
         joint_pos_rad = feedback_data["joint_pos_rad"]
-        sim_time = feedback_data["sim_time"] * NANO_SEC
+        sim_time_s = feedback_data["sim_time"] * NANO_SEC
 
         with self.sensory_profile.time():
             self.controllers[0].update_sensory_info_from_NRP(joint_pos_rad)
@@ -93,17 +93,18 @@ class Script(EngineScript):
             self.log.debug("[neural] updated sensory info")
 
         with self.sim_profile.time():
-            nest.Run(timestep_ns * NANO_SEC)
+            nest.Run(timestep_ns * NANO_SEC * 1000)
 
         if self.step % 50 == 0:
             self.log.debug("[neural] simulated")
 
         with self.motor_profile.time():
-            pos, neg = self.controllers[0].extract_motor_command_NRP(sim_time)
+            pos, neg = self.controllers[0].extract_motor_command_NRP(sim_time_s)
 
         if self.step % 50 == 0:
             self.log.debug(
                 f"[neural] Update {self.step} complete.",
+                sim_time=sim_time_s,
                 rate_pos=pos,
                 rate_neg=neg,
                 angle=joint_pos_rad,
