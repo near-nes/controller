@@ -258,6 +258,9 @@ class PlantSimulator:
             where ee_pos_m and ee_vel_m_list are lists representing end effector
             position and velocity
         """
+        joint_pos_rad, joint_vel_rad_s = self.plant.get_joint_state()
+        ee_pos_m, ee_vel_m_list = self.plant.get_ee_pose_and_velocity()
+
         if step >= self.num_total_steps:
             self.log.warning(
                 "Step index exceeds data_array size, breaking loop.",
@@ -265,7 +268,7 @@ class PlantSimulator:
                 max_steps=self.num_total_steps,
                 sim_time=current_sim_time_s,
             )
-            return None
+            return joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list
 
         net_rate_hz = rate_pos_hz - rate_neg_hz
         input_torque = net_rate_hz / self.config.SCALE_TORQUE
@@ -277,8 +280,6 @@ class PlantSimulator:
 
         # 1. Get current plant state
         self.plant.update_stats()
-        joint_pos_rad, joint_vel_rad_s = self.plant.get_joint_state()
-        ee_pos_m, ee_vel_m_list = self.plant.get_ee_pose_and_velocity()
 
         # 2. Apply motor command to plant
         self._set_joint_torque(input_torque, current_sim_time_s)
