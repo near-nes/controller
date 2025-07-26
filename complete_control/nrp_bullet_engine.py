@@ -1,6 +1,6 @@
 """ """
 
-import datetime
+import os
 
 import config.paths as project_paths
 import pybullet as p
@@ -21,7 +21,7 @@ class Script(EngineScript):
 
     def initialize(self):
         print("PyBullet Engine Server is initializing.")
-        run_timestamp_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        run_timestamp_str = os.getenv("EXEC_TIMESTAMP")
         self.run_paths = project_paths.RunPaths.from_run_id(run_timestamp_str)
         self.config = PlantConfig.from_runpaths(self.run_paths)
 
@@ -78,4 +78,6 @@ class Script(EngineScript):
         self.rest_profile.start()
 
     def shutdown(self):
+        self.log.info("Simulation loop finished.")
+        self.simulator._finalize_and_process_data()
         print("Simulation End !!!")

@@ -5,15 +5,19 @@
     "EngineConfigs": 
     [
         {
-            "EngineType": "python_json",
+            "EngineType": "python_grpc",
             "EngineName": "bullet_simulator",
-            "PythonFileName": "complete_control/nrp_bullet_engine.py",
-            "EngineTimestep" : 0.0001 
+            "ServerAddress":"0.0.0.0:1234",
+            "PythonFileName": "complete_control/nrp_bullet_engine_bk.py",
+			"ProtobufPackages": ["Wrappers", "NrpGenericProto"],
+            "EngineTimestep" : 0.0001
         },
 		{
-            "EngineType": "python_json",
+            "EngineType": "python_grpc",
 			"EngineName": "nest_client",
-			"PythonFileName": "complete_control/nrp_neural_engine.py",
+			"ServerAddress":"0.0.0.0:1235",
+			"PythonFileName": "complete_control/nrp_neural_engine_bk.py",
+			"ProtobufPackages": ["Wrappers", "NrpGenericProto"],
             "EngineTimestep" : 0.0001
 		}
     ],

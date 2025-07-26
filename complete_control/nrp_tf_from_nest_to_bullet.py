@@ -1,7 +1,7 @@
 # This is calclated on NRP-Core side
 
 from nrp_core import *
-from nrp_core.data.nrp_json import *
+from nrp_core.data.nrp_protobuf import *
 
 
 @EngineDataPack(
@@ -9,8 +9,7 @@ from nrp_core.data.nrp_json import *
 )
 @TransceiverFunction("bullet_simulator")
 def to_bullet(control_cmd):
-    rec_cmd = JsonDataPack("control_cmd", "bullet_simulator")
-    rec_cmd.data["rate_pos"] = control_cmd.data["rate_pos"]
-    rec_cmd.data["rate_neg"] = control_cmd.data["rate_neg"]
+    datapack = NrpGenericProtoArrayDoubleDataPack("control_cmd", "bullet_simulator")
+    datapack.data.array.extend(control_cmd.data.array)
 
-    return [rec_cmd]
+    return [datapack]
