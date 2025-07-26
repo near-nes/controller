@@ -54,7 +54,7 @@ services:
       - ./:/sim/controller
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/root/.Xauthority
-    command: NRPCoreSim -c /sim/controller/nrp_simulation_config_nest_docker_compose.json --cloglevel info --logdir /home/nrpuser/logs
+    command: sh -c "EXEC_TIMESTAMP=$(date +%Y%m%d_%H%M%S) && NRPCoreSim -c /sim/controller/nrp_simulation_config_nest_docker_compose.json --cloglevel debug --logdir /home/nrpuser/logs"
     working_dir: /sim/controller
     # tty: true
     depends_on:

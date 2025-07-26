@@ -1,17 +1,17 @@
 """NRP Neural Engine for the complete control simulation."""
 
-import datetime
+import os
 
 import structlog
 from config.MasterParams import MasterParams
 from config.paths import COMPLETE_CONTROL, RunPaths
 from neural.nest_adapter import initialize_nest, nest
+from neural.plot_utils import plot_controller_outputs
 from neural_simulation_lib import (
     create_controllers,
     setup_environment,
     setup_nest_kernel,
 )
-from nrp_core import SimulationTime
 from nrp_core.engines.python_json import EngineScript
 from utils_common.generate_analog_signals import generate_signals
 from utils_common.profile import Profile
@@ -34,16 +34,16 @@ class Script(EngineScript):
         self.log.debug(nest.GetKernelStatus())
         self.step = 0
 
-        run_timestamp_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        run_timestamp_str = os.getenv("EXEC_TIMESTAMP")
 
         self.run_paths = RunPaths.from_run_id(run_timestamp_str)
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger("nrp_neural")
         self.log.info(f"Engine Log Path: {self.run_paths.logs}")
 
-        self.master_config = MasterParams.from_runpaths(
-            run_paths=self.run_paths, USE_MUSIC=False
-        )
-        self.log.info("MasterParams loaded successfully.")
+        self.master_config = MasterParams.from_runpaths(self.run_paths, USE_MUSIC=False)
+        with open(self.run_paths.params_json, "w") as f:
+            f.write(self.master_config.model_dump_json(indent=2))
+        self.log.info("MasterParams loaded and dumped successfully.")
 
         setup_environment()
         setup_nest_kernel(
@@ -119,14 +119,16 @@ class Script(EngineScript):
 
     def shutdown(self):
         self.log.info("NRP Neural Engine: Shutting down.")
-        self.log.info("Data collapsing and plotting (if enabled) would occur here.")
         from neural.data_handling import collapse_files
 
         pop_views = []
         for controller in self.controllers:
             pop_views.extend(controller.get_all_recorded_views())
         collapse_files(self.run_paths.data_nest, pop_views)
-        nest.Cleanup()
+        if self.master_config.PLOT_AFTER_SIMULATE:
+            plot_controller_outputs(self.run_paths)
+
+        # nest.Cleanup()
 
     # def reset(self):
     #     self.log.info("NRP Neural Engine: Resetting.")
