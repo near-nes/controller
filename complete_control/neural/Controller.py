@@ -728,78 +728,34 @@ class Controller:
             kp=self.master_params.modules.spine.sensNeur_kp,
             res=self.sim_params.resolution,
         )
-        self.proxy_in_gen = nest.Create("poisson_generator", 2)
+        self.proxy_in_gen = nest.Create("inhomogeneous_poisson_generator", 2)
+        self.proxy_in_gen_view = self._create_pop_view(
+            self.proxy_in_gen, "proxy_in_NRP", True
+        )
 
         self.log.info(
             "Sensory neurons created and connected",
             neurons_per_pop=self.N,
         )
-        nest.Connect(self.proxy_in_gen[0], self.pops.sn_p.pop, "all_to_all")
-        nest.Connect(self.proxy_in_gen[1], self.pops.sn_n.pop, "all_to_all")
+        conn_spec = {
+            "weight": self.spine_params.wgt_sensNeur_spine,
+            "delay": self.spine_params.fbk_delay,
+        }
+        nest.Connect(self.proxy_in_gen[0], self.pops.sn_p.pop, "all_to_all", conn_spec)
+        nest.Connect(self.proxy_in_gen[1], self.pops.sn_n.pop, "all_to_all", conn_spec)
 
-    def update_sensory_info_from_NRP(self, angle: float):
+    def update_sensory_info_from_NRP(self, angle: float, sim_time: float):
         pos = self.proxy_in_p.lam(angle)
         neg = self.proxy_in_n.lam(angle)
-        nest.SetStatus(self.proxy_in_gen, {"rate": [pos, neg]})
+        # self.log.debug(f"result for angle={angle}", pos=pos, neg=neg)
+        nest.SetStatus(
+            self.proxy_in_gen,
+            {"rate_times": [sim_time, sim_time], "rate_values": [pos, neg]},
+        )
 
-    def extract_motor_command_NRP(self, current_sim_time_s):
-        # self.log.debug("test_rec status:")
-        # self.log.debug(nest.GetStatus(self.test_rec))
-
+    def extract_motor_command_NRP(self):
         rate_pos = nest.GetStatus(self.proxy_out_p, "in_rate")[0]
         rate_neg = nest.GetStatus(self.proxy_out_n, "in_rate")[0]
-        #### NEEDED FOR OTHERS
-        # buffer_len = 0.01  # right now, only in plant config
-
-        # buffer_start = max(current_sim_time_s - buffer_len, 0)
-        # buffer_end = current_sim_time_s
-
-        # p_spike_times = nest.GetStatus(self.proxy_out_p, "events")[0]["times"]
-        # n_spike_times = nest.GetStatus(self.proxy_out_n, "events")[0]["times"]
-        # self.log.debug(
-        #     f"checking behavior for spikes after {current_sim_time_s}. total spikes: {len(p_spike_times)}"
-        # )
-
-        #### SHARE FUNCTION WITH MUSIC VERSION
-        # rate_pos, weighted_count = compute_spike_rate(
-        #     spikes=p_spike_times,
-        #     weight=self.master_params.modules.spine.wgt_motCtx_motNeur,
-        #     n_neurons=self.master_params.brain.population_size,
-        #     time_start=buffer_start * 1000,
-        #     time_end=buffer_end * 1000,
-        # )
-        # rate_neg, weighted_count_n = compute_spike_rate(
-        #     spikes=n_spike_times,
-        #     weight=self.master_params.modules.spine.wgt_motCtx_motNeur,
-        #     n_neurons=self.master_params.brain.population_size,
-        #     time_start=buffer_start * 1000,
-        #     time_end=buffer_end * 1000,
-        # )
-        # self.log.debug(p_spike_times[:-10])
-        # self.log.debug(
-        #     f"found {len(p_spike_times)} in range [{buffer_start, buffer_end}]"
-        # )
-
-        ##### BINARY SEARCH OVER SPIKES
-        # rate_pos = (
-        #     count_ge(p_spike_times, current_sim_time_s * 1000)
-        #     / self.sim_params.resolution
-        # )
-        # rate_neg = (
-        #     count_ge(n_spike_times, current_sim_time_s * 1000)
-        #     / self.sim_params.resolution
-        # )
-
-        #### MANUALLY MOVE RECORDER WINDOW
-        # rate_pos = len(p_spike_times) / self.sim_params.resolution
-        # rate_neg = len(n_spike_times) / self.sim_params.resolution
-        # nest.SetStatus(
-        #     self.proxy_out_p,
-        #     {
-        #         "start": buffer_start + self.master_params.simulation.resolution,
-        #         "end": current_sim_time + self.master_params.simulation.resolution,
-        #     },
-        # )
 
         return rate_pos, rate_neg
 

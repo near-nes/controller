@@ -87,7 +87,9 @@ class Script(EngineScript):
         sim_time_s = self._time_ns * NANO_SEC
 
         with self.sensory_profile.time():
-            self.controllers[0].update_sensory_info_from_NRP(joint_pos_rad)
+            self.controllers[0].update_sensory_info_from_NRP(
+                joint_pos_rad, sim_time_s * 1000
+            )
 
         if self.step % 50 == 0:
             self.log.debug("[neural] updated sensory info")
@@ -99,7 +101,7 @@ class Script(EngineScript):
             self.log.debug("[neural] simulated")
 
         with self.motor_profile.time():
-            pos, neg = self.controllers[0].extract_motor_command_NRP(sim_time_s)
+            pos, neg = self.controllers[0].extract_motor_command_NRP()
 
         if self.step % 50 == 0:
             self.log.debug(
