@@ -12,14 +12,16 @@ from neural_simulation_lib import (
     setup_environment,
     setup_nest_kernel,
 )
-from nrp_core.engines.python_json import EngineScript
+from nrp_core.engines.python_grpc import GrpcEngineScript
 from utils_common.generate_analog_signals import generate_signals
 from utils_common.profile import Profile
+
+from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 
 NANO_SEC = 1e-9
 
 
-class Script(EngineScript):
+class Script(GrpcEngineScript):
     def __init__(self):
         super().__init__()
         self.log = structlog.get_logger("nrp_neural_engine")
@@ -27,7 +29,7 @@ class Script(EngineScript):
         self.master_config = None
         self.controllers = []
         self.step = 0
-        self.run_paths = None  # TOCHECK: How run_paths are handled in NRP context
+        self.run_paths = None
 
     def initialize(self):
         self.log.info("NRP Neural Engine: Initializing...")
@@ -69,10 +71,16 @@ class Script(EngineScript):
         self.motor_profile = Profile()
         self.rest_profile = Profile()
 
-        self._registerDataPack("control_cmd")
-        self._registerDataPack("positions")
-        self._setDataPack("control_cmd", {"rate_pos": 0, "rate_neg": 0})
-        self.log.info("Datapacks registered: control_cmd")
+        # joint_pos_rad (datapack<Double>)
+        self._registerDataPack("joint_pos_rad", wrappers_pb2.DoubleValue)
+        proto_wrapper = wrappers_pb2.DoubleValue()
+        proto_wrapper.value = self.master_config.experiment.init_joint_angle
+        self._setDataPack("joint_pos_rad", proto_wrapper)
+        # control_cmd (datapack<Double[]>)
+        self._registerDataPack("control_cmd", nrpgenericproto_pb2.ArrayDouble)
+        proto_wrapper = nrpgenericproto_pb2.ArrayDouble()
+        proto_wrapper.array.extend([0.0, 0.0])
+        self._setDataPack("control_cmd", proto_wrapper)
 
         nest.Prepare()
         self.log.info("NRP Neural Engine: Initialization complete.")
@@ -82,8 +90,8 @@ class Script(EngineScript):
         if self.step % 50 == 0:
             self.log.debug("[neural] starting neural update...")
 
-        feedback_data = self._getDataPack("positions")
-        joint_pos_rad = feedback_data["joint_pos_rad"]
+        joint_pos_rad = self._getDataPack("joint_pos_rad").value
+
         sim_time_s = self._time_ns * NANO_SEC
 
         with self.sensory_profile.time():
@@ -116,7 +124,11 @@ class Script(EngineScript):
                 time_rest=str(self.rest_profile.total_time),
             )
         self.step += 1
-        self._setDataPack("control_cmd", {"rate_pos": pos, "rate_neg": neg})
+
+        datapack = nrpgenericproto_pb2.ArrayDouble()
+        datapack.array.extend([pos, neg])
+        self._setDataPack("control_cmd", datapack)
+
         self.rest_profile.start()
 
     def shutdown(self):
