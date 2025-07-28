@@ -71,6 +71,7 @@ ENV OMPI_INSTALL_DIR=$INSTALL_DIR/openmpi
 ENV CONTROLLER_DIR=/sim/controller
 ENV SHARED_DATA_DIR=/sim/shared_data
 ENV NEST_MODULE_PATH=/sim/install/nest/lib/nest
+ENV NEST_PYTHON_MODULE_PATH=${NEST_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages/nest
 RUN mkdir -p $CONTROLLER_DIR $SHARED_DATA_DIR $NEST_MODULE_PATH
 
 ENV CEREBELLUM_PATH=/sim/cerebellum
@@ -141,6 +142,10 @@ RUN mkdir -p nest-build \
     $DEPS_DIR/nest-simulator \
     && make -j$(nproc) \
     && make install
+
+## atch nest-server
+RUN sed -i 's/jsonify(response)/jsonify(nest.serialize_data(response))/' "${NEST_PYTHON_MODULE_PATH}"/server/hl_api_server.py
+COPY ./docker/hl_api_types.py "${NEST_PYTHON_MODULE_PATH}"/lib/hl_api_types.py
 
 # final runtime image
 FROM base AS runtime

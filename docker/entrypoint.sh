@@ -16,6 +16,7 @@ NEST_MODULE_PATH="${NEST_MODULE_PATH}"
 COMPRESSED_BSB_NETWORK_FILE="${COMPRESSED_BSB_NETWORK_FILE}"
 BSB_NETWORK_FILE="${BSB_NETWORK_FILE}"
 NEST_SERVER_BIN="${NEST_INSTALL_DIR}/bin/nest-server"
+NEST_SERVER_MPI_BIN="${NEST_INSTALL_DIR}/bin/nest-server-mpi"
 
 PYTHON_MAJOR_MINOR=$(python -c "import sys; print(f'python{sys.version_info.major}.{sys.version_info.minor}')")
 SITE_PACKAGES_PATH="$VENV_PATH/lib/${PYTHON_MAJOR_MINOR}/site-packages"
@@ -132,6 +133,22 @@ if [ "$NEST_MODE" = "nest-server" ]; then
     export NEST_SERVER_ENABLE_EXEC_CALL="${NEST_SERVER_ENABLE_EXEC_CALL:-1}"
     export NEST_SERVER_MODULES="${NEST_SERVER_MODULES:-import nest; import numpy; import os; import json; import sys}"
     exec $NEST_SERVER_BIN start
+elif [[ "${MODE}" = 'nest-server-mpi' ]]; then
+    export NEST_SERVER_HOST="${NEST_SERVER_HOST:-0.0.0.0}"
+    export NEST_SERVER_PORT="${NEST_SERVER_PORT:-52425}"
+
+    export NEST_SERVER_ACCESS_TOKEN="${NEST_SERVER_ACCESS_TOKEN}"
+    export NEST_SERVER_CORS_ORIGINS="${NEST_SERVER_CORS_ORIGINS:-*}"
+    export NEST_SERVER_DISABLE_AUTH="${NEST_SERVER_DISABLE_AUTH:-1}"
+    export NEST_SERVER_DISABLE_RESTRICTION="${NEST_SERVER_DISABLE_RESTRICTION:-1}"
+    export NEST_SERVER_ENABLE_EXEC_CALL="${NEST_SERVER_ENABLE_EXEC_CALL:-1}"
+    export NEST_SERVER_MODULES="${NEST_SERVER_MODULES:-import nest; import numpy; import numpy as np}"
+    export NEST_SERVER_MPI_LOGGER_LEVEL="${NEST_SERVER_MPI_LOGGER_LEVEL:-INFO}"
+
+    export OMPI_ALLOW_RUN_AS_ROOT="${OMPI_ALLOW_RUN_AS_ROOT:-1}"
+    export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM="${OMPI_ALLOW_RUN_AS_ROOT_CONFIRM:-1}"
+    # exec mpirun -np "${NEST_SERVER_MPI_NUM:-1}" nest-server-mpi --host "${NEST_SERVER_HOST}" --port "${NEST_SERVER_PORT}"
+    exec "${NEST_SERVER_MPI_BIN}" --host "${NEST_SERVER_HOST}" --port "${NEST_SERVER_PORT}"
 else
     exec gosu "$USERNAME" "$@"
 fi
