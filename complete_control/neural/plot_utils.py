@@ -276,6 +276,7 @@ def plot_controller_outputs(run_paths: RunPaths):
         "planner",
         "brainstem",
         "mc_out",
+        "mc_ffwd",
         "state",
         "sensoryneur",
         "cereb_core_forw_dcnp",
