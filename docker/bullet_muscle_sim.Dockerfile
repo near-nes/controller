@@ -1,4 +1,4 @@
-FROM docker.io/nrp-local/nrp-vanilla-ubuntu20:local
+FROM nrp-local/nrp-t3.4:local
 
 ENV DEPS_DIR=$HOME/sim/dependencies
 ENV BULLET_MUSCLE_DIR=$DEPS_DIR/bullet_muscle_sim
