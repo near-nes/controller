@@ -1,7 +1,7 @@
 {
     "SimulationName": "test_bullet",
     "SimulationDescription": "Launch a py_sim engine to run a Bullet simulation and a python engine to control the simulation",
-    "SimulationTimeout": 1,
+    "SimulationTimeout": 0.5,
     "EngineConfigs": 
     [
         {

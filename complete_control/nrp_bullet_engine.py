@@ -7,6 +7,7 @@ import pybullet as p
 import structlog
 from config.plant_config import PlantConfig
 from nrp_core.engines.python_grpc import GrpcEngineScript
+from plant.plant_plotting import plot_plant_outputs
 from plant.plant_simulator import PlantSimulator
 from utils_common.profile import Profile
 
@@ -87,4 +88,6 @@ class Script(GrpcEngineScript):
     def shutdown(self):
         self.log.info("Simulation loop finished.")
         self.simulator._finalize_and_process_data()
+        if self.config.master_config.PLOT_AFTER_SIMULATE:
+            plot_plant_outputs(self.run_paths)
         print("Simulation End !!!")

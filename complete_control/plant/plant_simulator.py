@@ -381,23 +381,8 @@ class PlantSimulator:
         """Saves all data required for post-simulation analysis and plotting."""
         self.log.info("Finalizing and saving simulation data...")
 
-        sensory_spikes_p_all_joints: List[List[Tuple[float, int]]] = [
-            sn.spike for sn in self.sensory_neurons_p
-        ]
-        sensory_spikes_n_all_joints: List[List[Tuple[float, int]]] = [
-            sn.spike for sn in self.sensory_neurons_n
-        ]
-
         plot_data = PlantPlotData(
             joint_data=self.joint_data,
-            received_spikes={
-                "pos": self.received_spikes_pos,
-                "neg": self.received_spikes_neg,
-            },
-            sensory_spikes={
-                "p": sensory_spikes_p_all_joints,
-                "n": sensory_spikes_n_all_joints,
-            },
             errors_per_trial=self.errors_per_trial,
             init_hand_pos_ee=list(self.plant.init_hand_pos_ee),
             trgt_hand_pos_ee=list(self.plant.trgt_hand_pos_ee),

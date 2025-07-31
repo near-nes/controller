@@ -21,8 +21,6 @@ class PlantPlotData(BaseModel):
     """Holds all data needed for plotting."""
 
     joint_data: List[JointData]
-    received_spikes: Dict[str, List[List[Tuple[float, int]]]]
-    sensory_spikes: Dict[str, List[List[Tuple[float, int]]]]
     errors_per_trial: List[float]
     init_hand_pos_ee: List[float]
     trgt_hand_pos_ee: List[float]

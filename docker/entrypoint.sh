@@ -132,6 +132,7 @@ if [ "$NEST_MODE" = "nest-server" ]; then
     export NEST_SERVER_DISABLE_RESTRICTION="${NEST_SERVER_DISABLE_RESTRICTION:-1}"
     export NEST_SERVER_ENABLE_EXEC_CALL="${NEST_SERVER_ENABLE_EXEC_CALL:-1}"
     export NEST_SERVER_MODULES="${NEST_SERVER_MODULES:-import nest; import numpy; import os; import json; import sys}"
+    echo "Running nest-server: $NEST_SERVER_BIN"
     exec $NEST_SERVER_BIN start
 elif [[ "${MODE}" = 'nest-server-mpi' ]]; then
     export NEST_SERVER_HOST="${NEST_SERVER_HOST:-0.0.0.0}"
@@ -148,8 +149,10 @@ elif [[ "${MODE}" = 'nest-server-mpi' ]]; then
     export OMPI_ALLOW_RUN_AS_ROOT="${OMPI_ALLOW_RUN_AS_ROOT:-1}"
     export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM="${OMPI_ALLOW_RUN_AS_ROOT_CONFIRM:-1}"
     # exec mpirun -np "${NEST_SERVER_MPI_NUM:-1}" nest-server-mpi --host "${NEST_SERVER_HOST}" --port "${NEST_SERVER_PORT}"
+    echo "Running nest-server-mpi: $NEST_SERVER_MPI_BIN"
     exec "${NEST_SERVER_MPI_BIN}" --host "${NEST_SERVER_HOST}" --port "${NEST_SERVER_PORT}"
 else
+    echo "Running passed command: $@"
     exec gosu "$USERNAME" "$@"
 fi
 exec gosu "$USERNAME" "$@"
