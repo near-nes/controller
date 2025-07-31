@@ -8,8 +8,9 @@ from config.MasterParams import MasterParams
 from config.paths import RunPaths
 from config.plant_config import PlantConfig
 from utils_common.generate_analog_signals import generate_signals
-
+from pathlib import Path
 from .plant_models import PlantPlotData
+from draw_schema import draw_schema
 
 log = structlog.get_logger(__name__)
 
@@ -235,5 +236,7 @@ def plot_plant_outputs(run_paths: RunPaths):
     )
     if plant_data.errors_per_trial:
         plot_errors_per_trial(config=config, errors_list=plant_data.errors_per_trial)
+
+    draw_schema(run_paths, scale_factor=0.005)
 
     log.info("Plant plots generated.")
