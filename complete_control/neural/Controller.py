@@ -687,26 +687,27 @@ class Controller:
 
     def create_and_connect_NRP_interface(self):
         buffer_len = 10  # ms, right now, only in plant config
-        pop_params = {
-            "kp": 0,
-            "buffer_size": buffer_len,
-            "base_rate": 0,
-            "simulation_steps": len(self.total_time_vect),
-        }
         conn_spec = {
             "delay": self.spine_params.fbk_delay,
             "weight": self.spine_params.wgt_sensNeur_spine,
         }
-        self.proxy_out_p = nest.Create("basic_neuron_nestml", 1)
-        nest.SetStatus(self.proxy_out_p, {**pop_params, "pos": True})
-        self.proxy_out_n = nest.Create("basic_neuron_nestml", 1)
-        nest.SetStatus(self.proxy_out_n, {**pop_params, "pos": True})
+        self.proxy_out = nest.Create("basic_neuron_nestml", 2)
+        nest.SetStatus(
+            self.proxy_out,
+            {
+                "kp": 0,
+                "buffer_size": buffer_len,
+                "base_rate": 0,
+                "simulation_steps": len(self.total_time_vect),
+                "pos": True,
+            },
+        )
 
         nest.Connect(
-            self.pops.brainstem_p.pop, self.proxy_out_p, "all_to_all", conn_spec
+            self.pops.brainstem_p.pop, self.proxy_out[0], "all_to_all", conn_spec
         )
         nest.Connect(
-            self.pops.brainstem_n.pop, self.proxy_out_n, "all_to_all", conn_spec
+            self.pops.brainstem_n.pop, self.proxy_out[1], "all_to_all", conn_spec
         )
 
         # positive
@@ -756,8 +757,7 @@ class Controller:
         )
 
     def extract_motor_command_NRP(self):
-        rate_pos = nest.GetStatus(self.proxy_out_p, "in_rate")[0]
-        rate_neg = nest.GetStatus(self.proxy_out_n, "in_rate")[0]
+        rate_pos, rate_neg = nest.GetStatus(self.proxy_out, "in_rate")[0:2]
 
         return rate_pos, rate_neg
 
