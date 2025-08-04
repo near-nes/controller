@@ -688,7 +688,7 @@ class Controller:
         buffer_len = 10  # ms, right now, only in plant config
         conn_spec = {
             "delay": self.spine_params.fbk_delay,
-            "weight": self.spine_params.wgt_sensNeur_spine,
+            "weight": 1,
         }
         self.proxy_out = nest.Create("basic_neuron_nestml", 2)
         nest.SetStatus(
