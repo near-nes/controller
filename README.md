@@ -5,7 +5,7 @@ This project involves multiple codebases interacting. In an attempt to make the 
 This branch of the repository features all code needed to run simulations of reaching tasks on a virtual robotic arm driven by a closed-loop cerebellar controller.
 
 The file `complete_control/complete.music` defines the two Python scripts containing the two simulations to be synchronized by MUSIC. The NEST simulation is run by `complete_control/main_simulation.py` and the PyBullet simulation by `complete_control/receiver_plant.py`. The file `./complete_control/complete.music` can be modified to allocate the desired number of slots (i.e. MPI procs) to both the controller script and the plant one. The simulation can be started by running:
-`mpirun -np 2 music complete.music` from `./complete_control`. The value of the -np parameter should be adjusted according to the number of processes allocated in the `complete.music` file.
+`mpirun -np <tot_number_procs> music complete.music` from `./complete_control`. The value of the -np parameter should be adjusted according to the number of processes allocated in the `complete.music` file.
 
 The folder `config` contains several pydantic models used for parameters. A specific configuration can be exported to and from JSON.
 
