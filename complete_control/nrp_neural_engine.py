@@ -132,7 +132,13 @@ class Script(GrpcEngineScript):
         self.rest_profile.start()
 
     def shutdown(self):
-        self.log.info("NRP Neural Engine: Shutting down.")
+        self.log.info(
+            f"[neural] Simulation complete.",
+            time_sensory=str(self.sensory_profile.total_time),
+            time_sim=str(self.sim_profile.total_time),
+            time_motor=str(self.motor_profile.total_time),
+            time_rest=str(self.rest_profile.total_time),
+        )
         from neural.data_handling import collapse_files
 
         pop_views = []

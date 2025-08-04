@@ -105,8 +105,7 @@ def compute_spike_rate(
     # Using a more direct iteration for potentially better performance with many spikes
     # than converting to numpy array first for just filtering.
     count = 0
-    # TODO fix for music...
-    for t in spikes:
+    for t, _ in spikes:
         if time_start <= t < time_end:
             count += 1
 
