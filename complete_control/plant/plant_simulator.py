@@ -229,14 +229,12 @@ class PlantSimulator:
 
         rate_pos_hz, _ = plant_utils.compute_spike_rate(
             spikes=self.received_spikes_pos[j],
-            weight=self.config.WGT_MOTCTX_MOTNEUR,
             n_neurons=self.config.N_NEURONS,
             time_start=buffer_start_time,
             time_end=current_sim_time_s,
         )
         rate_neg_hz, _ = plant_utils.compute_spike_rate(
             spikes=self.received_spikes_neg[j],
-            weight=self.config.WGT_MOTCTX_MOTNEUR,
             n_neurons=self.config.N_NEURONS,
             time_start=buffer_start_time,
             time_end=current_sim_time_s,

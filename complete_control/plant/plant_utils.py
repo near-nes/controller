@@ -80,7 +80,6 @@ class JointData(BaseModel):
 
 def compute_spike_rate(
     spikes: List[Tuple[float, int]],  # List of (timestamp, channel_id)
-    weight: float,
     n_neurons: int,
     time_start: float,
     time_end: float,
@@ -109,7 +108,6 @@ def compute_spike_rate(
         if time_start <= t < time_end:
             count += 1
 
-    weighted_count = weight * count
     duration = time_end - time_start
 
     if duration <= 0 or n_neurons <= 0:
@@ -119,7 +117,7 @@ def compute_spike_rate(
             duration=duration,
             n_neurons=n_neurons,
         )
-        return 0.0, int(weighted_count)
+        return 0.0, int(count)
 
-    rate_hz = weighted_count / (duration * n_neurons)
-    return rate_hz, int(weighted_count)
+    rate_hz = count / (duration * n_neurons)
+    return rate_hz, count

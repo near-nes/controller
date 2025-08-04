@@ -54,7 +54,7 @@ class SensoryNeuron:
 
     # Update theoretical spike rate based on input signal, and generate spikes
     def update(self, signal, simTime):
-        lmd = self.lam(signal)
+        lmd = self.lam(signal) * self.res
         nEv = self.rng.poisson(lam=lmd, size=(self.numNeurons))
 
         for i in range(self.numNeurons):
@@ -72,4 +72,4 @@ class SensoryNeuron:
         if (self.pos and signal < 0) or (not self.pos and signal >= 0):
             signal = 0
         rate = self.baseline_rate + self.gain * abs(signal)
-        return rate * self.res
+        return rate

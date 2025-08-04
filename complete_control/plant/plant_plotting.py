@@ -93,7 +93,7 @@ def plot_joint_space(
     plt.ylabel("Joint Angle (rad)")
     plt.title("Joint Space Position")
     plt.legend()
-    plt.ylim((0.0, 1.6))  # As in original
+    plt.ylim((0.0, 2.8))
     if save_fig:
         filepath = pth_fig_receiver / f"position_joint_{timestamp}.png"
         plt.savefig(filepath)
