@@ -2,6 +2,7 @@
 
 import os
 
+import nest
 import structlog
 from config.MasterParams import MasterParams
 from config.paths import COMPLETE_CONTROL, RunPaths
@@ -13,10 +14,9 @@ from neural_simulation_lib import (
     setup_nest_kernel,
 )
 from nrp_core.engines.python_grpc import GrpcEngineScript
+from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 from utils_common.generate_analog_signals import generate_signals
 from utils_common.profile import Profile
-
-from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 
 NANO_SEC = 1e-9
 
@@ -25,7 +25,8 @@ class Script(GrpcEngineScript):
     def __init__(self):
         super().__init__()
         self.log = structlog.get_logger("nrp_neural_engine")
-        initialize_nest("NRP")
+        initialize_nest("MUSIC")
+        # initialize_nest("NRP")
         self.master_config = None
         self.controllers = []
         self.step = 0
@@ -34,6 +35,7 @@ class Script(GrpcEngineScript):
     def initialize(self):
         self.log.info("NRP Neural Engine: Initializing...")
         self.log.debug(nest.GetKernelStatus())
+        self.log.debug(nest.ResetKernel())
         self.step = 0
 
         run_timestamp_str = os.getenv("EXEC_TIMESTAMP")
