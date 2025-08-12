@@ -46,12 +46,14 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/root/.Xauthority
     stdin_open: true
-    command: sh -c "export EXEC_TIMESTAMP=$(date +%Y%m%d_%H%M%S) && NRPCoreSim -c /sim/controller/nrp_simulation_config_nest_docker_compose.json --cloglevel debug --logdir /home/nrpuser/logs"
+    command: sh -c "export EXEC_TIMESTAMP=$(date +%Y%m%d_%H%M%S) && NRPCoreSim -c /sim/controller/nrp_simulation_config_nest_docker_compose.json --cloglevel debug --logdir /home/simuser/logs"
     working_dir: /sim/controller
     depends_on:
       - nest-server
     environment:
       DISPLAY: $DISPLAY
+      TZ: ${TZ:-Europe/Rome}
+      PYNEST_QUIET: 0
 
 volumes:
   nrp_sim_shared_data:

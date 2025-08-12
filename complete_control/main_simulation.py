@@ -10,6 +10,15 @@ initialize_nest("MUSIC")
 
 
 import structlog
+from config.paths import RunPaths
+from mpi4py import MPI
+from mpi4py.MPI import Comm
+from neural.Controller import Controller
+from neural.data_handling import collapse_files, save_conn_weights
+from neural.plot_utils import plot_controller_outputs
+from utils_common.generate_analog_signals import generate_signals
+from utils_common.log import setup_logging
+
 from complete_control.config.core_models import SimulationParams
 from complete_control.config.MasterParams import MasterParams
 from complete_control.neural.Controller import Controller
@@ -19,11 +28,6 @@ from complete_control.neural_simulation_lib import (
     setup_environment,
     setup_nest_kernel,
 )
-from config.paths import RunPaths
-from mpi4py import MPI
-from neural.plot_utils import plot_controller_outputs
-from utils_common.generate_analog_signals import generate_signals
-from utils_common.log import setup_logging
 
 
 def run_simulation(
@@ -43,6 +47,9 @@ def run_simulation(
         pop_views.extend(controller.get_all_recorded_views())
 
     log.info("collected all popviews")
+    controller = controllers[0]
+    log.info("Starting Simulation")
+
     nest.Prepare()
     for trial in range(n_trials):
         current_sim_start_time = nest.GetKernelStatus("biological_time")
@@ -55,6 +62,9 @@ def run_simulation(
         start_trial_time = timer()
 
         nest.Run(single_trial_ms)
+
+        if controller.use_cerebellum:
+            controller.record_synaptic_weights(trial)
 
         end_trial_time = timer()
         trial_wall_time = datetime.timedelta(seconds=end_trial_time - start_trial_time)
@@ -69,8 +79,18 @@ def run_simulation(
     # --- Data Collapsing (after all trials) ---
     log.info("Attempting data collapsing for all trials...")
     start_collapse_time = timer()
-    # log.warning("skipping collapse as this should be single process...")
-    collapse_files(path_data, pop_views, comm=comm)
+    collapse_files(
+        path_data,
+        pop_views,
+        comm,
+    )
+    if controller.use_cerebellum:
+        log.info("Saving recorded synapse weights for all trials started...")
+        save_conn_weights(
+            controller.weights_history,
+            path_data,
+            "weightrecord",
+        )
 
     end_collapse_time = timer()
     collapse_wall_time = datetime.timedelta(

@@ -1,0 +1,85 @@
+model rb_neuron:
+    parameters:
+        kp real = 1.0 # Gain
+        base_rate Hz = 0 Hz # Base firing rate
+        buffer_size ms = 100 ms # Size of the sliding window
+        simulation_steps integer = 1000 # Number of simulation steps (simulation_time/resolution())
+        n_tabs integer = 46 # Upper limit for Poisson distribution tabulation
+        len integer = 45
+        sdev real = 1.0 # Parameter for the RBF
+        desired Hz = 1.0 Hz # Desired input frequency (to be compared to actual input rate)
+    
+    state:
+        in_rate Hz = 0 Hz # Input firing rate: to be computed from spikes
+        out_rate Hz = 0 Hz # Output firing rate: defined accordingly to the input firing rate
+        spike_count_in real = 0.0 # Total incoming spikes (both excitatory and inhibitory)
+        spike_count_out integer = 0 # Outgoing spikes
+        tick integer = 0 # Tick 
+        lambda_poisson real = 0 # Parameter of the Poisson distribution defining generator behavior
+        spikes_buffer[simulation_steps] real = 0 # Buffer for incoming spikes
+        poisson_distr [n_tabs] real = 0.0
+    
+    internals:
+        res ms = resolution()
+        window_counts integer = steps(buffer_size) # Number of ticks corresponding to the window size
+        
+    input: 
+        spikes <- spike
+    
+    output:
+        spike
+    
+    update:
+        tick = steps(t)
+        
+        # Save the weight of the synapse into the buffer
+        spikes_buffer[tick] = spikes
+        
+        # Total weighted net input (positive and negative): Spikes in the previous 100 ms
+        index integer = 0
+        spike_count_in = 0
+        i integer = 0
+        for i in 0 ... window_counts step 1:
+            index = tick - i
+            if (index >= 0 and spikes_buffer[index] !=0):
+                spike_count_in += spikes_buffer[index]
+            
+        # Compute input and output firing rate
+        in_rate = (kp * spike_count_in)/buffer_size # Compute the input firing rate
+        out_rate = base_rate + 300 * exp(-((desired - in_rate) / sdev)**2) * Hz # Compute the output firing rate
+        
+        # Set the new parameter for the Poisson distribution
+        lambda_poisson = out_rate * resolution() * 0.001
+        
+        # Draw from Poisson distribution (like tracking_neuron)
+        # First compute the Cumulative Density Function
+        p real = exp(-lambda_poisson)
+        previous_k integer = 0
+        previous_P real = 0
+        new_P real = 0
+        
+        poisson_distr[0] = p
+        k integer = 0
+        
+        for k in 1 ... (n_tabs-1) step 1:
+            p *= lambda_poisson/k
+            new_P = previous_P + p
+            if new_P <= 1:
+                poisson_distr[k] = new_P
+            else:
+                poisson_distr[k] = 1
+            
+            previous_k = k
+            previous_P = poisson_distr[k]
+            
+        poisson_distr[len] = 1
+        
+        # Now draw randomly according to probability distribution        
+        u real = random_uniform(0,1)
+        spike_count_out = 0
+        while (u > poisson_distr[spike_count_out] and spike_count_out!=n_tabs):
+            spike_count_out += 1
+        
+        # If probability not null, emit spike
+        if spike_count_out > 0:
+            emit_spike()

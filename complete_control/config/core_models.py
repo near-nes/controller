@@ -30,15 +30,18 @@ class RobotSpecParams(BaseModel, frozen=True):
 
 
 class ExperimentParams(BaseModel, frozen=True):
-    init_joint_angle: float = 75
-    tgt_joint_angle: float = 15
+    init_joint_angle: float = 0
+    tgt_joint_angle: float = 150
     robot_spec: RobotSpecParams = Field(default_factory=lambda: RobotSpecParams())
     # frcFld_angle: float  # unused for now
     # frcFld_k: float  # unused for now
     # ff_application: float  # unused for now
-    # ff_removal: float  # unused for now
     # cerebellum_application_forw: float # unused for now
     # cerebellum_application_inv: float # unused for now
+    enable_gravity: bool = False
+    z_gravity_magnitude: float = 9.81  # m/s^2
+    gravity_trial_start: int = 0  # gravity turns ON at start of this trial
+    gravity_trial_end: int = 1  # gravity turns OFF at end of this trial
 
     @computed_field
     @property

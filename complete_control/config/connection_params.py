@@ -53,7 +53,7 @@ class ConnectionsParams(BaseModel):
     )
     mc_out_motor_commands: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.03,
+            weight=1,
             delay=0.1,
         )
     )
@@ -78,11 +78,17 @@ class ConnectionsParams(BaseModel):
     )
     planner_plan_to_inv: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
+            weight=1,
+            delay=0.1,
+        )
+    )
+    planner_error_inv: SingleSynapseParams = Field(
+        default_factory=lambda: SingleSynapseParams(
             weight=0.001,
             delay=0.1,
         )
     )
-    plan_to_inv_mossy_i: SingleSynapseParams = Field(
+    plan_to_inv_mossy: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=1.0,
             delay=0.1,

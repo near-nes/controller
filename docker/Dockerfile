@@ -240,7 +240,8 @@ ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_b
 ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5
 
 
-# Install bullet muscle simulation
+# Install bullet muscle simulation and skeleton models
+
 RUN git clone https://github.com/near-nes/bullet_muscle_sim.git $BULLET_MUSCLE_DIR \
     && git clone https://github.com/near-nes/embodiment_sdf_models.git $SDF_MODELS_DIR
 

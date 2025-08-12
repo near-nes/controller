@@ -1,0 +1,55 @@
+model rb_neuron:
+    parameters:
+        kp real = 1.0 # Gain
+        base_rate Hz = 0 Hz # Base firing rate
+        buffer_size ms = 100 ms # Size of the sliding window
+        simulation_steps integer = 1000 # Number of simulation steps (simulation_time/resolution())
+        sdev real = 1.0 # Parameter for the RBF
+        desired Hz = 1.0 Hz # Desired input frequency (to be compared to actual input rate)
+    
+    state:
+        in_rate Hz = 0 Hz # Input firing rate: to be computed from spikes
+        out_rate Hz = 0 Hz # Output firing rate: defined accordingly to the input firing rate
+        spike_count_in real = 0.0 # Total incoming spikes (both excitatory and inhibitory)
+        spike_count_out integer = 0 # Outgoing spikes
+        tick integer = 0 # Tick 
+        lambda_poisson real = 0 # Parameter of the Poisson distribution defining generator behavior
+        spikes_buffer[simulation_steps] real = 0 # Buffer for incoming spikes
+    
+    internals:
+        res ms = resolution()
+        window_counts integer = steps(buffer_size) # Number of ticks corresponding to the window size
+        
+    input: 
+        spikes <- spike
+    
+    output:
+        spike
+    
+    update:
+        tick = steps(t)
+        
+        # Save the weight of the synapse into the buffer
+        spikes_buffer[tick] = spikes
+        
+        # Total weighted net input (positive and negative): Spikes in the previous 100 ms
+        index integer = 0
+        spike_count_in = 0
+        i integer = 0
+        for i in 0 ... window_counts step 1:
+            index = tick - i
+            if (index >= 0 and spikes_buffer[index] !=0):
+                spike_count_in += spikes_buffer[index]
+            
+        # Compute input and output firing rate
+        in_rate = (kp * spike_count_in)/buffer_size # Compute the input firing rate
+        out_rate = base_rate + 300 * exp(-((desired - in_rate) / sdev)**2) * Hz # Compute the output firing rate
+        
+        # Set the new parameter for the Poisson distribution
+        lambda_poisson = out_rate * resolution() * 0.001
+        
+        spike_count_out = random_poisson(lambda_poisson)
+        
+        # If probability not null, emit spike
+        if spike_count_out > 0:
+            emit_spike()

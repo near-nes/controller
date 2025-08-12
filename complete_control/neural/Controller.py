@@ -1,4 +1,5 @@
 import bisect
+from collections import defaultdict
 from typing import List, Optional
 
 import numpy as np
@@ -15,6 +16,7 @@ from config.module_params import (
 )
 from config.population_params import PopulationsParams
 from neural.nest_adapter import nest
+from neural.neural_models import SynapseRecording
 from plant.sensoryneuron import SensoryNeuron
 
 from .ControllerPopulations import ControllerPopulations
@@ -95,7 +97,7 @@ class Controller:
         self.trajectory_slice = trajectory_slice
         self.motor_cmd_slice = motor_cmd_slice
 
-        # Store parameters
+        self.weights_history = defaultdict(lambda: defaultdict(list))
         self.mc_params = mc_params
         self.plan_params = plan_params
         self.spine_params = spine_params
@@ -159,6 +161,29 @@ class Controller:
             self.log.info(f"Connected controller to NRP proxies")
 
         self.log.info("Controller initialization complete.")
+
+    def record_synaptic_weights(self, trial: int):
+        PF_to_purkinje_conns = (
+            self.cerebellum_handler.get_synapse_connections_PF_to_PC()
+        )
+        for (pre_pop, post_pop), conns in PF_to_purkinje_conns.items():
+            for conn in conns:
+                source_neur, target_neur, synapse_id, delay, synapse_model, weight = (
+                    nest.GetStatus(
+                        conn,
+                        [
+                            "source",
+                            "target",
+                            "synapse_id",
+                            "delay",
+                            "synapse_model",
+                            "weight",
+                        ],
+                    )[0]
+                )
+                self.weights_history[(pre_pop, post_pop)][
+                    (source_neur, target_neur, synapse_id, synapse_model)
+                ].append(weight)
 
     def _instantiate_cerebellum_handler(self, controller_pops: ControllerPopulations):
         from .CerebellumHandler import CerebellumHandler

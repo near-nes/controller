@@ -5,7 +5,7 @@ from config.plant_config import PlantConfig
 from utils_common.log import tqdm
 
 from . import plant_utils
-from .plant_plotting import PlantPlotData
+from .plant_models import PlantPlotData
 from .robotic_plant import RoboticPlant
 from .sensoryneuron import SensoryNeuron
 
@@ -31,7 +31,9 @@ class PlantSimulator:
             pybullet_instance: The initialized PyBullet instance (e.g., p from `import pybullet as p`).
             music_setup: when None, assume Music is not being used (i.e. NRP).
         """
-        self.log = structlog.get_logger(type(self).__name__)
+        self.log: structlog.stdlib.BoundLogger = structlog.get_logger(
+            type(self).__name__
+        )
         self.log.info("Initializing PlantSimulator...")
         self.config: PlantConfig = config
         self.p = pybullet_instance
@@ -268,6 +270,7 @@ class PlantSimulator:
             )
             return joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list
 
+        exp_params = self.config.master_config.experiment
         net_rate_hz = rate_pos_hz - rate_neg_hz
         input_torque = net_rate_hz / self.config.SCALE_TORQUE
 
@@ -278,6 +281,20 @@ class PlantSimulator:
 
         # 1. Get current plant state
         self.plant.update_stats()
+
+        if exp_params.enable_gravity:
+            current_trial = int(current_sim_time_s / self.config.TIME_TRIAL_S)
+
+            # Turn gravity on if we've reached application trial
+            if current_trial >= exp_params.gravity_trial_start:
+                self.plant.set_gravity(True, exp_params.z_gravity_magnitude)
+
+            # Turn gravity off if removal trial is set and after we've reached it
+            if (
+                exp_params.gravity_trial_end is not None
+                and current_trial > exp_params.gravity_trial_end
+            ):
+                self.plant.set_gravity(False)
 
         # 2. Apply motor command to plant
         self._set_joint_torque(input_torque, current_sim_time_s)

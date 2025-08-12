@@ -1,7 +1,9 @@
 from pathlib import Path
 
+import numpy as np
 import structlog
 from mpi4py.MPI import Comm
+from neural.neural_models import PopulationSpikes, SynapseBlock, SynapseRecording
 from neural.population_view import PopView
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(str(__file__))
@@ -26,7 +28,11 @@ def collapse_files(dir: Path, pops: list[PopView], comm: Comm = None):
     if comm is None or comm.rank == 0:
         for pop in pops:
             name = pop.label
-            file_list = [i for i in dir.iterdir() if i.name.startswith(name)]
+            file_list = [
+                i
+                for i in dir.iterdir()
+                if i.name.startswith(name) and i.suffix != ".json"
+            ]
             senders = []
             times = []
             combined_data = []
@@ -45,13 +51,58 @@ def collapse_files(dir: Path, pops: list[PopView], comm: Comm = None):
                 senders.append(int(sender))
                 times.append(float(time))
 
-            complete_file = dir / (name + ".gdf")
-            with open(complete_file, "a") as wfd:
-                wfd.write("sender\ttime_ms\n")
-                for line in unique_lines:
-                    wfd.write(line + "\n")
+            gids = pop.pop.get("global_id")
+            neuron_model = pop.pop.get("model")
+            if isinstance(neuron_model, tuple) and len(neuron_model) > 0:
+                neuron_model = neuron_model[0]
+
+            pop_spikes = PopulationSpikes(
+                label=name,
+                gids=np.array(gids),
+                senders=np.array(senders),
+                times=np.array(times),
+                population_size=len(pop.pop),
+                neuron_model=neuron_model,
+            )
+
+            complete_file = dir / (name + ".json")
+            with open(complete_file, "w") as wfd:
+                wfd.write(pop_spikes.model_dump_json(indent=4))
+
             pop.filepath = complete_file
             for f in file_list:
                 f.unlink()
     if comm is not None:
         comm.barrier()
+
+
+def save_conn_weights(weights_history: dict, dir: Path, filename_prefix: str):
+    """
+    merge SynapseRecording objects with the same (source, target, type, trials_recorded),
+    concatenate their weight_history, and save as a JSON array.
+    """
+    for (source_pop, target_pop), inner in weights_history.items():
+        label = f"{source_pop.label}>{target_pop.label}"
+        recs = []
+        for (
+            (source_neur, target_neur, synapse_id, synapse_model),
+            weights,
+        ) in inner.items():
+            recs.append(
+                SynapseRecording(
+                    source=source_neur,
+                    target=target_neur,
+                    syn_id=synapse_id,
+                    syn_type=synapse_model,
+                    weight_history=weights,
+                )
+            )
+        s = SynapseBlock(
+            source_pop_label=source_pop.label,
+            target_pop_label=target_pop.label,
+            synapse_recordings=recs,
+        )
+        rec_path = dir / f"{filename_prefix}-{label}.json"
+        with open(rec_path, "w") as f:
+            json_array = s.model_dump_json(indent=2)
+            f.write(json_array)

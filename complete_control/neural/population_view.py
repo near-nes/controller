@@ -86,7 +86,7 @@ class PopView:
             # nest will create file(s) for this recorder and write the names to
             # self.detector.get("filenames"); once data is collapsed to a single file
             # for usability, this property will hold the filename
-            self.filepath: Path = None
+            self.filepath: Path | None = None
         else:
             self.detector = self._create_connect_spike_detector(pop)
 

@@ -10,6 +10,11 @@ class SinglePopParams(BaseModel):
     base_rate: float
 
 
+class RBFPopParams(SinglePopParams):
+    sdev: float
+    freq_max: float
+
+
 class PopulationsParams(BaseModel):
     model_config: ClassVar = {"frozen": True}
     prediction: SinglePopParams = Field(
@@ -17,8 +22,10 @@ class PopulationsParams(BaseModel):
             kp=4.0, buffer_size=20.0, base_rate=50.0
         )
     )
-    motor_commands: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(kp=0.1, buffer_size=25.0, base_rate=0.0)
+    motor_commands: RBFPopParams = Field(
+        default_factory=lambda: RBFPopParams(
+            kp=3.0, buffer_size=5.0, base_rate=5.0, sdev=4.0, freq_max=40
+        )
     )
     brain_stem: SinglePopParams = Field(
         default_factory=lambda: SinglePopParams(kp=0.2, buffer_size=10.0, base_rate=0.0)
@@ -36,7 +43,12 @@ class PopulationsParams(BaseModel):
             kp=1.0, buffer_size=30.0, base_rate=-20.0
         )
     )
-    plan_to_inv: SinglePopParams = Field(
+    plan_to_inv: RBFPopParams = Field(
+        default_factory=lambda: RBFPopParams(
+            kp=3.0, buffer_size=5.0, base_rate=5.0, sdev=20.0, freq_max=450
+        )
+    )
+    state_to_inv: SinglePopParams = Field(
         default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=10.0, base_rate=0.0)
     )
     motor_pred: SinglePopParams = Field(
