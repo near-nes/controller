@@ -1,9 +1,7 @@
-from datetime import datetime
-from pathlib import Path
 from typing import List
 
 import numpy as np
-from pydantic import BaseModel, Field, FilePath, computed_field
+from pydantic import BaseModel, Field, computed_field
 from utils_common.git_utils import get_git_commit_hash
 
 from . import paths
@@ -30,8 +28,8 @@ class RobotSpecParams(BaseModel, frozen=True):
 
 
 class ExperimentParams(BaseModel, frozen=True):
-    init_joint_angle: float = 0
-    tgt_joint_angle: float = 150
+    init_joint_angle: float = 90
+    tgt_joint_angle: float = 20
     robot_spec: RobotSpecParams = Field(default_factory=lambda: RobotSpecParams())
     # frcFld_angle: float  # unused for now
     # frcFld_k: float  # unused for now
@@ -57,8 +55,8 @@ class ExperimentParams(BaseModel, frozen=True):
 class SimulationParams(BaseModel, frozen=True):
     resolution: float = 0.1  # ms
     time_prep: float = 150.0  # ms
-    time_move: float = 300.0  # ms
-    time_post: float = 50.0  # ms
+    time_move: float = 500.0  # ms
+    time_post: float = 350.0  # ms
     n_trials: int = 1
 
     seed: int = 12345
