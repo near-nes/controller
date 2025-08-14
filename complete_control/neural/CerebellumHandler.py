@@ -233,13 +233,13 @@ class CerebellumHandler:
             "simulation_steps": len(self.total_time_vect),
             "sdev": params.sdev,
         }
+
         plan_to_inv = nest.Create("rb_neuron_nestml", self.N_mossy_inv)
-        signal_sensibility = np.linspace(
-            -params.freq_max, params.freq_max, self.N_mossy_inv
-        )
+        signal_sensibility = np.linspace(0, params.freq_max, self.N_mossy_inv)
         nest.SetStatus(plan_to_inv, pop_params)
         for i, neuron in enumerate(plan_to_inv):
             nest.SetStatus(neuron, {"desired": signal_sensibility[i]})
+
         self.interface_pops.plan_to_inv = self._create_pop_view(
             plan_to_inv, "plan_to_inv"
         )
