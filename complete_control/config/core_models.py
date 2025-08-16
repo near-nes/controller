@@ -31,7 +31,7 @@ class RobotSpecParams(BaseModel, frozen=True):
 
 class ExperimentParams(BaseModel, frozen=True):
     init_joint_angle: float = 0
-    tgt_joint_angle: float = 150
+    tgt_joint_angle: float = 90 #150
     robot_spec: RobotSpecParams = Field(default_factory=lambda: RobotSpecParams())
     # frcFld_angle: float  # unused for now
     # frcFld_k: float  # unused for now
