@@ -146,7 +146,51 @@ class RoboticPlant:
         self.bullet_robot.SetJointTorques(
             joint_ids=[self.elbow_joint_id], torques=torques
         )
+    
+    def shoulder_and_object(
+        self, q_d: float, qp_d: float, kp: float, kd: float
+    ) -> None:
+        body_id = self.bullet_robot._body_id
+        elbow_state = self.p.getJointState(body_id, 1)[0]
+        if math.isclose(elbow_state, np.deg2rad(90), abs_tol=1e-4):
+            ball_shape = self.p.createVisualShape(
+                shapeType=self.p.GEOM_SPHERE, radius=0.02, rgbaColor=[1, 0, 0, 1]
+            )
+            ball_collision = self.p.createCollisionShape(
+                shapeType=self.p.GEOM_SPHERE, radius=0.02
+            )
+            ball = self.p.createMultiBody(
+                baseMass=1,
+                baseInertialFramePosition=[0, 0, 0],
+                baseCollisionShapeIndex=ball_collision,
+                baseVisualShapeIndex=ball_shape,
+                basePosition=[0.36, -0.35, 1.2],
+            )
+            ball_const = self.p.createConstraint(
+                body_id,
+                4,
+                ball,
+                -1,
+                self.p.JOINT_FIXED,
+                [0, 0, 0],
+                self.p.getJointState(body_id, 4)[:2],
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0],
+            )
 
+            qa, qpa = self.p.getJointState(body_id, 0)[:2]
+            e_p = q_d - qa
+            e_v = qp_d - qpa
+            f0 = kp * e_p + kd * e_v
+
+            move = self.p.setJointMotorControl2(
+                body_id, 0, controlMode=self.p.TORQUE_CONTROL, force=f0
+            )
+
+            if math.isclose(qa, q_d, abs_tol=1e-3):
+                self.p.removeConstraint(ball_const)
+    
     def simulate_step(self, duration: float) -> None:
         """
         Steps the PyBullet simulation by the given duration.
