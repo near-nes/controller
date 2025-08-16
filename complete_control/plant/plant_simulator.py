@@ -10,6 +10,7 @@ from . import plant_utils
 from .plant_models import PlantPlotData
 from .robotic_plant import RoboticPlant
 from .sensoryneuron import SensoryNeuron
+import numpy as np
 
 
 class PlantSimulator:
@@ -232,6 +233,11 @@ class PlantSimulator:
         step = 0
 
         exp_params = self.config.master_config.experiment
+        obj_empty = True
+        q_d = np.deg2rad(50)
+        qp_d = 0
+        kp = 28
+        kd = 4
 
         with tqdm(total=self.num_total_steps, unit="step", desc="Simulating") as pbar:
             # Simulation loop
@@ -306,6 +312,11 @@ class PlantSimulator:
 
                 # 4. Apply motor command to plant
                 self._set_joint_torque(computed_torque_from_input, current_sim_time_s)
+
+                # Create object and actuate shoulder if a certain condition is reached
+                if obj_empty:
+                    self.plant.shoulder_and_object(q_d, qp_d, kp, kd)
+                    obj_empty = False
 
                 # 5. Step PyBullet simulation
                 self.plant.simulate_step(self.config.RESOLUTION_S)
