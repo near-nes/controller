@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 import structlog
 from mpi4py.MPI import Comm
+from neural.nest_adapter import nest
 from neural.neural_models import PopulationSpikes, SynapseBlock, SynapseRecording
 from neural.population_view import PopView
 
@@ -51,10 +52,8 @@ def collapse_files(dir: Path, pops: list[PopView], comm: Comm = None):
                 senders.append(int(sender))
                 times.append(float(time))
 
-            gids = pop.pop.get("global_id")
-            neuron_model = pop.pop.get("model")
-            if isinstance(neuron_model, tuple) and len(neuron_model) > 0:
-                neuron_model = neuron_model[0]
+            gids = nest.GetStatus(pop.pop, "global_id")
+            neuron_model = nest.GetStatus(pop.pop, "model")[0]
 
             pop_spikes = PopulationSpikes(
                 label=name,
