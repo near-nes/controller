@@ -22,7 +22,7 @@ class M1EPropConfig(BaseModel):
 
 class MotorCortexModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
-    use_m1_eprop: bool = False
+    use_m1_eprop: bool = True
     m1_mock_config: M1MockConfig = Field(default_factory=lambda: M1MockConfig())
     m1_eprop_config: M1EPropConfig = Field(default_factory=lambda: M1EPropConfig())
     fbk_base_rate: float = 0.0

@@ -9,8 +9,9 @@ from config.MasterParams import MasterParams
 from config.paths import RunPaths
 from mpi4py import MPI
 
-from .neural_models import PopulationSpikes
 from complete_control.neural.neural_models import SynapseBlock
+
+from .neural_models import PopulationSpikes
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
 FIGURE_EXT = "png"
@@ -38,11 +39,6 @@ def load_spike_data_from_file(filepath: Path) -> PopulationSpikes:
     except Exception as e:
         _log.error(f"Error loading PopulationSpikes from {filepath}: {e}")
         raise
-
-
-import matplotlib.pyplot as plt
-import numpy as np
-import logging
 
 
 def plot_synaptic_weight_evolution(synapse_json_path, max_synapses=10, fig_path=None):
@@ -276,7 +272,7 @@ def plot_controller_outputs(run_paths: RunPaths):
         "planner",
         "brainstem",
         "mc_out",
-        "mc_ffwd",
+        "mc_m1",
         "state",
         "sensoryneur",
         "cereb_core_forw_dcnp",

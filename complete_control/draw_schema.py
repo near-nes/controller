@@ -1,11 +1,12 @@
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from matplotlib.patches import Rectangle, FancyArrow
-from pathlib import Path
-from config.plant_config import PlantConfig
-from config.paths import RunPaths
-import structlog
 import contextlib
+from pathlib import Path
+
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import structlog
+from config.paths import RunPaths
+from config.plant_config import PlantConfig
+from matplotlib.patches import FancyArrow, Rectangle
 
 log = structlog.get_logger(__name__)
 
@@ -280,7 +281,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "Ffwd",
             "black",
             12,
-            neural_figs_path / "mc_ffwd_0.png",
+            neural_figs_path / "mc_m1_0.png",
         ),
         "Out": (
             16.0,
