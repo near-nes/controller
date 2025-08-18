@@ -6,3 +6,6 @@
 	path = motor_cortex
 	url = git@github.com:near-nes/motor-cortex-eprop.git
 	branch = main
+[submodule "pfc-planner"]
+	path = pfc-planner
+	url = https://github.com/near-nes/pfc-planner
