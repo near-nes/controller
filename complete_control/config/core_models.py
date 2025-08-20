@@ -76,6 +76,10 @@ class SimulationParams(BaseModel, frozen=True):
     def get_default_seed(cls):
         return cls.model_fields["seed"].default
 
+    @property
+    def sim_steps(self) -> int:
+        return int(self.total_duration_all_trials_ms / self.resolution)
+
 
 class BrainParams(BaseModel, frozen=True):
     population_size: int = 50

@@ -296,7 +296,7 @@ class Controller:
                 "base_rate": p_params.base_rate,
                 "pos": True,
                 "traj": self.trajectory_slice.tolist(),
-                "simulation_steps": len(self.trajectory_slice),
+                "simulation_steps": self.sim_params.sim_steps,
             },
         )
         tmp_pop_n = nest.Create(
@@ -307,7 +307,7 @@ class Controller:
                 "base_rate": p_params.base_rate,
                 "pos": False,
                 "traj": self.trajectory_slice.tolist(),
-                "simulation_steps": len(self.trajectory_slice),
+                "simulation_steps": self.sim_params.sim_steps,
             },
         )
         self.pops.planner_p = self._create_pop_view(tmp_pop_p, "planner_p", to_file)
@@ -378,7 +378,7 @@ class Controller:
             "kp": params.kp,
             "buffer_size": params.buffer_size,
             "base_rate": params.base_rate,
-            "simulation_steps": len(self.total_time_vect),
+            "simulation_steps": self.sim_params.sim_steps,
         }
 
         pop_p = nest.Create("diff_neuron_nestml", self.N)
@@ -396,7 +396,7 @@ class Controller:
             "kp": params.kp,
             "buffer_size": params.buffer_size,
             "base_rate": params.base_rate,
-            "simulation_steps": len(self.total_time_vect),
+            "simulation_steps": self.sim_params.sim_steps,
         }
         self.log.debug("Creating feedback neurons", **pop_params)
 
@@ -415,7 +415,7 @@ class Controller:
             "kp": params.kp,
             "buffer_size": params.buffer_size,
             "base_rate": params.base_rate,
-            "simulation_steps": len(self.total_time_vect),
+            "simulation_steps": self.sim_params.sim_steps,
         }
         self.log.debug("Creating output neurons (brainstem)", **pop_params)
 
@@ -715,7 +715,7 @@ class Controller:
                 "kp": 0,
                 "buffer_size": buffer_len,
                 "base_rate": 0,
-                "simulation_steps": len(self.total_time_vect),
+                "simulation_steps": self.sim_params.sim_steps,
                 "pos": True,
             },
         )

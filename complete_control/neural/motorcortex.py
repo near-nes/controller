@@ -1,5 +1,6 @@
 import config.paths as paths
 import structlog
+from config.core_models import SimulationParams
 from config.module_params import M1MockConfig, MotorCortexModuleConfig
 from interfaces.m1_base import M1SubModule
 from neural.nest_adapter import nest
@@ -24,10 +25,11 @@ class M1Mock(M1SubModule):
     #           - │   │  │  neuron)│                    │
     #             │   │  └─────────┘                    │
     #                 └─────────────────────────────────┘
-    def __init__(self, numNeurons, motorCommands, params: M1MockConfig):
+    def __init__(self, numNeurons, motorCommands, params: M1MockConfig, sim_steps):
         self.N = numNeurons
         self.params = params
         self.motorCommands = motorCommands
+        self.sim_steps = sim_steps
         self.create_network()
 
     def create_network(self):
@@ -38,7 +40,7 @@ class M1Mock(M1SubModule):
             {
                 "pos": True,
                 "traj": self.motorCommands,
-                "simulation_steps": len(self.motorCommands),
+                "simulation_steps": self.sim_steps,
             },
         )
 
@@ -48,7 +50,7 @@ class M1Mock(M1SubModule):
             {
                 "pos": False,
                 "traj": self.motorCommands,
-                "simulation_steps": len(self.motorCommands),
+                "simulation_steps": self.sim_steps,
             },
         )
         # self.output_n = PopView(n, to_file=True, label="mc_m1_n")
@@ -85,9 +87,11 @@ class MotorCortex:
     and a mock one, implemented above.
     """
 
-    def __init__(self, numNeurons, mtCmds, params: MotorCortexModuleConfig):
+    def __init__(
+        self, numNeurons, params: MotorCortexModuleConfig, sim: SimulationParams
+    ):
         self._log = structlog.get_logger("motorcortex")
-        self.motorCommands = mtCmds
+        self.sim = sim
         self.N = numNeurons
         self.params = params
         self.create_net(params, numNeurons)
@@ -97,11 +101,13 @@ class MotorCortex:
             from M1MotorCortexEprop import M1MotorCortexEprop
 
             self.m1 = M1MotorCortexEprop(
-                paths.M1_CONFIG, paths.M1_WEIGHTS, len(self.motorCommands), nest
+                paths.M1_CONFIG, paths.M1_WEIGHTS, self.sim.sim_steps, nest
             )
             m1_to_out = "all_to_all"
         else:
-            self.m1 = M1Mock(numNeurons, self.motorCommands, params.m1_mock_config)
+            self.m1 = M1Mock(
+                numNeurons, motor_commands, params.m1_mock_config, self.sim.sim_steps
+            )
             m1_to_out = "one_to_one"
 
         par_fbk = {"base_rate": params.fbk_base_rate, "kp": params.fbk_kp}
@@ -124,7 +130,7 @@ class MotorCortex:
             {
                 "pos": True,
                 "buffer_size": buf_sz,
-                "simulation_steps": len(self.motorCommands),
+                "simulation_steps": self.sim.sim_steps,
             },
         )
         self.fbk_p = PopView(tmp_pop_p, to_file=True, label="mc_fbk_p")
@@ -135,7 +141,7 @@ class MotorCortex:
             {
                 "pos": False,
                 "buffer_size": buf_sz,
-                "simulation_steps": len(self.motorCommands),
+                "simulation_steps": self.sim.sim_steps,
             },
         )
         self.fbk_n = PopView(tmp_pop_n, to_file=True, label="mc_fbk_n")
@@ -147,7 +153,7 @@ class MotorCortex:
             {
                 "pos": True,
                 "buffer_size": buf_sz,
-                "simulation_steps": len(self.motorCommands),
+                "simulation_steps": self.sim.sim_steps,
             },
         )
         self.out_p = PopView(tmp_pop_p, to_file=True, label="mc_out_p")
@@ -158,7 +164,7 @@ class MotorCortex:
             {
                 "pos": False,
                 "buffer_size": buf_sz,
-                "simulation_steps": len(self.motorCommands),
+                "simulation_steps": self.sim.sim_steps,
             },
         )
         self.out_n = PopView(tmp_pop_n, to_file=True, label="mc_out_n")
