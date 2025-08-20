@@ -1,5 +1,7 @@
+import os
 import random
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -9,8 +11,6 @@ from config.MasterParams import MasterParams
 from config.module_params import TrajGeneratorType
 from neural.Controller import Controller
 from neural.nest_adapter import nest
-
-# nest.set_verbosity("M_ERROR") # TOCHECK: Verbosity might be set by NEST server
 
 
 # --- Configuration and Setup ---
@@ -98,6 +98,10 @@ def create_controllers(
     music_cfg = (
         master_config.music if master_config.USE_MUSIC else None
     )  # TODO what is this man find a better solution
+    if master_config.modules.planner.trajgen_type != TrajGeneratorType.MOCKED:
+        log.debug("Reached initialization. Waiting for input image to be created...")
+        while not os.path.exists(master_config.run_paths.input_image):
+            time.sleep(1)
 
     controllers = []
     log.info(f"Constructing Network", dof=njt, N_neurons_pop=N)

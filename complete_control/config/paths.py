@@ -29,12 +29,15 @@ M1_WEIGHTS = (
     M1 / "sim_results" / "default_plastic_False_manualRBF_False" / "trained_weights.npz"
 )
 
+PFC_PLANNER = ROOT / "pfc-planner"
+
 
 @dataclass(frozen=True)
 class RunPaths:
     """Holds the standard paths for a single simulation run."""
 
     run: Path
+    input_image: Path
     data_nest: Path
     robot_result: Path
     figures: Path
@@ -62,6 +65,7 @@ class RunPaths:
         figures_receiver_dir = run_dir / FOLDER_NAME_ROBOTIC_FIGS
         logs_dir = run_dir / "logs"
         params_path = run_dir / f"params{run_timestamp}.json"
+        input_image = run_dir / "input_image.bmp"
 
         # Create directories if they don't exist
         for dir_path in [
@@ -76,6 +80,7 @@ class RunPaths:
 
         return cls(
             run=run_dir,
+            input_image=input_image,
             data_nest=data_nest_dir,
             robot_result=robot_result,
             figures=figures_dir,
