@@ -6,6 +6,7 @@ import numpy as np
 import structlog
 from config.core_models import SimulationParams
 from config.MasterParams import MasterParams
+from config.module_params import TrajGeneratorType
 from neural.Controller import Controller
 from neural.nest_adapter import nest
 
@@ -64,8 +65,6 @@ def setup_nest_kernel(
 
 def create_controllers(
     master_config: MasterParams,
-    trj: np.ndarray,
-    motor_commands: np.ndarray,
     comm=None,  # if comm is None, Cerebellum will be loaded without MPI
 ) -> list[Controller]:
     log = structlog.get_logger("main.network_construction")
@@ -109,8 +108,6 @@ def create_controllers(
             dof_id=j,
             N=N,
             total_time_vect=total_time_vect_concat,
-            trajectory_slice=trj,
-            motor_cmd_slice=motor_commands,
             mc_params=module_params.motor_cortex,
             plan_params=module_params.planner,
             spine_params=module_params.spine,

@@ -15,7 +15,6 @@ from neural_simulation_lib import (
 )
 from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
-from utils_common.generate_analog_signals import generate_signals
 from utils_common.profile import Profile
 
 NANO_SEC = 1e-9
@@ -56,14 +55,7 @@ class Script(GrpcEngineScript):
         )
         self.log.info("Environment and NEST kernel setup complete.")
 
-        trj, motor_commands = generate_signals(self.master_config.simulation)
-        self.log.info("Input data (trajectory, motor_commands) generated.")
-
-        self.controllers = create_controllers(
-            self.master_config,
-            trj,
-            motor_commands,
-        )
+        self.controllers = create_controllers(self.master_config)
         self.log.info(f"Created {len(self.controllers)} controllers.")
         self.sensory_profile = Profile()
         self.sim_profile = Profile()

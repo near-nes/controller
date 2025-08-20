@@ -16,7 +16,6 @@ from mpi4py.MPI import Comm
 from neural.Controller import Controller
 from neural.data_handling import collapse_files, save_conn_weights
 from neural.plot_utils import plot_controller_outputs
-from utils_common.generate_analog_signals import generate_signals
 from utils_common.log import setup_logging
 
 from complete_control.config.core_models import SimulationParams
@@ -170,12 +169,8 @@ if __name__ == "__main__":
         run_paths.data_nest,
     )
 
-    # Generate signals
-    trj, motor_commands = generate_signals(master_config.simulation)
-
-
     # Create controllers
-    controllers = create_controllers(master_config, trj, motor_commands, comm=comm)
+    controllers = create_controllers(master_config, comm=comm)
 
     # Run simulation
     run_simulation(master_config.simulation, run_paths.data_nest, controllers, comm)

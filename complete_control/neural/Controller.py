@@ -16,6 +16,7 @@ from config.module_params import (
 from config.population_params import PopulationsParams
 from neural.nest_adapter import nest
 from plant.sensoryneuron import SensoryNeuron
+from utils_common.generate_signals import generate_traj
 
 from .ControllerPopulations import ControllerPopulations
 from .motorcortex import MotorCortex
@@ -60,8 +61,6 @@ class Controller:
         dof_id: int,
         N: int,
         total_time_vect: np.ndarray,
-        trajectory_slice: np.ndarray,
-        motor_cmd_slice: np.ndarray,
         mc_params: MotorCortexModuleConfig,
         plan_params: PlannerModuleConfig,
         spine_params: SpineModuleConfig,
@@ -92,8 +91,6 @@ class Controller:
         self.dof_id = dof_id
         self.N = N
         self.total_time_vect = total_time_vect
-        self.trajectory_slice = trajectory_slice
-        self.motor_cmd_slice = motor_cmd_slice
 
         self.weights_history = defaultdict(lambda: defaultdict(list))
         self.mc_params = mc_params
@@ -276,10 +273,11 @@ class Controller:
             nest_pop, self.total_time_vect, to_file=to_file, label=full_label
         )
 
-    # --- Build Methods (Example: Planner) ---
+    # --- Build Methods ---
     def _build_planner(self, to_file=False):
         p_params = self.plan_params
         N = self.N
+        trajectory = generate_traj(p_params, self.sim_params)
         self.log.debug(
             "Initializing Planner sub-module",
             N=N,
@@ -295,7 +293,7 @@ class Controller:
                 "kp": p_params.kp,
                 "base_rate": p_params.base_rate,
                 "pos": True,
-                "traj": self.trajectory_slice.tolist(),
+                "traj": trajectory.tolist(),
                 "simulation_steps": self.sim_params.sim_steps,
             },
         )
@@ -306,7 +304,7 @@ class Controller:
                 "kp": p_params.kp,
                 "base_rate": p_params.base_rate,
                 "pos": False,
-                "traj": self.trajectory_slice.tolist(),
+                "traj": trajectory.tolist(),
                 "simulation_steps": self.sim_params.sim_steps,
             },
         )
@@ -320,7 +318,7 @@ class Controller:
             njt=1,
             mc_params=self.mc_params,
         )
-        self.mc = MotorCortex(self.N, self.motor_cmd_slice, self.mc_params)
+        self.mc = MotorCortex(self.N, self.mc_params, self.sim_params)
         self.pops.mc_M1_p = self.mc.m1_out_p
         self.pops.mc_M1_n = self.mc.m1_out_n
         self.pops.mc_fbk_p = self.mc.fbk_p

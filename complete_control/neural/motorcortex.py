@@ -105,6 +105,11 @@ class MotorCortex:
             )
             m1_to_out = "all_to_all"
         else:
+            from utils_common.generate_signals_minjerk import (
+                generate_motor_commands_minjerk,
+            )
+
+            motor_commands = generate_motor_commands_minjerk(self.sim)
             self.m1 = M1Mock(
                 numNeurons, motor_commands, params.m1_mock_config, self.sim.sim_steps
             )

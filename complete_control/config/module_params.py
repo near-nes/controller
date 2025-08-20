@@ -1,10 +1,26 @@
+from enum import Enum
 from typing import ClassVar
 
+import config.paths as paths
 from pydantic import BaseModel, Field
+
+
+class TrajGeneratorType(str, Enum):
+    MOCKED = "mocked"
+    GLE = "gle"
+    ANN = "ann"
+
+
+class GLETrajGeneratorConfig(BaseModel):
+    model_path: str = str(paths.PFC_PLANNER / "models" / "trained_gle_planner.pth")
 
 
 class PlannerModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
+    trajgen_type: TrajGeneratorType = Field(default=TrajGeneratorType.MOCKED)
+    gle_config: GLETrajGeneratorConfig = Field(
+        default_factory=lambda: GLETrajGeneratorConfig()
+    )
     kp: float = 1255.0503631208485
     kpl: float = 0.32504265346581107
     base_rate: float = 10.0
