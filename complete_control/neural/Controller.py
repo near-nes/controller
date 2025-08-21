@@ -277,7 +277,9 @@ class Controller:
     def _build_planner(self, to_file=False):
         p_params = self.plan_params
         N = self.N
-        trajectory = generate_traj(p_params, self.sim_params)
+        trajectory = generate_traj(
+            p_params, self.sim_params, self.master_params.run_paths.input_image
+        )
         self.log.debug(
             "Initializing Planner sub-module",
             N=N,

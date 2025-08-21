@@ -12,7 +12,7 @@ from config.module_params import (
 def generate_traj(
     params: PlannerModuleConfig,
     sim: SimulationParams,
-    input_image_path: Path | None = None,
+    input_image_path: Path,
 ):
     log = structlog.get_logger("main.generate_signals")
 
@@ -30,7 +30,9 @@ def generate_traj(
             generate_trajectory_gle,
         )
 
-        return generate_trajectory_gle(input_image_path, params.gle_config.model_path)
+        return generate_trajectory_gle(
+            input_image_path, params.gle_config.model_path, sim
+        )
     else:
         raise NotImplementedError(f"Unknown planner type: {traj_gen_type}")
 

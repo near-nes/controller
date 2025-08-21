@@ -80,6 +80,14 @@ class SimulationParams(BaseModel, frozen=True):
     def sim_steps(self) -> int:
         return int(self.total_duration_all_trials_ms / self.resolution)
 
+    @property
+    def neural_control_steps(self) -> int:
+        return int((self.time_prep + self.time_move) / self.resolution)
+
+    @property
+    def manual_control_steps(self) -> int:
+        return int(self.time_post / self.resolution)
+
 
 class BrainParams(BaseModel, frozen=True):
     population_size: int = 50
