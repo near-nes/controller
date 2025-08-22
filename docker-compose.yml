@@ -1,27 +1,43 @@
-services:
-  simulation:
-    image: simulation:latest
-    build:
+x-simulation-base: &simulation-base
+  image: simulation:latest
+  build:
       context: .
       dockerfile: docker/Dockerfile
       target: dev
-      # The entrypoint script handles the runtime matching regardless.
-      args:
-        # expect there to be either a .env or suitable env vars
-        USER_UID: ${UID:-1000}
-        USER_GID: ${GID:-1000}
-    volumes:
-      # Bind mount the current host directory (.) into /sim/controller
-      - .:/sim/controller
-    stdin_open: true
-    tty: true
-    environment:
-      TZ: ${TZ:-Europe/Rome}
-      VNC_PASSWORD: ${VNC_PASSWORD} # this is not a secret.
-      NEST_MODE: "normal"
-    ports:
-      # Map host port 5901 (localhost only) to container port 5901 (VNC display :1)
-      - "127.0.0.1:5901:5901"
-      - 9000:9000
-    # If you want to run a specific script, use 'docker-compose run simulation python your_script.py'
+  volumes:
+    - .:/sim/controller
+  stdin_open: true
+  tty: true
+  environment:
+    TZ: ${TZ:-Europe/Rome}
+    PYNEST_QUIET: 0
+  ports:
+  # Map host port 5901 (localhost only) to container port 5901 (VNC display :1)
+  - "127.0.0.1:5901:5901"
+  working_dir: /sim/controller
+
+services:
+  development:
+    <<: *simulation-base
+    image: simulation:dev
     command: bash
+
+  simulation-music:
+    <<: *simulation-base
+    image: simulation:music
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: hpc
+    command: mpirun -np 4 music /sim/controller/complete_control/complete.music
+
+  simulation-nrp:
+    <<: *simulation-base
+    image: simulation:nrp
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: hpc
+    command: sh -c "export EXEC_TIMESTAMP=$(date +%Y%m%d_%H%M%S) && NRPCoreSim -c /sim/controller/nrp_simulation_config_nest_docker_compose.json --cloglevel debug --logdir /home/simuser/logs"
+    # depends_on:
+    #   - nest-server
