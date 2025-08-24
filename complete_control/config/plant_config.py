@@ -98,5 +98,6 @@ class PlantConfig:
     def from_runpaths(
         cls,
         run_paths: paths.RunPaths,
+        **kwargs,
     ):
-        return cls(MasterParams.from_runpaths(run_paths))
+        return cls(MasterParams.from_runpaths(run_paths, **kwargs))

@@ -68,6 +68,39 @@ class RoboticPlant:
             self.bullet_robot._body_id, RobotArm1Dof.HAND_LINK_ID
         )[0]
 
+    def _capture_state_and_save(self, image_path) -> None:
+        from PIL import Image
+
+        self.log.debug("setting up camera...")
+
+        camera_target_position = [0.3, 0.3, 1.5]
+        camera_position = [0, -1, 1.7]
+        up_vector = [0, 0, 1]
+        width = 1024
+        height = 768
+        fov = 60
+        aspect = width / height
+        near = 0.1
+        far = 100
+        projection_matrix = self.p.computeProjectionMatrixFOV(fov, aspect, near, far)
+        view_matrix = self.p.computeViewMatrix(
+            camera_position, camera_target_position, up_vector
+        )
+        self.log.debug("getting image...")
+        img_arr = self.p.getCameraImage(
+            width,
+            height,
+            viewMatrix=view_matrix,
+            projectionMatrix=projection_matrix,
+            renderer=self.p.ER_BULLET_HARDWARE_OPENGL,
+        )
+
+        self.log.debug("saving image...")
+        rgb_buffer = np.array(img_arr[2])
+        rgb = rgb_buffer[:, :, :3]  # drop alpha
+        Image.fromarray(rgb.astype(np.uint8)).save(image_path)
+        self.log.info(f"saved input image at {str(image_path)}")
+
     def _test_init_tgt_positions(self) -> None:
         self.init_hand_pos_ee = self._set_EE_pos(self.initial_joint_position_rad)
         self.trgt_hand_pos_ee = self._set_EE_pos(self.target_joint_position_rad)

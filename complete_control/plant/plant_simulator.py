@@ -67,42 +67,9 @@ class PlantSimulator:
             [] for _ in range(self.config.NJT)
         ]
         self.errors_per_trial: List[float] = []  # Store final error of each trial
-        self._capture_state_and_save(self.config.run_paths.input_image)
+        self.plant._capture_state_and_save(self.config.run_paths.input_image)
 
         self.log.info("PlantSimulator initialization complete.")
-
-    def _capture_state_and_save(self, image_path) -> None:
-        from PIL import Image
-
-        self.log.debug("setting up camera...")
-
-        camera_target_position = [0.3, 0.3, 1.5]
-        camera_position = [0, -1, 1.7]
-        up_vector = [0, 0, 1]
-        width = 1024
-        height = 768
-        fov = 60
-        aspect = width / height
-        near = 0.1
-        far = 100
-        projection_matrix = self.p.computeProjectionMatrixFOV(fov, aspect, near, far)
-        view_matrix = self.p.computeViewMatrix(
-            camera_position, camera_target_position, up_vector
-        )
-        self.log.debug("getting image...")
-        img_arr = self.p.getCameraImage(
-            width,
-            height,
-            viewMatrix=view_matrix,
-            projectionMatrix=projection_matrix,
-            renderer=self.p.ER_BULLET_HARDWARE_OPENGL,
-        )
-
-        self.log.debug("saving image...")
-        rgb_buffer = np.array(img_arr[2])
-        rgb = rgb_buffer[:, :, :3]  # drop alpha
-        Image.fromarray(rgb.astype(np.uint8)).save(image_path)
-        self.log.info(f"saved input image at {str(image_path)}")
 
     def _setup_music_communication(self) -> None:
         """Sets up MUSIC input and output ports and handlers."""
