@@ -2,9 +2,9 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-ROOT = Path(os.getenv("CONTROLLER_DIR", "/sim/controller"))
+ROOT = Path(os.getenv("CONTROLLER_DIR"))
 COMPLETE_CONTROL = ROOT / "complete_control"
-RUNS_DIR = Path(os.getenv("RUNS_PATH")) or ROOT / "runs"  # Base directory for all runs
+RUNS_DIR = Path(os.getenv("RUNS_PATH", ROOT / "runs"))  # Base directory for all runs
 
 FOLDER_NAME_NEURAL_FIGS = "figs_neural"
 FOLDER_NAME_ROBOTIC_FIGS = "figs_robotic"
