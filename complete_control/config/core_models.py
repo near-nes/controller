@@ -1,7 +1,16 @@
+from enum import Enum
 from typing import List
 
 import numpy as np
 from pydantic import BaseModel, Field, computed_field
+
+
+class TargetColor(Enum):
+    # RGBA
+    BLUE_LEFT = [0, 0, 1, 1]
+    RED_RIGHT = [1, 0, 0, 1]
+
+
 from utils_common.git_utils import get_git_commit_hash
 
 from . import paths
@@ -33,6 +42,8 @@ class ExperimentParams(BaseModel, frozen=True):
 class OracleData(BaseModel):
     init_joint_angle: float = 90
     tgt_joint_angle: float = 20
+    target_visual_offset: float = 4.0
+    target_color: TargetColor = Field(default=TargetColor.BLUE_LEFT)
     robot_spec: RobotSpecParams = Field(default_factory=lambda: RobotSpecParams())
 
     @computed_field
@@ -44,6 +55,10 @@ class OracleData(BaseModel):
     @property
     def tgt_pos_angle_rad(self) -> float:
         return np.deg2rad(self.tgt_joint_angle)
+
+    @property
+    def tgt_visual_offset_rad(self) -> float:
+        return np.deg2rad(self.target_visual_offset)
 
 
 class SimulationParams(BaseModel, frozen=True):
