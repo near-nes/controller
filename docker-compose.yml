@@ -38,6 +38,6 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       target: hpc
-    command: sh -c "export EXEC_TIMESTAMP=$(date +%Y%m%d_%H%M%S) && NRPCoreSim -c /sim/controller/nrp_simulation_config_nest_docker_compose.json --cloglevel debug --logdir /home/simuser/logs"
+    command: sh -c "export EXEC_TIMESTAMP=$(date +%Y%m%d_%H%M%S) && NRPCoreSim -c /sim/controller/nrp_simulation_config_nest_docker_compose.json --cloglevel debug --logdir /home/simuser/logs && python /sim/controller/complete_control/plot_from_run.py /sim/controller/runs/\$EXEC_TIMESTAMP"
     # depends_on:
     #   - nest-server
