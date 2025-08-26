@@ -66,7 +66,7 @@ class RunPaths:
             figures_receiver_dir,
             logs_dir,
         ]:
-            dir_path.mkdir(parents=True, exist_ok=True)
+            dir_path.mkdir(parents=True, exist_ok=True, mode=0o770)
 
         return cls(
             run=run_dir,

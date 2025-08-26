@@ -15,12 +15,8 @@ set -e
 echo "Running VNC startup script as user: $(id)"
 
 # --- Check Dependencies ---
-if ! command -v vncpasswd &> /dev/null || ! command -v vncserver &> /dev/null; then
+if ! command -v vncserver &> /dev/null; then
     echo "Error: vncpasswd or vncserver command not found. Is tigervnc installed correctly?" >&2
-    exit 1
-fi
-if [ -z "$VNC_PASSWORD" ]; then
-    echo "Error: VNC_PASSWORD environment variable is not set." >&2
     exit 1
 fi
 if [ ! -f "$HOME/.vnc/xstartup" ]; then
@@ -28,18 +24,11 @@ if [ ! -f "$HOME/.vnc/xstartup" ]; then
     exit 1
 fi
 
-# --- VNC Password Setup ---
-echo "Setting VNC password..."
-# Ensure .vnc directory exists (entrypoint should create it, but double-check)
-mkdir -p "$HOME/.vnc"
-echo "$VNC_PASSWORD" | vncpasswd -f > "$HOME/.vnc/passwd"
-chmod 600 "$HOME/.vnc/passwd"
-
 # --- Start VNC Server ---
 VNC_DISPLAY="${VNC_DISPLAY}"
 VNC_GEOMETRY="1280x800"
 VNC_DEPTH="24"
-VNC_ARGS="-geometry $VNC_GEOMETRY -depth $VNC_DEPTH -localhost no -xstartup $HOME/.vnc/xstartup"
+VNC_ARGS="-SecurityTypes None --I-KNOW-THIS-IS-INSECURE -geometry $VNC_GEOMETRY -depth $VNC_DEPTH -localhost no -xstartup $HOME/.vnc/xstartup"
 
 # Check if VNC server is already running on this display
 if vncserver -list | grep -q "^${VNC_DISPLAY}"; then

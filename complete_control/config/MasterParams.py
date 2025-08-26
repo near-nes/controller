@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import ClassVar
 
@@ -24,9 +25,10 @@ class MasterParams(BaseModel):
     }
     run_paths: RunPaths
 
-    PLOT_AFTER_SIMULATE: bool = False
-    USE_CEREBELLUM: bool = False
+    PLOT_AFTER_SIMULATE: bool = True
+    USE_CEREBELLUM: bool = True
     GUI_PYBULLET: bool = False
+    USE_MUSIC: bool = False
 
     NJT: int = 1
     simulation: SimulationParams = Field(default_factory=lambda: SimulationParams())
@@ -39,6 +41,15 @@ class MasterParams(BaseModel):
     @property
     def meta(self) -> MetaInfo:
         return MetaInfo(run_id=self.run_paths.run.name)
+
+    @computed_field
+    @property
+    def total_num_virtual_procs(self) -> int:
+        if self.USE_MUSIC:
+            # https://github.com/nest/nest-simulator/issues/3446
+            return None
+        else:
+            return int(os.getenv("NPROC", 1))
 
     @computed_field
     @property
@@ -58,5 +69,7 @@ class MasterParams(BaseModel):
             f.write(self.model_dump_json(indent=indent))
 
     @classmethod
-    def from_runpaths(cls, run_paths: RunPaths):
-        return MasterParams(run_paths=RunPaths.from_run_id(run_paths.run.name))
+    def from_runpaths(cls, run_paths: RunPaths, **kwargs):
+        return MasterParams(
+            run_paths=RunPaths.from_run_id(run_paths.run.name), **kwargs
+        )

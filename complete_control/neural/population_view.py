@@ -10,10 +10,10 @@ __version__ = "1.0.1"
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import nest
 import numpy as np
 import pandas as pd
 import structlog
+from neural.nest_adapter import nest
 
 _log = structlog.get_logger(__name__)
 
@@ -208,10 +208,10 @@ class PopView:
     def get_spike_events(self):
         spike_detector = self.detector
         # Get metadata about the recorder
-        metadata = spike_detector.get()
+        metadata = nest.GetStatus(spike_detector)
 
         if metadata.get("record_to") == "memory":
-            dSD = spike_detector.get("events")
+            dSD = nest.GetStatus(spike_detector, "events")
             evs = dSD["senders"]
             ts = dSD["times"]
             return evs, ts

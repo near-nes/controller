@@ -6,7 +6,8 @@
     "remoteUser": "simuser",
     // "remoteUser": "${localEnv:USER}",
     "workspaceFolder": "/sim/controller",
-    "service": "simulation",
+    "service": "development",
+    "runServices": ["development"],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -29,4 +30,5 @@
             }
         }
     }
+    // "overrideCommand": true
 }

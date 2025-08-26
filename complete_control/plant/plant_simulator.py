@@ -1,9 +1,7 @@
 from typing import Any, List, Tuple
 
-import music
 import structlog
 from config.plant_config import PlantConfig
-from utils_common.generate_analog_signals import generate_signals
 from utils_common.log import tqdm
 
 from . import plant_utils
@@ -29,9 +27,9 @@ class PlantSimulator:
         Initializes the PlantSimulator.
 
         Args:
-            run_paths: A RunPaths object with paths for the current run.
+            config: a PlantConfig object.
             pybullet_instance: The initialized PyBullet instance (e.g., p from `import pybullet as p`).
-            connect_gui: Whether the RoboticPlant should connect to the PyBullet GUI.
+            music_setup: when None, assume Music is not being used (i.e. NRP).
         """
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger(
             type(self).__name__
@@ -39,14 +37,20 @@ class PlantSimulator:
         self.log.info("Initializing PlantSimulator...")
         self.config: PlantConfig = config
         self.p = pybullet_instance
-        self.music_setup = music_setup
+        self.music_enabled = music_setup is not None
 
         self.plant = RoboticPlant(config=self.config, pybullet_instance=self.p)
         self.log.debug("RoboticPlant initialized.")
 
-        self._setup_music_communication()
-        self._setup_sensory_system()
-        self.log.debug("MUSIC communication and SensorySystem setup complete.")
+        if self.music_enabled:
+            import music
+
+            self.music = music
+            self.music_setup = music_setup
+            self._setup_music_communication()
+            self._setup_sensory_system()
+
+            self.log.debug("MUSIC communication and SensorySystem setup complete.")
 
         self.num_total_steps = len(self.config.time_vector_total_s)
         self.joint_data = [
@@ -80,7 +84,7 @@ class PlantSimulator:
         n_music_channels_in = self.config.N_NEURONS * 2 * self.config.NJT
         self.music_input_port.map(
             self._music_inhandler,
-            music.Index.GLOBAL,
+            self.music.Index.GLOBAL,
             base=0,
             size=n_music_channels_in,
             accLatency=self.config.MUSIC_ACCEPTABLE_LATENCY_S,
@@ -96,7 +100,7 @@ class PlantSimulator:
         # Sensory neurons will connect to this port. Mapping is global, base 0, size N*2*njt.
         n_music_channels_out = self.config.N_NEURONS * 2 * self.config.NJT
         self.music_output_port.map(
-            music.Index.GLOBAL,
+            self.music.Index.GLOBAL,
             base=self.config.SENS_NEURON_ID_START,  # Global ID start for these sensory neurons
             size=n_music_channels_out,
         )
@@ -160,6 +164,8 @@ class PlantSimulator:
                 idStart=id_start_p,
                 bas_rate=self.config.SENS_NEURON_BASE_RATE,
                 kp=self.config.SENS_NEURON_KP,
+                res=self.config.RESOLUTION_S,
+                music_index_strategy=self.music.Index.GLOBAL,
             )
             sn_p.connect(self.music_output_port)
             self.sensory_neurons_p.append(sn_p)
@@ -172,6 +178,8 @@ class PlantSimulator:
                 idStart=id_start_n,
                 bas_rate=self.config.SENS_NEURON_BASE_RATE,
                 kp=self.config.SENS_NEURON_KP,
+                res=self.config.RESOLUTION_S,
+                music_index_strategy=self.music.Index.GLOBAL,
             )
             sn_n.connect(self.music_output_port)
             self.sensory_neurons_n.append(sn_n)
@@ -202,22 +210,147 @@ class PlantSimulator:
             return
         self.plant.set_joint_torques([joint_torque])
 
-    def _update_sensory_feedback(
-        self, current_joint_pos_rad: float, current_sim_time_s: float
+    def music_end_step(
+        self, joint_pos_rad: float, current_sim_time_s: float, music_runtime
     ) -> None:
-        """
-        Updates all sensory neurons based on the current plant state.
-        **Assumes NJT=1**
-        """
         if self._should_mask_sensory_info(current_sim_time_s):
-            current_joint_pos_rad = 0
+            joint_pos_rad = 0.0
 
-        self.sensory_neurons_p[0].update(
-            current_joint_pos_rad, self.config.RESOLUTION_S, current_sim_time_s
+        self.sensory_neurons_p[0].update(joint_pos_rad, current_sim_time_s)
+        self.sensory_neurons_n[0].update(joint_pos_rad, current_sim_time_s)
+        music_runtime.tick()
+
+    def music_prepare_step(
+        self, current_sim_time_s: float
+    ) -> Tuple[float, float, float, float]:
+        # Calculate buffer window for spike rate computation
+        buffer_start_time = current_sim_time_s - self.config.BUFFER_SIZE_S
+
+        # For NJT=1, we only process joint 0
+        j = 0
+
+        rate_pos_hz, _ = plant_utils.compute_spike_rate(
+            spikes=self.received_spikes_pos[j],
+            n_neurons=self.config.N_NEURONS,
+            time_start=buffer_start_time,
+            time_end=current_sim_time_s,
         )
-        self.sensory_neurons_n[0].update(
-            current_joint_pos_rad, self.config.RESOLUTION_S, current_sim_time_s
+        rate_neg_hz, _ = plant_utils.compute_spike_rate(
+            spikes=self.received_spikes_neg[j],
+            n_neurons=self.config.N_NEURONS,
+            time_start=buffer_start_time,
+            time_end=current_sim_time_s,
         )
+
+        return rate_pos_hz, rate_neg_hz
+
+    def run_simulation_step(
+        self,
+        rate_pos_hz: float,
+        rate_neg_hz: float,
+        current_sim_time_s: float,
+        step: int,
+    ) -> Tuple[float, float, List[float], List[float]]:
+        """Execute one simulation step.
+
+        Returns:
+            Tuple containing (joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list)
+            where ee_pos_m and ee_vel_m_list are lists representing end effector
+            position and velocity
+        """
+        joint_pos_rad, joint_vel_rad_s = self.plant.get_joint_state()
+        ee_pos_m, ee_vel_m_list = self.plant.get_ee_pose_and_velocity()
+
+        if step >= self.num_total_steps:
+            self.log.warning(
+                "Step index exceeds data_array size, breaking loop.",
+                step=step,
+                max_steps=self.num_total_steps,
+                sim_time=current_sim_time_s,
+            )
+            return joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list
+
+        net_rate_hz = rate_pos_hz - rate_neg_hz
+        input_torque = net_rate_hz / self.config.SCALE_TORQUE
+
+        if not (step % 500):
+            self.log.debug(
+                "Simulation progress", step=step, sim_time_s=current_sim_time_s
+            )
+
+        self.plant.update_stats()
+        # Enable perturbation/gravity
+        self._check_gravity(current_sim_time_s)
+        # Apply motor command to plant
+        self._set_joint_torque(input_torque, current_sim_time_s)
+        # Step PyBullet simulation
+        self.plant.simulate_step(self.config.RESOLUTION_S)
+        # Record data for this step (For NJT=1)
+        self.joint_data[0].record_step(
+            step=step,
+            joint_pos_rad=joint_pos_rad,
+            joint_vel_rad_s=joint_vel_rad_s,
+            ee_pos_m=ee_pos_m,
+            ee_vel_m_s=ee_vel_m_list,
+            spk_rate_pos_hz=rate_pos_hz,
+            spk_rate_neg_hz=rate_neg_hz,
+            spk_rate_net_hz=net_rate_hz,
+            input_cmd_torque=input_torque,
+        )
+
+        # Trial end logic (reset plant if needed)
+        is_trial_end_time = self._check_trial_end(current_sim_time_s)
+        if is_trial_end_time:
+            final_error_rad = joint_pos_rad - self.config.target_joint_pos_rad
+            self.errors_per_trial.append(final_error_rad)
+            self.log.info(
+                "Trial finished. Resetting plant.",
+                trial_num=len(self.errors_per_trial),
+                sim_time_s=current_sim_time_s,
+                final_error_rad=final_error_rad,
+            )
+            self.plant.reset_plant()
+
+        return joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list
+
+    def _check_gravity(self, current_sim_time_s: float):
+        """Check trial number and enable/disable gravity"""
+        exp_params = self.config.master_config.experiment
+
+        if exp_params.enable_gravity:
+            current_trial = int(current_sim_time_s / self.config.TIME_TRIAL_S)
+
+            if current_trial >= exp_params.gravity_trial_start:
+                self.plant.set_gravity(True, exp_params.z_gravity_magnitude)
+            if (
+                exp_params.gravity_trial_end is not None
+                and current_trial > exp_params.gravity_trial_end
+            ):
+                self.plant.set_gravity(False)
+
+    def _check_trial_end(self, current_sim_time_s: float) -> bool:
+        """Check if current step is at the end of a trial.
+
+        Args:
+            current_sim_time_s: Current simulation time in seconds
+
+        Returns:
+            True if this is the end of a trial, False otherwise
+        """
+
+        # Check if current_sim_time_s is (almost) a multiple of TIME_TRIAL_S
+        # Or if it's the last step of the simulation
+        if abs(current_sim_time_s % self.config.TIME_TRIAL_S) < (
+            self.config.RESOLUTION_S / 2.0
+        ) or abs(
+            current_sim_time_s
+            - (self.config.TOTAL_SIM_DURATION_S - self.config.RESOLUTION_S)
+        ) < (
+            self.config.RESOLUTION_S / 2.0
+        ):
+            if not (abs(current_sim_time_s) < self.config.RESOLUTION_S / 2.0):
+                return True
+        return False
 
     def run_simulation(self) -> None:
         """Runs the main simulation loop. **NJT==1**"""
@@ -227,155 +360,29 @@ class PlantSimulator:
             resolution_s=self.config.RESOLUTION_S,
         )
 
-        music_runtime = music.Runtime(self.music_setup, self.config.RESOLUTION_S)
+        music_runtime = self.music.Runtime(self.music_setup, self.config.RESOLUTION_S)
         current_sim_time_s = 0.0
         step = 0
 
-        exp_params = self.config.master_config.experiment
-
         with tqdm(total=self.num_total_steps, unit="step", desc="Simulating") as pbar:
-            # Simulation loop
-            # Loop while current_sim_time_s is less than the total duration.
-            # Add a small epsilon to ensure the last step is processed if time is exact.
-            # Simulation loop; TODO should this count in num_steps instead?
-
             while current_sim_time_s < self.config.TOTAL_SIM_DURATION_S - (
                 self.config.RESOLUTION_S / 2.0
             ):
-                # self.log.warning(f"starting receiver loop for step {step}...")
-                current_sim_time_s = music_runtime.time()  # Current time from MUSIC
+                # Get commands from MUSIC
+                rate_pos, rate_neg = self.music_prepare_step(current_sim_time_s)
 
-                if step >= self.num_total_steps:
-                    self.log.warning(
-                        "Step index exceeds data_array size, breaking loop.",
-                        step=step,
-                        max_steps=self.num_total_steps,
-                        sim_time=current_sim_time_s,
-                    )
-                    break
-
-                if not (step % 500):
-                    self.log.debug(
-                        "Simulation progress", step=step, sim_time_s=current_sim_time_s
-                    )
-
-                # 1. Get current plant state
-                self.plant.update_stats()
-                joint_pos_rad, joint_vel_rad_s = self.plant.get_joint_state()
-                ee_pos_m, ee_vel_m_list = self.plant.get_ee_pose_and_velocity()
-
-                # 2. Send sensory feedback via MUSIC
-                self._update_sensory_feedback(joint_pos_rad, current_sim_time_s)
-
-                # 3. Calculate motor command from received spikes
-                # For NJT=1
-                j = 0  # Current joint index
-                buffer_start_time = current_sim_time_s - self.config.BUFFER_SIZE_S
-
-                rate_pos_hz, _ = plant_utils.compute_spike_rate(
-                    spikes=self.received_spikes_pos[j],
-                    weight=self.config.WGT_MOTCTX_MOTNEUR,
-                    n_neurons=self.config.N_NEURONS,
-                    time_start=buffer_start_time,
-                    time_end=current_sim_time_s,
-                )
-                rate_neg_hz, _ = plant_utils.compute_spike_rate(
-                    spikes=self.received_spikes_neg[j],
-                    weight=self.config.WGT_MOTCTX_MOTNEUR,
-                    n_neurons=self.config.N_NEURONS,
-                    time_start=buffer_start_time,
-                    time_end=current_sim_time_s,
-                )
-                net_rate_hz = rate_pos_hz - rate_neg_hz
-                computed_torque_from_input = net_rate_hz / self.config.SCALE_TORQUE
-
-                # Perturbation logic
-                if exp_params.enable_gravity:
-                    current_trial = int(current_sim_time_s / self.config.TIME_TRIAL_S)
-
-                    # Turn gravity on if we've reached application trial
-                    if current_trial >= exp_params.gravity_trial_start:
-                        self.plant.set_gravity(True, exp_params.z_gravity_magnitude)
-
-                    # Turn gravity off if removal trial is set and after we've reached it
-                    if (
-                        exp_params.gravity_trial_end is not None
-                        and current_trial > exp_params.gravity_trial_end
-                    ):
-                        self.plant.set_gravity(False)
-
-                # 4. Apply motor command to plant
-                self._set_joint_torque(computed_torque_from_input, current_sim_time_s)
-
-                # 5. Step PyBullet simulation
-                self.plant.simulate_step(self.config.RESOLUTION_S)
-
-                # 6. Record data for this step
-                # For NJT=1
-                self.joint_data[0].record_step(
-                    step=step,
-                    joint_pos_rad=joint_pos_rad,
-                    joint_vel_rad_s=joint_vel_rad_s,
-                    ee_pos_m=ee_pos_m,
-                    ee_vel_m_s=ee_vel_m_list,
-                    spk_rate_pos_hz=rate_pos_hz,
-                    spk_rate_neg_hz=rate_neg_hz,
-                    spk_rate_net_hz=net_rate_hz,
-                    input_cmd_torque=computed_torque_from_input,
+                # Run simulation step
+                joint_pos, joint_vel, ee_pos, ee_vel = self.run_simulation_step(
+                    rate_pos, rate_neg, current_sim_time_s, step
                 )
 
-                # 7. Trial end logic (reset plant)
-                # Check if current_sim_time_s is at the end of a trial period
-                # (timeMax + timeWait). Using fmod for float comparison robustness.
-                # A trial ends right BEFORE the next one starts or at the very end of simulation.
-                current_trial_time_s = current_sim_time_s % self.config.TIME_TRIAL_S
-                # Check if we are close to the end of the active part of the trial (timeMax)
-                # or more robustly, if we are at the end of the full trial period (timeMax + timeWait)
-                # The original reset happened if tickt % time_trial == 0 (and not at t=0) OR at exp_duration - res
+                # Send sensory feedback through MUSIC
+                self.music_end_step(joint_pos, current_sim_time_s, music_runtime)
 
-                # A trial is considered finished after (timeMax + timeWait)
-                # So, reset happens when current_sim_time_s is a multiple of TIME_TRIAL_S
-                # (but not at t=0, and also at the very end of the simulation)
-                is_trial_end_time = False
-                if step > 0:  # Avoid reset at the very beginning
-                    # Check if current_sim_time_s is (almost) a multiple of TIME_TRIAL_S
-                    # Or if it's the last step of the simulation
-                    if abs(current_sim_time_s % self.config.TIME_TRIAL_S) < (
-                        self.config.RESOLUTION_S / 2.0
-                    ) or abs(
-                        current_sim_time_s
-                        - (self.config.TOTAL_SIM_DURATION_S - self.config.RESOLUTION_S)
-                    ) < (
-                        self.config.RESOLUTION_S / 2.0
-                    ):
-                        if not (
-                            abs(current_sim_time_s) < self.config.RESOLUTION_S / 2.0
-                            and step == 0
-                        ):  # ensure not t=0
-                            is_trial_end_time = True
-
-                if is_trial_end_time:
-                    final_error_rad = joint_pos_rad - self.config.target_joint_pos_rad
-                    self.errors_per_trial.append(final_error_rad)
-                    self.log.info(
-                        "Trial finished. Resetting plant.",
-                        trial_num=len(self.errors_per_trial),  # 1-based
-                        sim_time_s=current_sim_time_s,
-                        final_error_rad=final_error_rad,
-                    )
-                    self.plant.reset_plant()
-                    # Clear spike buffers for the next trial? Original code did not explicitly clear spikes_pos/neg lists.
-                    # MUSIC spikes are timestamped, so old spikes won't affect future rate calculations
-                    # as long as the buffer_start_time correctly moves forward.
-
-                # 8. Advance MUSIC time
-                music_runtime.tick()
+                # Update progress
+                current_sim_time_s += self.config.RESOLUTION_S
                 step += 1
-                # Update tqdm progress bar
                 pbar.update(1)
-                # pbar.set_postfix(sim_time_s=f"{current_sim_time_s:.2f}", refresh=True)
-                # PyBullet is stepped by plant.simulate_step.
-                # If direct p.stepSimulation() was used, it would be here.
 
         music_runtime.finalize()
         self.log.info("Simulation loop finished.")
@@ -387,23 +394,8 @@ class PlantSimulator:
         """Saves all data required for post-simulation analysis and plotting."""
         self.log.info("Finalizing and saving simulation data...")
 
-        sensory_spikes_p_all_joints: List[List[Tuple[float, int]]] = [
-            sn.spike for sn in self.sensory_neurons_p
-        ]
-        sensory_spikes_n_all_joints: List[List[Tuple[float, int]]] = [
-            sn.spike for sn in self.sensory_neurons_n
-        ]
-
         plot_data = PlantPlotData(
             joint_data=self.joint_data,
-            received_spikes={
-                "pos": self.received_spikes_pos,
-                "neg": self.received_spikes_neg,
-            },
-            sensory_spikes={
-                "p": sensory_spikes_p_all_joints,
-                "n": sensory_spikes_n_all_joints,
-            },
             errors_per_trial=self.errors_per_trial,
             init_hand_pos_ee=list(self.plant.init_hand_pos_ee),
             trgt_hand_pos_ee=list(self.plant.trgt_hand_pos_ee),

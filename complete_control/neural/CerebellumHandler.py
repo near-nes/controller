@@ -1,16 +1,15 @@
-from typing import Any, Dict, Optional
+from typing import Optional
 
-import nest
 import numpy as np
 import structlog
 from config.bsb_models import BSBConfigPaths
 from config.connection_params import ConnectionsParams
 from config.core_models import SimulationParams
 from config.population_params import PopulationsParams, RBFPopParams
-from mpi4py.MPI import Comm
+from neural.nest_adapter import nest
 
 from .Cerebellum import Cerebellum
-from .CerebellumHandlerPopulations import CerebellumHandlerPopulations  # Added import
+from .CerebellumHandlerPopulations import CerebellumHandlerPopulations
 from .ControllerPopulations import ControllerPopulations
 from .population_view import PopView
 
@@ -61,7 +60,7 @@ class CerebellumHandler:
         conn_params: ConnectionsParams,
         cerebellum_paths: BSBConfigPaths,  # Params for Cerebellum object (paths etc)
         path_data: str,
-        comm: Comm,
+        comm,  # MPI.Comm
         controller_pops: Optional[ControllerPopulations],
         label_prefix: str = "cereb_",
         dof_id: int = 0,

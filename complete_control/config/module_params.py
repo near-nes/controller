@@ -7,7 +7,7 @@ class PlannerModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
     kp: float = 1255.0503631208485
     kpl: float = 0.32504265346581107
-    base_rate: float = 0.0
+    base_rate: float = 10.0
 
 
 class MotorCortexModuleConfig(BaseModel):

@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import List
+from pathlib import Path
+from typing import ClassVar, List
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,12 +8,40 @@ import structlog
 from config.MasterParams import MasterParams
 from config.paths import RunPaths
 from config.plant_config import PlantConfig
-from utils_common.generate_analog_signals import generate_signals
-from pathlib import Path
-from .plant_models import PlantPlotData
 from draw_schema import draw_schema
+from pydantic import BaseModel
+from utils_common.generate_analog_signals import generate_signals
+
+from .plant_utils import JointData
 
 log = structlog.get_logger(__name__)
+
+
+class PlantPlotData(BaseModel):
+    """Holds all data needed for plotting."""
+
+    joint_data: List[JointData]
+    errors_per_trial: List[float]
+    init_hand_pos_ee: List[float]
+    trgt_hand_pos_ee: List[float]
+
+    model_config: ClassVar = {
+        "arbitrary_types_allowed": True,
+    }
+
+    def save(self, params_path: Path):
+        """Saves all collected simulation data to a single JSON file."""
+        log.info(f"Saving all simulation data to {params_path}")
+        with open(params_path, "w") as f:
+            f.write(self.model_dump_json(indent=2))
+        log.info("Finished saving all data.")
+
+    @classmethod
+    def load(cls, params_path: Path):
+        """Loads the main plant data model from a JSON file."""
+        log.info(f"Loading plant data from {params_path}")
+        with open(params_path, "r") as f:
+            return cls.model_validate_json(f.read())
 
 
 def plot_joint_space(

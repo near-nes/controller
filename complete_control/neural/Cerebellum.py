@@ -1,16 +1,9 @@
-import os
-from pathlib import Path
-
 import numpy as np
 import structlog
-
-# from bsb.core import from_storage
 from bsb import SimulationData, config, from_storage, get_simulation_adapter, options
-from bsb_nest import NestAdapter
-from bsb_nest.adapter import NestResult
+from bsb_nest.adapter import NestAdapter, NestResult
+from config.bsb_models import BSBConfigPaths
 from mpi4py import MPI
-
-from complete_control.config.bsb_models import BSBConfigPaths
 
 from .CerebellumPopulations import CerebellumPopulations
 from .population_view import PopView

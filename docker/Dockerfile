@@ -1,25 +1,25 @@
 ARG PYTHON_MAJOR=3
 ARG PYTHON_MINOR=10
 
-FROM python:${PYTHON_MAJOR}.${PYTHON_MINOR}-slim-bookworm AS base
+# FROM python:${PYTHON_MAJOR}.${PYTHON_MINOR}-slim-bookworm AS base
+FROM ubuntu:jammy AS base
 
 ARG PYTHON_MAJOR
 ARG PYTHON_MINOR
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
     ca-certificates \
     git \
     # nest-simulator dependencies, partly from https://nest-simulator.readthedocs.io/en/stable/installation/noenv_install.html#noenv
-    libtool \
-    cmake \
     gsl-bin \
-    libgsl-dev \
-    libltdl-dev \
-    libboost-dev \
-    libreadline-dev \
+    libgsl27 \
+    libltdl7 \
+    # libboost-dev \
+    libgomp1 \
+    libreadline8 \
     libhdf5-dev \
-    gcc \
+    python3-venv \
+    python-is-python3 \
     gosu \
     vim \
     gzip \
@@ -34,12 +34,48 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# nrp-core dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gnupg2 \
+    software-properties-common \
+    sudo \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+RUN add-apt-repository ppa:pistache+team/unstable
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libboost-filesystem1.74.0 \
+    libboost-python1.74.0 \
+    libboost-numpy1.74.0 \
+    libbrotli1 \
+    libcurl4 \
+    libgrpc++1 \
+    libpistache0 \
+    libprotobuf23 \
+    libzip-dev \
+    nlohmann-json3-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG UID=1000
+ARG GID=1000
+ENV USERNAME=simuser
+RUN groupadd --gid $GID $USERNAME && \
+    useradd --uid $UID --gid $GID --create-home --shell /bin/bash $USERNAME \
+    && echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+RUN mkdir /sim && chown $USERNAME:$USERNAME /sim
+
+USER $USERNAME
+ARG PYTHON_MAJOR
+ARG PYTHON_MINOR
+ENV USERNAME=simuser
+
+
 WORKDIR /sim
 ENV VIRTUAL_ENV=/sim/venv
-RUN python -m venv $VIRTUAL_ENV
+RUN python -m venv --system-site-packages $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN pip install --upgrade pip setuptools wheel
+RUN pip install --upgrade pip setuptools wheel packaging
 
 ENV INSTALL_DIR=/sim/install
 ENV DEPS_DIR=/sim/dependencies
@@ -50,6 +86,7 @@ ENV OMPI_INSTALL_DIR=$INSTALL_DIR/openmpi
 ENV CONTROLLER_DIR=/sim/controller
 ENV SHARED_DATA_DIR=/sim/shared_data
 ENV NEST_MODULE_PATH=/sim/install/nest/lib/nest
+ENV NEST_PYTHON_MODULE_PATH=${NEST_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages/nest
 RUN mkdir -p $CONTROLLER_DIR $SHARED_DATA_DIR $NEST_MODULE_PATH
 
 ENV CEREBELLUM_PATH=/sim/cerebellum
@@ -59,6 +96,36 @@ RUN mkdir -p $INSTALL_DIR $DEPS_DIR $NEST_INSTALL_DIR $MUSIC_INSTALL_DIR
 
 # openmpi, music and nest
 FROM base AS builder
+
+RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    libtool \
+    cmake \
+    libgsl-dev \
+    libltdl-dev \
+    libreadline-dev \
+    python3-dev \
+    && sudo apt-get clean \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# nrp-core dependencies
+RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+    doxygen \
+    libboost-filesystem-dev \
+    libboost-numpy-dev \
+    libboost-python-dev \
+    libbrotli-dev \
+    libclang-dev \
+    libcurl4-openssl-dev \
+    libgrpc++-dev \
+    llvm-dev \
+    llvm \
+    libprotobuf-dev \
+    protobuf-compiler-grpc \
+    libpistache-dev \
+    && sudo apt-get clean \
+    && sudo rm -rf /var/lib/apt/lists/*
 
 ENV PATH="${VIRTUAL_ENV}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${LD_LIBRARY_PATH}"
@@ -80,7 +147,6 @@ ENV CFLAGS=-O2
 # ^ for https://github.com/mpi4py/mpi4py/issues/652
 COPY ./docker/requirements_base.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip setuptools wheel && \
     pip install -r requirements_base.txt
 ENV CFLAGS=
 
@@ -121,14 +187,80 @@ RUN mkdir -p nest-build \
     && make -j$(nproc) \
     && make install
 
+## atch nest-server
+RUN sed -i 's/jsonify(response)/jsonify(nest.serialize_data(response))/' "${NEST_PYTHON_MODULE_PATH}"/server/hl_api_server.py
+COPY ./docker/hl_api_types.py "${NEST_PYTHON_MODULE_PATH}"/lib/hl_api_types.py
+
+
+# # nrp
+# FROM base AS builder-nrp
+
+ENV NRP_INSTALL_DIR=${INSTALL_DIR}/nrp
+ENV NRP_DEPS_INSTALL_DIR=${INSTALL_DIR}/nrp_deps
+
+# nrp-core tests dependencies
+RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+    cppcheck \
+    libgmock-dev \
+    xvfb
+# unclear nrp-core dependencies
+RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+    pkg-config
+
+# Install MQTT (to NRP_DEPS_INSTALL_DIR)
+RUN git clone https://github.com/eclipse/paho.mqtt.cpp \
+    && cd paho.mqtt.cpp \
+    && git checkout v1.4.0 \
+    && git submodule init \
+    && git submodule update \
+    && cmake -Bbuild -H. -DPAHO_BUILD_STATIC=OFF -DPAHO_BUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX="${NRP_DEPS_INSTALL_DIR}" -DCMAKE_PREFIX_PATH="${NRP_DEPS_INSTALL_DIR}" -DPAHO_WITH_MQTT_C=ON \
+    && cmake --build build/ --target install \
+    && sudo ldconfig && cd .. && rm -rf paho.mqtt.cpp
+
+COPY ./docker/requirements_nrp.txt .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements_nrp.txt
+
+ENV NRP_SRC_DIR=/tmp/nrp-core-src
+RUN mkdir -p /tmp/nrp-core-src
+ENV CMAKE_CACHE_FILE=${NRP_SRC_DIR}/.ci/cmake_cache/t3_4.cmake
+# TODO: copy source files more elegant, but without breaking the cache
+# Copying the root (.) immediatly breaks the cache
+COPY --chown=${USERNAME}:${USERNAME} nrp-core/src ${NRP_SRC_DIR}/src
+COPY --chown=${USERNAME}:${USERNAME} nrp-core/docs ${NRP_SRC_DIR}/docs
+COPY --chown=${USERNAME}:${USERNAME} nrp-core/examples ${NRP_SRC_DIR}/examples
+COPY --chown=${USERNAME}:${USERNAME} nrp-core/cmake ${NRP_SRC_DIR}/cmake
+COPY --chown=${USERNAME}:${USERNAME} nrp-core/CMakeLists.txt ${NRP_SRC_DIR}/CMakeLists.txt
+COPY --chown=${USERNAME}:${USERNAME} docker/nrp_t3_4.cmake ${CMAKE_CACHE_FILE}
+COPY --chown=${USERNAME}:${USERNAME} nrp-core/.ci/11-prepare-build.sh ${NRP_SRC_DIR}/.ci/11-prepare-build.sh
+COPY --chown=${USERNAME}:${USERNAME} nrp-core/.ci/20-build.sh ${NRP_SRC_DIR}/.ci/20-build.sh
+
+RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-build.sh
+
+
+# # cerebellum model
+RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
+    && cd $CEREBELLUM_PATH \
+    && git checkout 53656eea5c5dd671371ff3b4f1ac0be9cadf32e9\
+    && cd custom_stdp \
+    && cmake . \
+    && make \
+    && make install
+
+
 # final runtime image
 FROM base AS runtime
 
-ENV PATH="${VIRTUAL_ENV}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
+ENV NRP_INSTALL_DIR=${INSTALL_DIR}/nrp
+ENV NRP_DEPS_INSTALL_DIR=${INSTALL_DIR}/nrp_deps
+
+ENV PATH="${VIRTUAL_ENV}/bin:${NRP_INSTALL_DIR}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH=${NRP_INSTALL_DIR}/lib:${NRP_DEPS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}
 
 COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY --from=builder ${CEREBELLUM_PATH} ${CEREBELLUM_PATH}
 # openMPI needs this if no ssh/rsh available
 ENV OMPI_MCA_plm=^rsh
 
@@ -151,15 +283,6 @@ RUN git clone https://github.com/near-nes/bullet_muscle_sim.git $BULLET_MUSCLE_D
 
 
 
-RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
-    && cd $CEREBELLUM_PATH \
-    && git checkout 53656eea5c5dd671371ff3b4f1ac0be9cadf32e9\
-    && cd custom_stdp \
-    && cmake . \
-    && make \
-    && make install
-
-
 WORKDIR ${DEPS_DIR}
 COPY ./docker/requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -169,50 +292,51 @@ ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 
 RUN echo ${NEST_INSTALL_DIR}/lib/${PYTHON_MAJOR_MINOR}/site-packages >> ${VIRTUAL_ENV}/lib/${PYTHON_MAJOR_MINOR}/site-packages/nest.pth
 
-ARG USER_UID=1000
-ARG USER_GID=1000
-ENV USERNAME=simuser
-RUN groupadd --gid $USER_GID $USERNAME && \
-    useradd --uid $USER_UID --gid $USER_GID --create-home --shell /bin/bash $USERNAME
-
-COPY ./docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
 
 
-# >>>>>>>>>> VNC SETUP >>>>>>>>>>>>>>
-ARG VNC_PASSWORD="vncpass"
-ENV VNC_PASSWORD=${VNC_PASSWORD}
-ENV VNC_DISPLAY=":1"
-ENV DISPLAY="${VNC_DISPLAY}"
-COPY scripts/start-vnc.sh /usr/local/bin/start-vnc.sh
-RUN chmod +x /usr/local/bin/start-vnc.sh
-
-RUN mkdir -p /home/simuser/.vnc
-COPY scripts/xstartup /home/simuser/.vnc/xstartup
-RUN chmod 700 /home/$USERNAME/.vnc/xstartup
-
-# COPY scripts/interactive_start.py /usr/local/bin/run_interactive.py
-# RUN chmod +x /usr/local/bin/run_interactive.py
-
-COPY scripts/aliases.sh /tmp/aliases.sh
-RUN cat /tmp/aliases.sh >> /etc/bash.bashrc && rm /tmp/aliases.sh
-# Set display for terminals opened in VNC
-RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc
-
-ENV PYTHONPATH="${CONTROLLER_DIR}:${BULLET_MUSCLE_DIR}:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
+ENV PYTHONPATH="${NRP_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages:${CONTROLLER_DIR}:${BULLET_MUSCLE_DIR}:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
 WORKDIR /sim
-
-RUN echo "Setting ownership of shared folders to: >>>>>>>>>>>>>>>>>>> userid:$USER_UID groupid:$USER_GID >>>>>>>>>>>>>>>>>>>"
-RUN chown -R $USERNAME:$USERNAME $VIRTUAL_ENV /home/$USERNAME $SHARED_DATA_DIR $NEST_MODULE_PATH $BULLET_MUSCLE_DIR
-
 
 # Expose VNC port (Display :1 is 5901)
 EXPOSE 5901
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
+RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+    libgomp1
 
+USER 0
+COPY ./docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+# >>>>>>>>>> VNC SETUP >>>>>>>>>>>>>>
+ARG VNC_PASSWORD="vncpass"
+ENV VNC_PASSWORD=${VNC_PASSWORD}
+ENV VNC_DISPLAY=":1"
+ENV DISPLAY="${VNC_DISPLAY}"
+COPY scripts/services/start-vnc.sh /usr/local/bin/start-vnc.sh
+RUN chmod +x /usr/local/bin/start-vnc.sh
+
+RUN mkdir -p /home/simuser/.vnc
+COPY scripts/services/xstartup /home/simuser/.vnc/xstartup
+RUN chmod 700 /home/$USERNAME/.vnc/xstartup
+
+# ensure env is loaded for all shells
+# login shells
+COPY scripts/env/* /etc/profile.d/
+RUN chmod +x /etc/profile.d/*
+
+# non-login interactive bash shells
+RUN mkdir -p /etc/bashrc.d
+COPY scripts/env/* /etc/bashrc.d/
+RUN chmod +x /etc/bashrc.d/*
+# interactive bash shells
+RUN echo 'if [ -d /etc/bashrc.d ]; then for f in /etc/bashrc.d/*; do [ -f "$f" ] && . "$f"; done; fi' \
+    >> /etc/bash.bashrc
+# (everything else is unsupported)
+RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc
+
+# FROM nrp-runtime AS dev
 FROM runtime AS dev
 # In dev, the controller directory is mounted from the host and the user is the same as the host user.
 ENV SIMULATION_MODE=dev
@@ -220,5 +344,8 @@ ENV SIMULATION_MODE=dev
 FROM runtime AS hpc
 # In HPC, the controller directory is copied into the image and the user is the default simuser.
 ENV SIMULATION_MODE=hpc
+# On HPC do not mount anythin on top of artifacts folder, so that the archive is not overwritten
+ENV BSB_NETWORK_FILE=/tmp/cerebellum_plastic_base.hdf5
 COPY . /sim/controller
 RUN chown -R simuser:simuser /sim/controller
+RUN chmod -R a+rwX /sim

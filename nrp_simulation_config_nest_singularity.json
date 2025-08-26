@@ -1,0 +1,35 @@
+{
+    "SimulationName": "test_bullet",
+    "SimulationDescription": "Launch a py_sim engine to run a Bullet simulation and a python engine to control the simulation",
+    "SimulationTimeout": 1,
+    "EngineConfigs": 
+    [
+        {
+            "EngineType": "python_grpc",
+            "EngineName": "bullet_simulator",
+            "ServerAddress":"127.0.0.1:1234",
+            "PythonFileName": "complete_control/nrp_bullet_engine.py",
+            "ProtobufPackages": ["Wrappers", "NrpGenericProto"],
+            "EngineTimestep" : 0.0001
+        },
+        {
+            "EngineType": "python_grpc",
+            "EngineName": "nest_client",
+            "ServerAddress":"127.0.0.1:1235",
+            "PythonFileName": "complete_control/nrp_neural_engine.py",
+            "ProtobufPackages": ["Wrappers", "NrpGenericProto"],
+            "EngineTimestep" : 0.0001
+        }
+    ],
+    "DataPackProcessingFunctions":
+    [
+        {
+            "Name": "to_bullet",
+            "FileName": "complete_control/nrp_tf_from_nest_to_bullet.py"
+        },
+        {
+            "Name": "from_bullet",
+            "FileName": "complete_control/nrp_tf_from_bullet.py"
+        }
+    ]
+}

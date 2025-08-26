@@ -12,3 +12,5 @@ logs/
 *.md
 nearnes*.tar
 nearnes*.tar.gz
+
+*.md

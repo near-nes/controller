@@ -1,12 +1,12 @@
 from collections import defaultdict
-from typing import Any, Dict, Optional, Tuple
+from typing import Optional
 
-import nest
 import numpy as np
 import structlog
 from config.bsb_models import BSBConfigPaths
 from config.connection_params import ConnectionsParams
 from config.core_models import MusicParams, SimulationParams
+from config.MasterParams import MasterParams
 from config.module_params import (
     MotorCortexModuleConfig,
     PlannerModuleConfig,
@@ -14,10 +14,9 @@ from config.module_params import (
     StateModuleConfig,
 )
 from config.population_params import PopulationsParams
-from mpi4py.MPI import Comm
-from neural.neural_models import SynapseRecording
+from neural.nest_adapter import nest
+from plant.sensoryneuron import SensoryNeuron
 
-from .CerebellumHandler import CerebellumHandler
 from .ControllerPopulations import ControllerPopulations
 from .motorcortex import MotorCortex
 from .population_view import PopView
@@ -70,9 +69,10 @@ class Controller:
         pops_params: PopulationsParams,
         conn_params: ConnectionsParams,
         sim_params: SimulationParams,
+        master_params: MasterParams,
         path_data: str,
-        comm: Comm,
-        music_cfg: MusicParams,
+        comm,  # MPI.Comm
+        music_cfg: MusicParams = None,
         label_prefix: str = "",
         use_cerebellum: bool = False,
         cerebellum_paths: Optional[BSBConfigPaths] = None,
@@ -96,15 +96,14 @@ class Controller:
         self.motor_cmd_slice = motor_cmd_slice
 
         self.weights_history = defaultdict(lambda: defaultdict(list))
-        # Store parameters (consider dedicated dataclasses per module if very stable)
         self.mc_params = mc_params
         self.plan_params = plan_params
         self.spine_params = spine_params
         self.state_params = state_params
-        # self.state_se_params = state_se_params # Store if needed
         self.pops_params = pops_params
         self.conn_params = conn_params
         self.sim_params = sim_params
+        self.master_params = master_params
         self.music_cfg = music_cfg
         self.path_data = path_data
         self.use_cerebellum = use_cerebellum
@@ -130,7 +129,7 @@ class Controller:
         )
 
         self.pops = ControllerPopulations()
-        self.cerebellum_handler: Optional[CerebellumHandler] = None
+        self.cerebellum_handler = None
 
         if use_cerebellum:
             self.cerebellum_handler = self._instantiate_cerebellum_handler(self.pops)
@@ -149,11 +148,16 @@ class Controller:
         if use_cerebellum:
             self.cerebellum_handler.connect_to_main_controller_populations()
 
-        self.log.info("Creating music interface...")
-        # --- MUSIC Setup and Connection ---
-        self.create_and_setup_music_interface()
-        self.log.info(f"Connecting controller to MUSIC")
-        self.connect_controller_to_music()
+        self.log.info("Creating coordinator interface...")
+        self.enable_music = music_cfg is not None
+        if self.enable_music:
+            self.create_and_setup_music_interface()
+            self.log.info(f"Connecting controller to MUSIC")
+            self.connect_controller_to_music()
+        else:
+            self.create_and_connect_NRP_interface()
+            self.log.info(f"Connected controller to NRP proxies")
+
         self.log.info("Controller initialization complete.")
 
     def record_synaptic_weights(self, trial: int):
@@ -179,9 +183,9 @@ class Controller:
                     (source_neur, target_neur, synapse_id, synapse_model)
                 ].append(weight)
 
-    def _instantiate_cerebellum_handler(
-        self, controller_pops: ControllerPopulations
-    ) -> CerebellumHandler:
+    def _instantiate_cerebellum_handler(self, controller_pops: ControllerPopulations):
+        from .CerebellumHandler import CerebellumHandler
+
         """Instantiates the internal CerebellumHandler."""
         self.log.info("Instantiating internal CerebellumHandler")
         if self.cerebellum_paths is None:
@@ -265,9 +269,7 @@ class Controller:
         self._build_brainstem(to_file=True)
 
     # --- Helper for PopView Creation ---
-    def _create_pop_view(
-        self, nest_pop: nest.NodeCollection, base_label: str, to_file: bool
-    ) -> PopView:
+    def _create_pop_view(self, nest_pop, base_label: str, to_file: bool) -> PopView:
         """Creates a PopView instance with appropriate label."""
         full_label = f"{self.label}{base_label}" if to_file else ""
         return PopView(
@@ -704,6 +706,84 @@ class Controller:
             "one_to_one",
             {"weight": wgt, "delay": delay},
         )
+
+    def create_and_connect_NRP_interface(self):
+        buffer_len = 10  # ms, right now, only in plant config
+        conn_spec = {
+            "delay": self.spine_params.fbk_delay,
+            "weight": 1,
+        }
+        self.proxy_out = nest.Create("basic_neuron_nestml", 2)
+        nest.SetStatus(
+            self.proxy_out,
+            {
+                "kp": 0,
+                "buffer_size": buffer_len,
+                "base_rate": 0,
+                "simulation_steps": len(self.total_time_vect),
+                "pos": True,
+            },
+        )
+
+        nest.Connect(
+            self.pops.brainstem_p.pop, self.proxy_out[0], "all_to_all", conn_spec
+        )
+        nest.Connect(
+            self.pops.brainstem_n.pop, self.proxy_out[1], "all_to_all", conn_spec
+        )
+
+        # positive
+        self.proxy_in_p = SensoryNeuron(
+            self.N,
+            pos=True,
+            idStart=0,
+            bas_rate=self.master_params.modules.spine.sensNeur_base_rate,
+            kp=self.master_params.modules.spine.sensNeur_kp,
+            res=self.sim_params.resolution,
+        )
+        # negative
+        id_start_n = self.N
+        self.proxy_in_n = SensoryNeuron(
+            self.N,
+            pos=False,
+            idStart=id_start_n,
+            bas_rate=self.master_params.modules.spine.sensNeur_base_rate,
+            kp=self.master_params.modules.spine.sensNeur_kp,
+            res=self.sim_params.resolution,
+        )
+        self.proxy_in_gen = nest.Create("inhomogeneous_poisson_generator", 2)
+        self.proxy_in_gen_view = self._create_pop_view(
+            self.proxy_in_gen, "proxy_in_NRP", True
+        )
+
+        self.log.info(
+            "Sensory neurons created and connected",
+            neurons_per_pop=self.N,
+        )
+        conn_spec = {
+            "weight": self.spine_params.wgt_sensNeur_spine,
+            "delay": self.spine_params.fbk_delay,
+        }
+        nest.Connect(self.proxy_in_gen[0], self.pops.sn_p.pop, "all_to_all", conn_spec)
+        nest.Connect(self.proxy_in_gen[1], self.pops.sn_n.pop, "all_to_all", conn_spec)
+
+    def update_sensory_info_from_NRP(self, angle: float, sim_time: float):
+        pos = self.proxy_in_p.lam(angle)
+        neg = self.proxy_in_n.lam(angle)
+        nest.SetStatus(
+            self.proxy_in_gen,
+            [
+                {"rate_times": [sim_time], "rate_values": [pos]},
+                {"rate_times": [sim_time], "rate_values": [neg]},
+            ],
+        )
+
+    def extract_motor_command_NRP(self):
+        rate_pos, rate_neg = [
+            i / self.N for i in nest.GetStatus(self.proxy_out, "in_rate")[0:2]
+        ]
+
+        return rate_pos, rate_neg
 
     def get_all_recorded_views(self) -> list[PopView]:
         """

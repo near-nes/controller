@@ -1,0 +1,15 @@
+grpcio-tools>=1.49.1
+pytest
+psutil
+flask
+gunicorn
+flask_cors
+mpi4py
+docopt
+docker
+urllib3>=1.26,<2.0
+paho-mqtt==1.6.1
+opencv-python~=4.11
+numpy~=1.26
+python-on-whales
+pyyaml

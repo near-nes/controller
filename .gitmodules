@@ -1,0 +1,4 @@
+[submodule "nrp-core"]
+	path = nrp-core
+	url = https://bitbucket.org/hbpneurorobotics/nrp-core.git
+	branch = t3-4-ebrains2

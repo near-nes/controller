@@ -1,4 +1,5 @@
 #!/bin/bash
+. /etc/profile
 
 # this entrypoint script does NOT include defaults. it expects env vars to be set by the container, 
 # and should error out if they aren't
@@ -15,6 +16,8 @@ VENV_PATH="${VIRTUAL_ENV}"
 NEST_MODULE_PATH="${NEST_MODULE_PATH}"
 COMPRESSED_BSB_NETWORK_FILE="${COMPRESSED_BSB_NETWORK_FILE}"
 BSB_NETWORK_FILE="${BSB_NETWORK_FILE}"
+NEST_SERVER_BIN="${NEST_INSTALL_DIR}/bin/nest-server"
+NEST_SERVER_MPI_BIN="${NEST_INSTALL_DIR}/bin/nest-server-mpi"
 
 PYTHON_MAJOR_MINOR=$(python -c "import sys; print(f'python{sys.version_info.major}.{sys.version_info.minor}')")
 SITE_PACKAGES_PATH="$VENV_PATH/lib/${PYTHON_MAJOR_MINOR}/site-packages"
@@ -96,6 +99,18 @@ else
     echo "Uncompressed network file ${BSB_NETWORK_FILE} already exists. Skipping decompression."
 fi
 
+# --- Set Environment Variables for Final Command ---
+# Ensure these are set *before* gosu executes the final command
+# so they are inherited by the user's environment.
+
+echo "Final LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+echo "Final PATH: $PATH"
+echo "Final PYTHONPATH: $PYTHONPATH"
+
+# --- Execute the command directly if in HPC mode ---
+if [ "$SIMULATION_MODE" = "hpc" ]; then
+    exec "$@"
+fi
 
 
 # --- Prerequisite Scripts ---
@@ -111,14 +126,41 @@ echo "----------------------------------------"
 echo "Switching to user $USERNAME (UID: $USER_ID_TO_USE, GID: $GROUP_ID_TO_USE) and executing command: $@"
 echo "----------------------------------------"
 
-# --- Set Environment Variables for Final Command ---
-# Ensure these are set *before* gosu executes the final command
-# so they are inherited by the user's environment.
 
-echo "Final LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
-echo "Final PATH: $PATH"
-echo "Final PYTHONPATH: $PYTHONPATH"
+if [ "$NEST_MODE" = "nest-server" ]; then
+    export NEST_SERVER_HOST="${NEST_SERVER_HOST:-0.0.0.0}"
+    export NEST_SERVER_PORT="${NEST_SERVER_PORT:-9000}"
+    export NEST_SERVER_STDOUT="${NEST_SERVER_STDOUT:-1}"
 
+    export NEST_SERVER_ACCESS_TOKEN="${NEST_SERVER_ACCESS_TOKEN}"
+    export NEST_SERVER_CORS_ORIGINS="${NEST_SERVER_CORS_ORIGINS:-*}"
+    export NEST_SERVER_DISABLE_AUTH="${NEST_SERVER_DISABLE_AUTH:-1}"
+    export NEST_SERVER_DISABLE_RESTRICTION="${NEST_SERVER_DISABLE_RESTRICTION:-1}"
+    export NEST_SERVER_ENABLE_EXEC_CALL="${NEST_SERVER_ENABLE_EXEC_CALL:-1}"
+    export NEST_SERVER_MODULES="${NEST_SERVER_MODULES:-import nest; import numpy; import os; import json; import sys}"
+    echo "Running nest-server: $NEST_SERVER_BIN"
+    exec $NEST_SERVER_BIN start
+elif [[ "${MODE}" = 'nest-server-mpi' ]]; then
+    export NEST_SERVER_HOST="${NEST_SERVER_HOST:-0.0.0.0}"
+    export NEST_SERVER_PORT="${NEST_SERVER_PORT:-52425}"
+
+    export NEST_SERVER_ACCESS_TOKEN="${NEST_SERVER_ACCESS_TOKEN}"
+    export NEST_SERVER_CORS_ORIGINS="${NEST_SERVER_CORS_ORIGINS:-*}"
+    export NEST_SERVER_DISABLE_AUTH="${NEST_SERVER_DISABLE_AUTH:-1}"
+    export NEST_SERVER_DISABLE_RESTRICTION="${NEST_SERVER_DISABLE_RESTRICTION:-1}"
+    export NEST_SERVER_ENABLE_EXEC_CALL="${NEST_SERVER_ENABLE_EXEC_CALL:-1}"
+    export NEST_SERVER_MODULES="${NEST_SERVER_MODULES:-import nest; import numpy; import numpy as np}"
+    export NEST_SERVER_MPI_LOGGER_LEVEL="${NEST_SERVER_MPI_LOGGER_LEVEL:-INFO}"
+
+    export OMPI_ALLOW_RUN_AS_ROOT="${OMPI_ALLOW_RUN_AS_ROOT:-1}"
+    export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM="${OMPI_ALLOW_RUN_AS_ROOT_CONFIRM:-1}"
+    # exec mpirun -np "${NEST_SERVER_MPI_NUM:-1}" nest-server-mpi --host "${NEST_SERVER_HOST}" --port "${NEST_SERVER_PORT}"
+    echo "Running nest-server-mpi: $NEST_SERVER_MPI_BIN"
+    exec "${NEST_SERVER_MPI_BIN}" --host "${NEST_SERVER_HOST}" --port "${NEST_SERVER_PORT}"
+else
+    echo "Running passed command: $@"
+    exec gosu "$USERNAME" "$@"
+fi
 exec gosu "$USERNAME" "$@"
 # exec gosu "$USERNAME" bash -c 'run_as_user "$@"' bash "$@"
 # python controller/complete_control/brain.py

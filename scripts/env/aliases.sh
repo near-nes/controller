@@ -1,3 +1,5 @@
+#!/bin/sh
+
 alias ls='ls -h --color=auto'
 alias l='ls -alFh --color=auto --group-directories-first --time-style=+"%Y-%m-%d %H:%M:%S"'
 alias ..='cd ..'
