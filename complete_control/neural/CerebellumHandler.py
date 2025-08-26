@@ -600,6 +600,7 @@ class CerebellumHandler:
             "all_to_all",
             syn_spec=syn_spec_p,
         )
+
         # DCN minus inhibits Positive Prediction
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_n_view.pop,
@@ -612,14 +613,15 @@ class CerebellumHandler:
             self.cerebellum.populations.forw_dcnp_n_view.pop,
             self.controller_pops.pred_n.pop,
             "all_to_all",
-            syn_spec=syn_spec_p,
+            syn_spec=syn_spec_n,
         )
+
         # DCN plus inhibits Negative Prediction
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_p_view.pop,
             self.controller_pops.pred_n.pop,
             "all_to_all",
-            syn_spec_n,
+            syn_spec_p,
         )
 
         # --- Connections TO Cerebellum Controller Interfaces (FROM controller_pops) ---
