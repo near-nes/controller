@@ -232,13 +232,13 @@ class CerebellumHandler:
             "simulation_steps": len(self.total_time_vect),
             "sdev": params.sdev,
         }
+
         plan_to_inv = nest.Create("rb_neuron_nestml", self.N_mossy_inv)
-        signal_sensibility = np.linspace(
-            -params.freq_max, params.freq_max, self.N_mossy_inv
-        )
+        signal_sensibility = np.linspace(0, params.freq_max, self.N_mossy_inv)
         nest.SetStatus(plan_to_inv, pop_params)
         for i, neuron in enumerate(plan_to_inv):
             nest.SetStatus(neuron, {"desired": signal_sensibility[i]})
+
         self.interface_pops.plan_to_inv = self._create_pop_view(
             plan_to_inv, "plan_to_inv"
         )
@@ -599,6 +599,7 @@ class CerebellumHandler:
             "all_to_all",
             syn_spec=syn_spec_p,
         )
+
         # DCN minus inhibits Positive Prediction
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_n_view.pop,
@@ -611,14 +612,15 @@ class CerebellumHandler:
             self.cerebellum.populations.forw_dcnp_n_view.pop,
             self.controller_pops.pred_n.pop,
             "all_to_all",
-            syn_spec=syn_spec_p,
+            syn_spec=syn_spec_n,
         )
+
         # DCN plus inhibits Negative Prediction
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_p_view.pop,
             self.controller_pops.pred_n.pop,
             "all_to_all",
-            syn_spec_n,
+            syn_spec_p,
         )
 
         # --- Connections TO Cerebellum Controller Interfaces (FROM controller_pops) ---
