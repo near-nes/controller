@@ -5,19 +5,12 @@ import dataclasses
 import datetime
 import sys
 from pathlib import Path
-import numpy as np
-from complete_control.config import paths
 
-# Add the project root to the Python path
-# This is necessary to ensure that the script can find the `complete_control` package
-# when run as a standalone script.
-project_root = Path(__file__).resolve().parents[1]
-sys.path.append(str(project_root))
 import structlog
 
+from complete_control.config import paths
 from complete_control.config.paths import RUNS_DIR, RunPaths
 from complete_control.neural.plot_utils import plot_controller_outputs
-
 from complete_control.plant.plant_plotting import plot_plant_outputs
 
 log = structlog.get_logger()

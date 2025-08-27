@@ -2,10 +2,15 @@
 	path = nrp-core
 	url = https://bitbucket.org/hbpneurorobotics/nrp-core.git
 	branch = t3-4-ebrains2
-[submodule "motor_cortex"]
-	path = motor_cortex
+[submodule "submodules/bullet_muscle_sim"]
+	path = submodules/bullet_muscle_sim
+	url = git@github.com:near-nes/bullet_muscle_sim.git
+[submodule "submodules/embodiment_sdf_models"]
+	path = submodules/embodiment_sdf_models
+	url = git@github.com:near-nes/embodiment_sdf_models.git
+[submodule "submodules/pfc_planner"]
+	path = submodules/pfc_planner
+	url = git@github.com:near-nes/pfc-planner.git
+[submodule "submodules/motor_cortex_eprop"]
+	path = submodules/motor_cortex_eprop
 	url = git@github.com:near-nes/motor-cortex-eprop.git
-	branch = main
-[submodule "pfc-planner"]
-	path = pfc-planner
-	url = https://github.com/near-nes/pfc-planner

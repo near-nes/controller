@@ -296,10 +296,7 @@ ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 
 RUN echo ${NEST_INSTALL_DIR}/lib/${PYTHON_MAJOR_MINOR}/site-packages >> ${VIRTUAL_ENV}/lib/${PYTHON_MAJOR_MINOR}/site-packages/nest.pth
 
-ARG M1EPROP_PATH=${CONTROLLER_DIR}/motor_cortex/eprop-motor-control
-ARG PFCPLANNER_PATH=${CONTROLLER_DIR}/pfc-planner
-
-ENV PYTHONPATH="${NRP_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages:${CONTROLLER_DIR}:${BULLET_MUSCLE_DIR}:${CEREBELLUM_PATH}:${M1EPROP_PATH}:${PFCPLANNER_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
+ENV PYTHONPATH="${NRP_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages:${CONTROLLER_DIR}:${BULLET_MUSCLE_DIR}:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
 WORKDIR /sim
@@ -315,8 +312,6 @@ USER 0
 COPY ./docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 # >>>>>>>>>> VNC SETUP >>>>>>>>>>>>>>
-ARG VNC_PASSWORD="vncpass"
-ENV VNC_PASSWORD=${VNC_PASSWORD}
 ENV VNC_DISPLAY=":1"
 ENV DISPLAY="${VNC_DISPLAY}"
 COPY scripts/services/start-vnc.sh /usr/local/bin/start-vnc.sh
@@ -347,8 +342,17 @@ RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc
 FROM runtime AS dev
 # In dev, the controller directory is mounted from the host and the user is the same as the host user.
 ENV SIMULATION_MODE=dev
+ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
+ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
+RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
 FROM runtime AS hpc
+# >>>>>>>tmp, move to git-installable packages asap TODO
+ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
+ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
+RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
+# <<<<<<<
+
 # In HPC, the controller directory is copied into the image and the user is the default simuser.
 ENV SIMULATION_MODE=hpc
 # On HPC do not mount anythin on top of artifacts folder, so that the archive is not overwritten

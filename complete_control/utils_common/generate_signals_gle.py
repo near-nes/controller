@@ -15,7 +15,7 @@ def generate_trajectory_gle(
     os.environ["OMP_NUM_THREADS"] = os.getenv("NPROC", "1")
 
     import torch
-    from gle_planner import GLEPlanner
+    from pfc_planner.gle_planner import GLEPlanner
     from torchvision import transforms
 
     """

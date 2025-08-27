@@ -98,7 +98,10 @@ class MotorCortex:
 
     def create_net(self, params: MotorCortexModuleConfig, numNeurons):
         if params.use_m1_eprop:
-            from M1MotorCortexEprop import M1MotorCortexEprop
+            # TODO let's make this a bit less convoluted
+            from motor_cortex_eprop.eprop_motor_control.M1MotorCortexEprop import (
+                M1MotorCortexEprop,
+            )
 
             self.m1 = M1MotorCortexEprop(
                 paths.M1_CONFIG, paths.M1_WEIGHTS, self.sim.sim_steps, nest
