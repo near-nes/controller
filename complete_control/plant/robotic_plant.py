@@ -9,6 +9,7 @@ from config.plant_config import PlantConfig
 import math
 import numpy as np
 
+
 class RoboticPlant:
     """
     Abstracts all PyBullet interactions for the 1-DOF robotic arm.
@@ -148,51 +149,73 @@ class RoboticPlant:
         self.bullet_robot.SetJointTorques(
             joint_ids=[self.elbow_joint_id], torques=torques
         )
-    
-    def shoulder_and_object(
-        self, q_d: float, qp_d: float, kp: float, kd: float
-    ) -> None:
+
+    def create_object(self):
+        body_id = self.bullet_robot._body_id
+        ball_shape = self.p.createVisualShape(
+            shapeType=self.p.GEOM_SPHERE, radius=0.02, rgbaColor=[1, 0, 0, 1]
+        )
+        ball_collision = self.p.createCollisionShape(
+            shapeType=self.p.GEOM_SPHERE, radius=0.02
+        )
+        ball = self.p.createMultiBody(
+            baseMass=1,
+            baseInertialFramePosition=[0, 0, 0],
+            baseCollisionShapeIndex=ball_collision,
+            baseVisualShapeIndex=ball_shape,
+            basePosition=[0.36, -0.22, 1.7],
+        )
+        self.p.changeDynamics(ball, -1, mass=0.00000001)
+        ball_const = self.p.createConstraint(
+            body_id,
+            -1,
+            ball,
+            -1,
+            self.p.JOINT_FIXED,
+            [0, 0, 0],
+            [0.36, -0.22, 1.65],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+        )
+        return ball, ball_const
+
+    def check_target_proximity(self) -> bool:
+        return True
         body_id = self.bullet_robot._body_id
         elbow_state = self.p.getJointState(body_id, 1)[0]
-        if math.isclose(elbow_state, np.deg2rad(90), abs_tol=1e-4):
-            ball_shape = self.p.createVisualShape(
-                shapeType=self.p.GEOM_SPHERE, radius=0.02, rgbaColor=[1, 0, 0, 1]
-            )
-            ball_collision = self.p.createCollisionShape(
-                shapeType=self.p.GEOM_SPHERE, radius=0.02
-            )
-            ball = self.p.createMultiBody(
-                baseMass=1,
-                baseInertialFramePosition=[0, 0, 0],
-                baseCollisionShapeIndex=ball_collision,
-                baseVisualShapeIndex=ball_shape,
-                basePosition=[0.36, -0.35, 1.2],
-            )
-            ball_const = self.p.createConstraint(
-                body_id,
-                4,
-                ball,
-                -1,
-                self.p.JOINT_FIXED,
-                [0, 0, 0],
-                self.p.getJointState(body_id, 4)[:2],
-                [0, 0, 0],
-                [0, 0, 0],
-                [0, 0, 0],
-            )
+        if math.isclose(elbow_state, np.deg2rad(90), abs_tol=1e-3):
+            return True
+        else:
+            return False
 
-            qa, qpa = self.p.getJointState(body_id, 0)[:2]
-            e_p = q_d - qa
-            e_v = qp_d - qpa
-            f0 = kp * e_p + kd * e_v
+    def move_shoulder(self, speed: float, ball: int, ball_const: int) -> None:
+        body_id = self.bullet_robot._body_id
+        self.p.removeConstraint(ball_const)
+        ball_const = self.p.createConstraint(
+            body_id,
+            4,
+            ball,
+            -1,
+            self.p.JOINT_FIXED,
+            [0, 0, 0],
+            self.p.getJointState(body_id, 4)[:2],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+        )
 
-            move = self.p.setJointMotorControl2(
-                body_id, 0, controlMode=self.p.TORQUE_CONTROL, force=f0
-            )
+        move = self.p.setJointMotorControl2(
+            body_id,
+            0,
+            controlMode=self.p.VELOCITY_CONTROL,
+            targetVelocity=speed,
+            force=1,
+        )
 
-            if math.isclose(qa, q_d, abs_tol=1e-3):
-                self.p.removeConstraint(ball_const)
-    
+        # if math.isclose(qa, q_d, abs_tol=1e-3):
+        #    self.p.removeConstraint(ball_const)
+
     def simulate_step(self, duration: float) -> None:
         """
         Steps the PyBullet simulation by the given duration.

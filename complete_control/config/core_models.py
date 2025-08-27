@@ -31,14 +31,14 @@ class RobotSpecParams(BaseModel, frozen=True):
 
 class ExperimentParams(BaseModel, frozen=True):
     init_joint_angle: float = 0
-    tgt_joint_angle: float = 90 #150
+    tgt_joint_angle: float = 90  # 150
     robot_spec: RobotSpecParams = Field(default_factory=lambda: RobotSpecParams())
     # frcFld_angle: float  # unused for now
     # frcFld_k: float  # unused for now
     # ff_application: float  # unused for now
     # cerebellum_application_forw: float # unused for now
     # cerebellum_application_inv: float # unused for now
-    enable_gravity: bool = True
+    enable_gravity: bool = False  # True
     z_gravity_magnitude: float = 9.81  # m/s^2
     gravity_trial_start: int = 0  # gravity turns ON at start of this trial
     gravity_trial_end: int = 1  # gravity turns OFF at end of this trial
@@ -57,8 +57,8 @@ class ExperimentParams(BaseModel, frozen=True):
 class SimulationParams(BaseModel, frozen=True):
     resolution: float = 0.1  # ms
     time_prep: float = 150.0  # ms
-    time_move: float = 300.0  # ms
-    time_post: float = 50.0  # ms
+    time_move: float = 500.0  # ms
+    time_post: float = 350.0  # ms
     n_trials: int = 1
 
     seed: int = 12345

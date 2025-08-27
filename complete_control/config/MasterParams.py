@@ -26,7 +26,7 @@ class MasterParams(BaseModel):
 
     PLOT_AFTER_SIMULATE: bool = False
     USE_CEREBELLUM: bool = False
-    GUI_PYBULLET: bool = False
+    GUI_PYBULLET: bool = True
 
     NJT: int = 1
     simulation: SimulationParams = Field(default_factory=lambda: SimulationParams())

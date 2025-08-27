@@ -64,6 +64,7 @@ class PlantSimulator:
         self.errors_per_trial: List[float] = []  # Store final error of each trial
 
         self.log.info("PlantSimulator initialization complete.")
+        self.ball, self.ball_const = self.plant.create_object()
 
     def _setup_music_communication(self) -> None:
         """Sets up MUSIC input and output ports and handlers."""
@@ -220,6 +221,18 @@ class PlantSimulator:
             current_joint_pos_rad, self.config.RESOLUTION_S, current_sim_time_s
         )
 
+    def _should_attach_target_and_move(self, current_sim_time_s: float) -> bool:
+        self.shoulder_moving = (
+            current_sim_time_s == self.config.TIME_PREP_S + self.config.TIME_MOVE_S
+        )
+        if not self.shoulder_moving:
+            return False
+        elif self.plant.check_target_proximity():
+            print(f"time_post starts now! {current_sim_time_s}")
+            return True
+        else:
+            return False
+
     def run_simulation(self) -> None:
         """Runs the main simulation loop. **NJT==1**"""
         self.log.info(
@@ -231,13 +244,9 @@ class PlantSimulator:
         music_runtime = music.Runtime(self.music_setup, self.config.RESOLUTION_S)
         current_sim_time_s = 0.0
         step = 0
+        move_left = True
 
         exp_params = self.config.master_config.experiment
-        obj_empty = True
-        q_d = np.deg2rad(50)
-        qp_d = 0
-        kp = 28
-        kd = 4
 
         with tqdm(total=self.num_total_steps, unit="step", desc="Simulating") as pbar:
             # Simulation loop
@@ -314,9 +323,14 @@ class PlantSimulator:
                 self._set_joint_torque(computed_torque_from_input, current_sim_time_s)
 
                 # Create object and actuate shoulder if a certain condition is reached
-                if obj_empty:
-                    self.plant.shoulder_and_object(q_d, qp_d, kp, kd)
-                    obj_empty = False
+                if self._should_attach_target_and_move(current_sim_time_s):
+                    if self.plant.check_target_proximity():
+                        if move_left:
+                            speed = -0.03
+                        else:
+                            speed = 0.03
+
+                        self.plant.move_shoulder(speed, self.ball, self.ball_const)
 
                 # 5. Step PyBullet simulation
                 self.plant.simulate_step(self.config.RESOLUTION_S)
