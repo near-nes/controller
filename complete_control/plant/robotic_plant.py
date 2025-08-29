@@ -1,9 +1,11 @@
+import math
+import time
 from typing import List, Tuple
 
 import numpy as np
 import structlog
-from arm_1dof.bullet_arm_1dof import BulletArm1Dof
-from arm_1dof.robot_arm_1dof import RobotArm1Dof
+from bullet_muscle_sim.arm_1dof.bullet_arm_1dof import BulletArm1Dof
+from bullet_muscle_sim.arm_1dof.robot_arm_1dof import RobotArm1Dof
 from config.plant_config import PlantConfig
 
 
@@ -30,7 +32,7 @@ class RoboticPlant:
         self.p = pybullet_instance
 
         # Initialize BulletArm1Dof helper
-        self.bullet_world = BulletArm1Dof()
+        self.bullet_world = BulletArm1Dof(self.p)
 
         if self.config.CONNECT_GUI:
             self.bullet_world.InitPybullet(bullet_connect=self.p.GUI)
@@ -46,7 +48,7 @@ class RoboticPlant:
             config.target_joint_pos_rad
             + config.master_config.simulation.oracle.tgt_visual_offset_rad
         )
-        self.bullet_world.LoadTarget(
+        self.ball = self.bullet_world.LoadTarget(
             target_position, config.master_config.simulation.oracle.target_color.value
         )
         self.log.info("PyBullet initialized and robot loaded", robot_id=self.robot_id)
@@ -257,3 +259,43 @@ class RoboticPlant:
             controlMode=self.p.VELOCITY_CONTROL,
             force=0,
         )
+
+    def check_target_proximity(self) -> bool:
+        body_id = self.bullet_robot._body_id
+        elbow_state = self.p.getJointState(body_id, 1)[0]
+        if math.isclose(
+            elbow_state, self.target_joint_position_rad, abs_tol=np.deg2rad(10)
+        ):
+            return True
+        else:
+            return False
+
+    def move_shoulder(self, speed: float) -> None:
+        hand_state = self.p.getLinkState(
+            self.bullet_robot._body_id, self.bullet_robot.HAND_LINK_ID
+        )
+        hand_pos, hand_orn = hand_state[0], hand_state[1]
+        inv_hand_pos, inv_hand_orn = self.p.invertTransform(hand_pos, hand_orn)
+
+        ball_pos, ball_orn = self.p.getBasePositionAndOrientation(self.ball)
+        self.ball_hand_rel_pos, self.ball_hand_rel_orn = self.p.multiplyTransforms(
+            inv_hand_pos, inv_hand_orn, ball_pos, ball_orn
+        )
+
+        move = self.p.setJointMotorControl2(
+            self.bullet_robot._body_id,
+            self.bullet_robot.SHOULDER_A_JOINT_ID,
+            controlMode=self.p.VELOCITY_CONTROL,
+            targetVelocity=speed,
+            force=1000,
+        )
+
+    def update_ball_position(self):
+        hand_state = self.p.getLinkState(
+            self.bullet_robot._body_id, self.bullet_robot.HAND_LINK_ID
+        )
+        hand_pos, hand_orn = hand_state[0], hand_state[1]
+        ball_pos, ball_orn = self.p.multiplyTransforms(
+            hand_pos, hand_orn, self.ball_hand_rel_pos, self.ball_hand_rel_orn
+        )
+        self.p.resetBasePositionAndOrientation(self.ball, ball_pos, ball_orn)

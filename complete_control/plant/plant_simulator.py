@@ -1,4 +1,5 @@
 import time
+from enum import Enum
 from typing import Any, List, Tuple
 
 import numpy as np
@@ -6,10 +7,16 @@ import structlog
 from config.plant_config import PlantConfig
 from utils_common.log import tqdm
 
+from complete_control.config.core_models import TargetColor
+
 from . import plant_utils
 from .plant_models import PlantPlotData
 from .robotic_plant import RoboticPlant
 from .sensoryneuron import SensoryNeuron
+
+
+class TrialSection(Enum):
+    TIME_PREP, TIME_MOVE, TIME_POST = range(3)
 
 
 class PlantSimulator:
@@ -68,6 +75,16 @@ class PlantSimulator:
         ]
         self.errors_per_trial: List[float] = []  # Store final error of each trial
         self.plant._capture_state_and_save(self.config.run_paths.input_image)
+        self.checked_proximity = False
+
+        # TODO this has to be saved from planner, and currently it's not. mock it!
+        if (
+            self.config.master_config.simulation.oracle.target_color
+            == TargetColor.BLUE_LEFT
+        ):
+            self.direction = 0.1
+        else:
+            self.direction = -0.1
 
         self.log.info("PlantSimulator initialization complete.")
 
@@ -247,6 +264,32 @@ class PlantSimulator:
 
         return rate_pos_hz, rate_neg_hz
 
+    def _move_shoulder_if_target_close(self, direction):
+        if not self.checked_proximity:
+            self.log.debug(
+                "In TIME_POST. Verifying whether EE is in range for attachment..."
+            )
+            self.checked_proximity = True
+            if self.plant.check_target_proximity():
+                self.log.debug("EE is in range. Attaching and moving shoulder...")
+                self.target_attached = True
+                self.plant.move_shoulder(direction)
+            else:
+                self.target_attached = True
+                self.log.debug(
+                    "EE is not in range. not attaching and not moving shoulder."
+                )
+        if self.target_attached:
+            self.plant.update_ball_position()
+
+    def get_current_section(self, curr_time_s: float):
+        if curr_time_s <= self.config.TIME_PREP_S:
+            return TrialSection.TIME_PREP
+        elif curr_time_s <= self.config.TIME_MOVE_S + self.config.TIME_PREP_S:
+            return TrialSection.TIME_MOVE
+        else:
+            return TrialSection.TIME_POST
+
     def run_simulation_step(
         self,
         rate_pos_hz: float,
@@ -263,6 +306,7 @@ class PlantSimulator:
         """
         joint_pos_rad, joint_vel_rad_s = self.plant.get_joint_state()
         ee_pos_m, ee_vel_m_list = self.plant.get_ee_pose_and_velocity()
+        curr_section = self.get_current_section(current_sim_time_s)
 
         if step >= self.num_total_steps:
             self.log.warning(
@@ -286,6 +330,10 @@ class PlantSimulator:
         self._check_gravity(current_sim_time_s)
         # Apply motor command to plant
         self._set_joint_torque(input_torque, current_sim_time_s)
+
+        if curr_section == TrialSection.TIME_POST:
+            self._move_shoulder_if_target_close(self.direction)
+
         # Step PyBullet simulation
         self.plant.simulate_step(self.config.RESOLUTION_S)
         # Record data for this step (For NJT=1)
