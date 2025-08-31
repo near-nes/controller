@@ -41,16 +41,17 @@ class RoboticPlant:
 
         self.bullet_robot = self.bullet_world.LoadRobot()
         self.robot_id = self.bullet_robot._body_id
+        self.shoulder_joint_id = self.bullet_robot.SHOULDER_A_JOINT_ID
         self.is_locked = False
+        self.ball = None
         self.bullet_world.LoadPlane()
 
-        target_position = self._set_EE_pos(
+        self.target_position = self._set_EE_pos(
             config.target_joint_pos_rad
             + config.master_config.simulation.oracle.tgt_visual_offset_rad
         )
-        self.ball = self.bullet_world.LoadTarget(
-            target_position, config.master_config.simulation.oracle.target_color.value
-        )
+        self.reset_target()
+        self.shoulder_joint_start_position_rad = 0
         self.log.info("PyBullet initialized and robot loaded", robot_id=self.robot_id)
 
         # Specific joint ID for the 1-DOF arm
@@ -210,10 +211,24 @@ class RoboticPlant:
             targetValue=self.initial_joint_position_rad,
             targetVelocity=0.0,
         )
+        self.p.resetJointState(
+            bodyUniqueId=self.robot_id,
+            jointIndex=self.shoulder_joint_id,
+            targetValue=self.shoulder_joint_start_position_rad,
+            targetVelocity=0.0,
+        )
         self.update_stats()
         self.log.debug(
             "Plant reset to initial position and zero velocity.",
             target_pos_rad=self.initial_joint_position_rad,
+        )
+
+    def reset_target(self) -> None:
+        if self.ball:
+            self.p.removeBody(self.ball)
+        self.ball = self.bullet_world.LoadTarget(
+            self.target_position,
+            self.config.master_config.simulation.oracle.target_color.value,
         )
 
     def lock_joint(self) -> None:

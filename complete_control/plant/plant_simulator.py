@@ -275,7 +275,7 @@ class PlantSimulator:
                 self.target_attached = True
                 self.plant.move_shoulder(direction)
             else:
-                self.target_attached = True
+                self.target_attached = False
                 self.log.debug(
                     "EE is not in range. not attaching and not moving shoulder."
                 )
@@ -361,6 +361,7 @@ class PlantSimulator:
                 final_error_rad=final_error_rad,
             )
             self.plant.reset_plant()
+            self.plant.reset_target()
 
         return joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list
 
