@@ -2,22 +2,40 @@
 
 This project involves multiple codebases interacting. In an attempt to make the results more reproducible, and to enable HPC simulations, we're creating a containerized setup. You can find more information in [INSTALL.md](INSTALL.md).
 
-This branch of the repository features all code needed to run simulations of reaching tasks on a virtual robotic arm driven by a closed-loop cerebellar controller.
+This branch of the repository features the core code needed to run simulations of reaching tasks on a virtual robotic arm driven by a closed-loop cerebellar controller. Various sub-modules are implemented in different repos: you'll need to clone all gitmodules (`git submodule update --init --recursive`) to run all possible configurations.
 
-The file `complete_control/complete.music` defines the two Python scripts containing the two simulations to be synchronized by MUSIC. The NEST simulation is run by `complete_control/main_simulation.py` and the PyBullet simulation by `complete_control/receiver_plant.py`. The file `./complete_control/complete.music` can be modified to allocate the desired number of slots (i.e. MPI procs) to both the controller script and the plant one. The simulation can be started by running:
-`mpirun -np <tot_number_procs> music complete.music` from `./complete_control`. The value of the -np parameter should be adjusted according to the number of processes allocated in the `complete.music` file.
+As the project involves multiple simulators, the interaction between them is governed by a *coordinator*. We provide two possible coordinators: **MUSIC** and **NRP**. Because of the very different natures of the two, it may be useful to understand basic data and control flow in each, so we outline it here.
 
-The folder `config` contains several pydantic models used for parameters. A specific configuration can be exported to and from JSON.
+## MUSIC
 
-We develop this using a devcontainer, made to the specifications of `devcontainer.json`, `docker-compose` and `docker/Dockerfile`. The HPC version is also generated from the container.
+MUSIC is an API that allows data exchange between simulators, implemented with MPI primitives. As it only focuses on data exchange (and between-process coordination), the main simulation loop is explicit and out of MUSIC control. Every MUSIC run is an MPI run (in fact, you run music directly with `mpirun`). NEST provides strong integration with MUSIC, so there are few explicit MUSIC calls in our neural-side implementation, which instead uses "MUSIC proxies", neuron models with MUSIC calls inside them. The robotic side, instead, needs explicit MUSIC calls.
+
+The main MUSIC configuration file is `complete_control/complete.music`. It defines the two Python scripts containing the two simulations to be synchronized by MUSIC. The NEST simulation is run by `complete_control/main_simulation.py` and the PyBullet simulation by `complete_control/receiver_plant.py`. The file `./complete_control/complete.music` can be modified to allocate the desired number of slots (i.e. MPI procs) to both the controller script and the plant one. The simulation can be started by running: `mpirun -np <tot_number_procs> music /sim/controller/complete_control/complete.music` from `./complete_control`. The value of the -np parameter must correspond to the configuration file
+
+## NRP
+
+NRP is a fully-fledged simulation coordinator, which expects simulation specifications (called "engines") to implement specific interfaces. Its configuration is `nrp_simulation_config_nest_docker_compose.json`, where you can find files for the two simulations: `nrp_neural_engine.py` and `nrp_bullet_engine.py`. As the loop component is inside the NRP, these files offer only single step functions. 
+
+## Simulations
+
+The folder `config` contains several pydantic models used for parameters. The main object is `MasterParams.py`; beyond this, you may need to edit `core_models.py` to change trajectories and simulation specifications, and `module_params.py` to specify which submodule to use for planner and M1 sections. A specific configuration can be exported to and from JSON.
+
+## Development
+We develop this using a (docker) devcontainer, made to the specifications of `devcontainer.json`, `docker-compose` and `docker/Dockerfile`. The HPC container (singularity) is also created from the docker container.
+
+## Build and run the container
+`echo -e "UID=$(id -u)\nGID=$(id -g)" > .env && docker compose build`
+You only need to create the `.env` once. This file is used to synchronize directories internally for live code editing. 
+Then, you can either open a devcontainer using it or `docker compose run development`. For more info, see `INSTALL.md`
 
 ## HPC
 Quick notes before a more complete documentation:
-- build the container using `/scripts/build_and_export.sh`
-- move the zipped image to HPC
-- decompress it
-- create necessary folders for mounts (consider that the singularity container is fully read-only) `mkdir scratch results artifacts tmp`
-- create the singularity container: `singularity build sim.sif docker-archive://sim.tar`
+- build the container using `/scripts/build_and_export.sh`, optionally specifying a remote to copy the built container to.
+- if you don't specify the remote, manually:
+    - move the zipped image to HPC
+    - decompress it
+    - create the singularity container: `singularity build sim.sif docker-archive://sim.tar`
+- create necessary folders **in HPC** for mounts (consider that the singularity container is fully read-only) `mkdir scratch results tmp`, then keep reading depending on what coordinator you're using.
 
 ### MUSIC and MPI
 - load openmpi module
@@ -32,14 +50,3 @@ Quick notes before a more complete documentation:
 
 Optionally, mount (`--bind`) `complete_control` for "live" code changes. If paired with vscode remote, you can almost have a fully interactive development session on the cluster... Not sure if there's a way to do client vscode -> cineca HPC -> devcontainer, might check [this](https://github.com/microsoft/vscode-remote-release/issues/3066#issuecomment-1019500216)
 
-
-## Build NRP image
-
-checkout recursively git submodules
-
-```
-docker compose build
-
-docker compose -f nrp_docker-compose-nest-pybullet.yaml up
-
-```
