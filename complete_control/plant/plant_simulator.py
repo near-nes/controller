@@ -195,18 +195,28 @@ class PlantSimulator:
         time_in_trial = current_sim_time_s % self.config.TIME_TRIAL_S
         return (self.config.TIME_PREP_S + self.config.TIME_MOVE_S) < time_in_trial
 
-    def _should_lock_joint(self, current_sim_time_s: float) -> bool:
+    def _should_lock_joint_post(self, current_sim_time_s: float) -> bool:
         time_in_trial = current_sim_time_s % self.config.TIME_TRIAL_S
         # joint is locked in two situations:
         # 1. during TIME_POST: we keep the joint locked at his arrival place
         # 2. during TIME_PREP: state needs time to adapt to sensory
         return (
             self.config.TIME_PREP_S + self.config.TIME_MOVE_S
-        ) < time_in_trial or time_in_trial < self.config.TIME_PREP_S
+        ) < time_in_trial and time_in_trial > self.config.TIME_PREP_S
+
+    def _should_lock_joint_pre(self, current_sim_time_s: float) -> bool:
+        time_in_trial = current_sim_time_s % self.config.TIME_TRIAL_S
+        # joint is locked in two situations:
+        # 1. during TIME_POST: we keep the joint locked at his arrival place
+        # 2. during TIME_PREP: state needs time to adapt to sensory
+        return time_in_trial < self.config.TIME_PREP_S
 
     def _set_joint_torque(self, joint_torque: float, current_sim_time_s: float) -> bool:
-        if self._should_lock_joint(current_sim_time_s):
-            self.plant.lock_joint()
+        if self._should_lock_joint_pre(current_sim_time_s):
+            self.plant.lock_joint_pre()
+            return
+        if self._should_lock_joint_post(current_sim_time_s):
+            self.plant.lock_joint_post()
             return
         self.plant.set_joint_torques([joint_torque])
 

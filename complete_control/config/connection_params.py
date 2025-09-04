@@ -17,7 +17,7 @@ class ConnectionsParams(BaseModel):
 
     dcn_forw_prediction: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.3,
+            weight=0.0055,
             delay=0.1,
         )
     )
@@ -47,7 +47,7 @@ class ConnectionsParams(BaseModel):
     )
     state_mc_fbk: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=-0.95,
+            weight=-1.2,
             delay=0.1,
         )
     )
@@ -71,7 +71,7 @@ class ConnectionsParams(BaseModel):
     )
     error_io_f: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=3.0,
+            weight=0.04,
             delay=0.1,
             receptor_type=1,
         )
@@ -82,9 +82,21 @@ class ConnectionsParams(BaseModel):
             delay=0.1,
         )
     )
+    state_state_to_inv: SingleSynapseParams = Field(
+        default_factory=lambda: SingleSynapseParams(
+            weight=0.020,
+            delay=0.1,
+        )
+    )
     planner_error_inv: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=0.001,
+            delay=0.1,
+        )
+    )
+    state_to_inv_error_inv: SingleSynapseParams = Field(
+        default_factory=lambda: SingleSynapseParams(
+            weight=-0.001,
             delay=0.1,
         )
     )
@@ -144,7 +156,7 @@ class ConnectionsParams(BaseModel):
     )
     error_inv_io_i: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=3.0,
+            weight=0.9,
             delay=0.1,
             receptor_type=1,
         )

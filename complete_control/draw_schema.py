@@ -302,7 +302,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "fbk_smooth_0.png",
+            neural_figs_path / "mc_fbk_0.png",
         ),
         # --- Brain Stem ---
         "Smoothing": (
@@ -489,12 +489,12 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
                 components["Mf_inv"][1] + components["Mf_inv"][3] / 2,
             ),
         ],
-        "plan_inv_to_error_inv": [
+        "plan_to_error_inv": [
             (
-                components["plan to inv"][0] + components["plan to inv"][2],
-                components["plan to inv"][1] + 0.5,
+                components["Planner"][0] + components["Planner"][2],
+                components["Planner"][1] + 0.5,
             ),
-            (components["error inv"][0] + 2, components["plan to inv"][1] + 0.5),
+            (components["error inv"][0] + 2, components["Planner"][1] + 0.5),
             (
                 components["error inv"][0] + 2,
                 components["error inv"][1] + components["error inv"][3],
@@ -703,7 +703,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
 
     draw_path(paths["planner_to_plan_inv"], "dimgray")
     draw_path(paths["plan_inv_to_mf"], "dimgray")
-    draw_path(paths["plan_inv_to_error_inv"], "dimgray")
+    draw_path(paths["plan_to_error_inv"], "dimgray")
     draw_path(paths["planner_to_fbk"], "dimgray")
     draw_path(paths["error_inv_to_io"], "orchid")
     draw_path(paths["state_to_state_inv"], "dimgray")

@@ -530,9 +530,7 @@ class CerebellumHandler:
             syn_spec=syn_spec_n,
         )
 
-        # Connect StateEst -> Inv Error (Inhibitory?)
-        # TODO why is this called "plan" when it is the state? Using same spec for now.
-        state_err_inv_spec = self.conn_params.plan_to_inv_error_inv
+        state_err_inv_spec = self.conn_params.state_to_inv_error_inv
         syn_spec_p = state_err_inv_spec.model_dump(exclude_none=True)
         syn_spec_n = state_err_inv_spec.model_copy(
             update={"weight": -state_err_inv_spec.weight}
@@ -720,10 +718,8 @@ class CerebellumHandler:
             syn_spec=syn_spec_n,
         )
 
-        # StateEst -> Cereb State To Inv Input
-        # TODO: Check if "planner_plan_to_inv" is the correct conn_spec or if a dedicated one like "state_state_to_inv" is needed.
         state_sti_spec = (
-            self.conn_params.planner_plan_to_inv
+            self.conn_params.state_state_to_inv
         )  # Using planner_plan_to_inv as per existing code
         syn_spec_p = state_sti_spec.model_dump(exclude_none=True)
         syn_spec_n = state_sti_spec.model_copy(

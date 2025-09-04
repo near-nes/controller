@@ -39,7 +39,8 @@ class RoboticPlant:
 
         self.bullet_robot = self.bullet_world.LoadRobot()
         self.robot_id = self.bullet_robot._body_id
-        self.is_locked = False
+        self.is_locked_post = False
+        self.is_locked_pre = False
         self.log.info("PyBullet initialized and robot loaded", robot_id=self.robot_id)
 
         # Specific joint ID for the 1-DOF arm
@@ -140,9 +141,9 @@ class RoboticPlant:
             raise ValueError(
                 "Torques list must contain exactly one value for 1-DOF arm."
             )
-
         self.unlock_joint()
-        self.is_locked = False
+        self.is_locked_post = False
+        self.is_locked_pre = False
         self.bullet_robot.SetJointTorques(
             joint_ids=[self.elbow_joint_id], torques=torques
         )
@@ -172,9 +173,9 @@ class RoboticPlant:
             target_pos_rad=self.initial_joint_position_rad,
         )
 
-    def lock_joint(self) -> None:
+    def lock_joint_post(self) -> None:
         """Lock joint at its current position using position control."""
-        if not self.is_locked:
+        if not self.is_locked_post:
             self.log.debug("setting joint torque to zero")
             current_joint_pos_rad, vel = self.get_joint_state()
             self.log.debug("current joint state", pos=current_joint_pos_rad, vel=vel)
@@ -203,7 +204,30 @@ class RoboticPlant:
             self.log.debug(
                 "Joint locked at current position", pos=current_joint_pos_rad, vel=vel
             )
-            self.is_locked = True
+            self.is_locked_post = True
+
+    def lock_joint_pre(self) -> None:
+        """Lock joint at its initial position using position control."""
+        if not self.is_locked_pre:
+            self.log.debug("setting joint torque to zero")
+
+            # First reset state with zero velocity
+            self.p.resetJointState(
+                bodyUniqueId=self.robot_id,
+                jointIndex=self.elbow_joint_id,
+                targetValue=self.initial_joint_position_rad,
+                targetVelocity=0.0,
+            )
+
+            self.p.setJointMotorControl2(
+                bodyIndex=self.robot_id,
+                jointIndex=self.elbow_joint_id,
+                targetPosition=self.initial_joint_position_rad,
+                controlMode=self.p.VELOCITY_CONTROL,
+                targetVelocity=0.0,
+                force=10000,  # whatever is strong enough to hold it
+            )
+            self.is_locked_pre = True
 
     def unlock_joint(self) -> None:
         """Unlock joint by setting it to velocity control mode."""
