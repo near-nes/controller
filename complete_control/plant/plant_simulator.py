@@ -200,9 +200,7 @@ class PlantSimulator:
         # joint is locked in two situations:
         # 1. during TIME_POST: we keep the joint locked at his arrival place
         # 2. during TIME_PREP: state needs time to adapt to sensory
-        return (
-            self.config.TIME_PREP_S + self.config.TIME_MOVE_S
-        ) < time_in_trial and time_in_trial > self.config.TIME_PREP_S
+        return (self.config.TIME_PREP_S + self.config.TIME_MOVE_S) < time_in_trial
 
     def _should_lock_joint_pre(self, current_sim_time_s: float) -> bool:
         time_in_trial = current_sim_time_s % self.config.TIME_TRIAL_S
