@@ -215,29 +215,6 @@ class PlantSimulator:
         time_in_trial = current_sim_time_s % self.config.TIME_TRIAL_S
         return (self.config.TIME_PREP_S + self.config.TIME_MOVE_S) < time_in_trial
 
-    def _should_lock_joint_post(self, current_sim_time_s: float) -> bool:
-        time_in_trial = current_sim_time_s % self.config.TIME_TRIAL_S
-        # joint is locked in two situations:
-        # 1. during TIME_POST: we keep the joint locked at his arrival place
-        # 2. during TIME_PREP: state needs time to adapt to sensory
-        return (self.config.TIME_PREP_S + self.config.TIME_MOVE_S) < time_in_trial
-
-    def _should_lock_joint_pre(self, current_sim_time_s: float) -> bool:
-        time_in_trial = current_sim_time_s % self.config.TIME_TRIAL_S
-        # joint is locked in two situations:
-        # 1. during TIME_POST: we keep the joint locked at his arrival place
-        # 2. during TIME_PREP: state needs time to adapt to sensory
-        return time_in_trial < self.config.TIME_PREP_S
-
-    def _set_joint_torque(self, joint_torque: float, current_sim_time_s: float) -> bool:
-        if self._should_lock_joint_pre(current_sim_time_s):
-            self.plant.lock_joint_pre()
-            return
-        if self._should_lock_joint_post(current_sim_time_s):
-            self.plant.lock_joint_post()
-            return
-        self.plant.set_joint_torques([joint_torque])
-
     def music_end_step(
         self, joint_pos_rad: float, current_sim_time_s: float, music_runtime
     ) -> None:
@@ -341,8 +318,14 @@ class PlantSimulator:
         self.plant.update_stats()
         # Enable perturbation/gravity
         self._check_gravity(current_sim_time_s)
-        # Apply motor command to plant
-        self._set_joint_torque(input_torque, current_sim_time_s)
+
+        if (
+            curr_section == TrialSection.TIME_PREP
+            or curr_section == TrialSection.TIME_POST
+        ):
+            self.plant.lock_elbow_joint()
+        else:
+            self.plant.set_elbow_joint_torque([input_torque])
 
         if curr_section == TrialSection.TIME_POST:
             self._move_shoulder_if_target_close(self.direction)
@@ -363,8 +346,7 @@ class PlantSimulator:
         )
 
         # Trial end logic (reset plant if needed)
-        is_trial_end_time = curr_section == TrialSection.TIME_END_TRIAL
-        if is_trial_end_time:
+        if curr_section == TrialSection.TIME_END_TRIAL:
             final_error_rad = joint_pos_rad - self.config.target_joint_pos_rad
             self.errors_per_trial.append(final_error_rad)
             self.log.info(
