@@ -1,4 +1,0 @@
-cython==3.0.12
-# mpi4py==3.1.4
-mpilock==1.1.0
-mpi4py==4.0.3

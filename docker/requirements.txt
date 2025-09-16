@@ -1,24 +1,20 @@
-# manually copied from cerebellum deps (cerebellum/pyproject.toml):
-# because can't include cerebellum in the docker build
-# (installing it as pip install -e => not available until volume is mounted at runtime)
-bsb~=6.0.0
-bsb-nest~=6.0.0
+bsb
+bsb-nest
 # extras
-# README: if you're editing this file, run `docker compose down -v` to remove all containers
-# read INSTALL.md for more info
-pandas~=2.2.3
-scipy~=1.15.2
-numpy~=1.26
-plotly~=6.0.1
-matplotlib~=3.9
-pybullet~=3.2.7
-structlog~=25.3.0
-pydantic~=2.11
+pandas
+scipy
+numpy
+plotly
+matplotlib
+pybullet
+structlog
+pydantic
+Pillow
+jupyter
 # nest-server:
-Flask==3.1.1
-flask-cors==6.0.1
-gunicorn~=23.0
-requests~=2.32
-RestrictedPython~=8.0
-
-h5py~=3.14.0
+Flask
+flask-cors
+gunicorn
+requests
+RestrictedPython
+h5py

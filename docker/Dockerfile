@@ -1,7 +1,6 @@
 ARG PYTHON_MAJOR=3
 ARG PYTHON_MINOR=10
 
-# FROM python:${PYTHON_MAJOR}.${PYTHON_MINOR}-slim-bookworm AS base
 FROM ubuntu:jammy AS base
 
 ARG PYTHON_MAJOR
@@ -93,6 +92,7 @@ ENV CEREBELLUM_PATH=/sim/cerebellum
 ENV LD_LIBRARY_PATH="${MUSIC_INSTALL_DIR}/lib"
 
 RUN mkdir -p $INSTALL_DIR $DEPS_DIR $NEST_INSTALL_DIR $MUSIC_INSTALL_DIR
+COPY ./docker/constraints.txt /tmp/constraints.txt
 
 # openmpi, music and nest
 FROM base AS builder
@@ -145,15 +145,13 @@ RUN tar xfz $OMPI_GZ \
 
 ENV CFLAGS=-O2
 # ^ for https://github.com/mpi4py/mpi4py/issues/652
-COPY ./docker/requirements_base.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements_base.txt
+    pip install cython mpilock mpi4py -c /tmp/constraints.txt
 ENV CFLAGS=
 
-####################### MUSIC #######################
-# Install MUSIC - pinned to last commit to ensure compatibility
 WORKDIR $DEPS_DIR
 
+####################### MUSIC #######################
 RUN git clone https://github.com/INCF/MUSIC \
     && cd MUSIC \
     && git checkout 6d12edf7094e1dbb473dd55f6fcbd0825f30b811 \
@@ -170,7 +168,6 @@ WORKDIR $DEPS_DIR
 RUN git clone --depth 1 --branch v${NEST_VERSION} https://github.com/nest/nest-simulator/
 WORKDIR ${DEPS_DIR}/nest-simulator
 
-# RUN pip install -r requirements_pynest.txt
 RUN mkdir -p nest-build \
     && cd nest-build \
     && cmake -DCMAKE_INSTALL_PREFIX:PATH=$NEST_INSTALL_DIR \
@@ -217,7 +214,7 @@ RUN git clone https://github.com/eclipse/paho.mqtt.cpp \
 
 COPY ./docker/requirements_nrp.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements_nrp.txt
+    pip install -r requirements_nrp.txt -c /tmp/constraints.txt
 
 ENV NRP_SRC_DIR=/tmp/nrp-core-src
 RUN mkdir -p /tmp/nrp-core-src
@@ -250,16 +247,15 @@ FROM base AS core_reqs
 WORKDIR ${DEPS_DIR}
 COPY ./docker/requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt
+    pip install -r requirements.txt -c /tmp/constraints.txt
 
 FROM base AS planner_reqs
 WORKDIR ${DEPS_DIR}
-COPY ./docker/requirements_planner.txt .
 # split from reqs to download CPU only
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements_planner.txt
+    pip install gle-code -c /tmp/constraints.txt
 
 # final runtime image
 FROM base AS runtime
@@ -269,7 +265,6 @@ ENV NRP_DEPS_INSTALL_DIR=${INSTALL_DIR}/nrp_deps
 
 ENV PATH="${VIRTUAL_ENV}/bin:${NRP_INSTALL_DIR}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${NRP_INSTALL_DIR}/lib:${NRP_DEPS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
-# ENV LD_LIBRARY_PATH=${NRP_INSTALL_DIR}/lib:${NRP_DEPS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}
 
 COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
@@ -299,9 +294,6 @@ WORKDIR /sim
 # Expose VNC port (Display :1 is 5901)
 EXPOSE 5901
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
-
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
-    libgomp1
 
 USER 0
 COPY ./docker/entrypoint.sh /usr/local/bin/entrypoint.sh
