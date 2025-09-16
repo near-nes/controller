@@ -187,14 +187,12 @@ RUN mkdir -p nest-build \
     && make -j$(nproc) \
     && make install
 
-## atch nest-server
+# patch nest-server
 RUN sed -i 's/jsonify(response)/jsonify(nest.serialize_data(response))/' "${NEST_PYTHON_MODULE_PATH}"/server/hl_api_server.py
 COPY ./docker/hl_api_types.py "${NEST_PYTHON_MODULE_PATH}"/lib/hl_api_types.py
 
 
-# # nrp
-# FROM base AS builder-nrp
-
+####################### NRP #######################
 ENV NRP_INSTALL_DIR=${INSTALL_DIR}/nrp
 ENV NRP_DEPS_INSTALL_DIR=${INSTALL_DIR}/nrp_deps
 
@@ -238,7 +236,7 @@ COPY --chown=${USERNAME}:${USERNAME} nrp-core/.ci/20-build.sh ${NRP_SRC_DIR}/.ci
 RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-build.sh
 
 
-# # cerebellum model
+####################### CEREBELLUM+MODELS #######################
 RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
     && git checkout 06974a57c233ac5efad6cfae560d2b7eb509027d\
@@ -247,6 +245,21 @@ RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
     && make \
     && make install
 
+# parallelize slow pip installs    
+FROM base AS core_reqs
+WORKDIR ${DEPS_DIR}
+COPY ./docker/requirements.txt .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
+
+FROM base AS planner_reqs
+WORKDIR ${DEPS_DIR}
+COPY ./docker/requirements_planner.txt .
+# split from reqs to download CPU only
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements_planner.txt
 
 # final runtime image
 FROM base AS runtime
@@ -255,47 +268,29 @@ ENV NRP_INSTALL_DIR=${INSTALL_DIR}/nrp
 ENV NRP_DEPS_INSTALL_DIR=${INSTALL_DIR}/nrp_deps
 
 ENV PATH="${VIRTUAL_ENV}/bin:${NRP_INSTALL_DIR}/bin:${MUSIC_INSTALL_DIR}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${LD_LIBRARY_PATH}"
-ENV LD_LIBRARY_PATH=${NRP_INSTALL_DIR}/lib:${NRP_DEPS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${NRP_INSTALL_DIR}/lib:${NRP_DEPS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+# ENV LD_LIBRARY_PATH=${NRP_INSTALL_DIR}/lib:${NRP_DEPS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}
 
 COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=builder ${CEREBELLUM_PATH} ${CEREBELLUM_PATH}
+COPY --from=core_reqs ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY --from=planner_reqs ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 # openMPI needs this if no ssh/rsh available
 ENV OMPI_MCA_plm=^rsh
 
 # suppress nest startup message
 ENV PYNEST_QUIET=1
 
-# ENV BULLET_MUSCLE_DIR=$DEPS_DIR/bullet_muscle_sim
-# ENV SDF_MODELS_DIR=/sim/embodiment_sdf_models
-# RUN mkdir -p $BULLET_MUSCLE_DIR $SDF_MODELS_DIR
-
 # cerebellum
 ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5.gz
 ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5
 
-
-# Install bullet muscle simulation and skeleton models
-
-# RUN git clone https://github.com/near-nes/bullet_muscle_sim.git $BULLET_MUSCLE_DIR \
-    # && git clone https://github.com/near-nes/embodiment_sdf_models.git $SDF_MODELS_DIR
-
-
-
-WORKDIR ${DEPS_DIR}
-COPY ./docker/requirements.txt .
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt
-
-COPY ./docker/requirements_planner.txt .
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements_planner.txt
-
 ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 
+# point nest to nest installation
 RUN echo ${NEST_INSTALL_DIR}/lib/${PYTHON_MAJOR_MINOR}/site-packages >> ${VIRTUAL_ENV}/lib/${PYTHON_MAJOR_MINOR}/site-packages/nest.pth
-
+# pythonpath construction
 ENV PYTHONPATH="${NRP_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages:${CONTROLLER_DIR}:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
