@@ -360,7 +360,7 @@ class PlantSimulator:
             self.plant.reset_plant()
             self.plant.reset_target()
 
-        return joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list
+        return joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list, curr_section
 
     def _check_gravity(self, current_sim_time_s: float):
         """Check trial number and enable/disable gravity"""
@@ -397,8 +397,10 @@ class PlantSimulator:
                 rate_pos, rate_neg = self.music_prepare_step(current_sim_time_s)
 
                 # Run simulation step
-                joint_pos, joint_vel, ee_pos, ee_vel = self.run_simulation_step(
-                    rate_pos, rate_neg, current_sim_time_s, step
+                joint_pos, joint_vel, ee_pos, ee_vel, curr_section = (
+                    self.run_simulation_step(
+                        rate_pos, rate_neg, current_sim_time_s, step
+                    )
                 )
 
                 # Send sensory feedback through MUSIC

@@ -9,7 +9,7 @@ from config.plant_config import PlantConfig
 from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 from plant.plant_plotting import plot_plant_outputs
-from plant.plant_simulator import PlantSimulator
+from plant.plant_simulator import PlantSimulator, TrialSection
 from utils_common.profile import Profile
 
 
@@ -62,11 +62,14 @@ class Script(GrpcEngineScript):
         rate_pos, rate_neg = ctrl[0], ctrl[1]
 
         with self.pybullet_profile.time():
-            joint_pos_rad, joint_vel, ee_pos, ee_vel = (
+            joint_pos_rad, joint_vel, ee_pos, ee_vel, curr_section = (
                 self.simulator.run_simulation_step(
                     rate_pos, rate_neg, self.current_sim_time_s, self.step
                 )
             )
+
+        if curr_section == TrialSection.TIME_POST:
+            joint_pos_rad = 0.0  # mask joint position during TIME_POST
 
         self.current_sim_time_s += self.config.RESOLUTION_S
         self.step += 1

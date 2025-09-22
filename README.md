@@ -38,7 +38,7 @@ Quick notes before a more complete documentation:
 - create necessary folders **in HPC** for mounts (consider that the singularity container is fully read-only) `mkdir scratch results tmp`, then keep reading depending on what coordinator you're using.
 
 ### MUSIC and MPI
-- load openmpi module
+- load openmpi module, export PMIX_MCA_gds=hash to [suppress PMIX warning](https://docs.hpc.cineca.it/services/singularity.html#parallel-mpi-container)
 - allocate what you need: `salloc --ntasks-per-node=7 --mem=23000MB --account=<your_account_name> --time=01:00:00 --partition=g100_usr_interactive`
 - run the simulation: `mpirun -np 7 singularity exec --bind ./scratch:/scratch_local --bind ./results:/sim/controller/runs --bind ./artifacts:/sim/controller/artifacts --bind ./tmp:/tmp sim.sif/ music /sim/controller/complete_control/complete.music`
 
