@@ -74,7 +74,7 @@ ENV VIRTUAL_ENV=/sim/venv
 RUN python -m venv --system-site-packages $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN pip install --upgrade pip setuptools wheel packaging
+RUN pip install --upgrade pip "setuptools<80" wheel packaging
 
 ENV INSTALL_DIR=/sim/install
 ENV DEPS_DIR=/sim/dependencies
