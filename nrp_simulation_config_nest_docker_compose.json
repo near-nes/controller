@@ -31,5 +31,10 @@
             "Name": "from_bullet",
             "FileName": "complete_control/nrp_tf_from_bullet.py"
         }
-    ]
+    ],
+    "StatusFunction":
+    {
+        "Name": "status_function",
+        "FileName": "complete_control/nrp_status_function.py"
+    }
 }
