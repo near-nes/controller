@@ -59,9 +59,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ARG UID=1000
 ARG GID=1000
 ENV USERNAME=simuser
-RUN groupadd --gid $GID $USERNAME && \
-    useradd --uid $UID --gid $GID --create-home --shell /bin/bash $USERNAME \
-    && echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+RUN set -eux; \
+    # create group only if GID is not already present
+    if ! getent group "$GID" >/dev/null; then \
+        groupadd --gid "$GID" "$USERNAME"; \
+    fi; \
+    useradd --uid "$UID" --gid "$GID" --create-home --shell /bin/bash "$USERNAME"; \
+    echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# RUN groupadd --gid $GID $USERNAME && \
+#     useradd --uid $UID --gid $GID --create-home --shell /bin/bash $USERNAME \
+#     && echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN mkdir /sim && chown $USERNAME:$USERNAME /sim
 
 USER $USERNAME
