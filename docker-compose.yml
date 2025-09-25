@@ -4,13 +4,19 @@ x-simulation-base: &simulation-base
       context: .
       dockerfile: docker/Dockerfile
       target: dev
+      args: # build arguments, only in build
+        UID: ${UID}
+        GID: ${GID}
   volumes:
     - .:/sim/controller
   stdin_open: true
   tty: true
   environment:
     TZ: ${TZ:-Europe/Rome}
-    PYNEST_QUIET: 0
+    PYNEST_QUIET: 0 
+    # env arguments, only in run
+    UID: ${UID}
+    GID: ${GID}
   ports:
   # Map host port 5901 (localhost only) to container port 5901 (VNC display :1)
   - "127.0.0.1:5901:5901"
