@@ -62,7 +62,7 @@ ENV USERNAME=simuser
 RUN set -eux; \
     # create group only if GID is not already present
     if ! getent group "$GID" >/dev/null; then \
-        groupadd --gid "$GID" "$USERNAME"; \
+    groupadd --gid "$GID" "$USERNAME"; \
     fi; \
     useradd --uid "$UID" --gid "$GID" --create-home --shell /bin/bash "$USERNAME"; \
     echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -70,7 +70,7 @@ RUN set -eux; \
 # RUN groupadd --gid $GID $USERNAME && \
 #     useradd --uid $UID --gid $GID --create-home --shell /bin/bash $USERNAME \
 #     && echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-RUN mkdir /sim && chown $USERNAME:$USERNAME /sim
+RUN mkdir /sim && chown $USERNAME /sim
 
 USER $USERNAME
 ARG PYTHON_MAJOR
@@ -226,14 +226,14 @@ RUN mkdir -p /tmp/nrp-core-src
 ENV CMAKE_CACHE_FILE=${NRP_SRC_DIR}/.ci/cmake_cache/t3_4.cmake
 # TODO: copy source files more elegant, but without breaking the cache
 # Copying the root (.) immediatly breaks the cache
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/src ${NRP_SRC_DIR}/src
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/docs ${NRP_SRC_DIR}/docs
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/examples ${NRP_SRC_DIR}/examples
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/cmake ${NRP_SRC_DIR}/cmake
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/CMakeLists.txt ${NRP_SRC_DIR}/CMakeLists.txt
-COPY --chown=${USERNAME}:${USERNAME} docker/nrp_t3_4.cmake ${CMAKE_CACHE_FILE}
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/.ci/11-prepare-build.sh ${NRP_SRC_DIR}/.ci/11-prepare-build.sh
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/.ci/20-build.sh ${NRP_SRC_DIR}/.ci/20-build.sh
+COPY --chown=${USERNAME} nrp-core/src ${NRP_SRC_DIR}/src
+COPY --chown=${USERNAME} nrp-core/docs ${NRP_SRC_DIR}/docs
+COPY --chown=${USERNAME} nrp-core/examples ${NRP_SRC_DIR}/examples
+COPY --chown=${USERNAME} nrp-core/cmake ${NRP_SRC_DIR}/cmake
+COPY --chown=${USERNAME} nrp-core/CMakeLists.txt ${NRP_SRC_DIR}/CMakeLists.txt
+COPY --chown=${USERNAME} docker/nrp_t3_4.cmake ${CMAKE_CACHE_FILE}
+COPY --chown=${USERNAME} nrp-core/.ci/11-prepare-build.sh ${NRP_SRC_DIR}/.ci/11-prepare-build.sh
+COPY --chown=${USERNAME} nrp-core/.ci/20-build.sh ${NRP_SRC_DIR}/.ci/20-build.sh
 
 RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-build.sh
 
@@ -309,10 +309,10 @@ ENV DISPLAY="${VNC_DISPLAY}"
 COPY scripts/services/start-vnc.sh /usr/local/bin/start-vnc.sh
 RUN chmod +x /usr/local/bin/start-vnc.sh
 
-RUN mkdir -p /home/simuser/.vnc
-COPY scripts/services/xstartup /home/simuser/.vnc/xstartup
+RUN mkdir -p /home/$USERNAME/.vnc
+COPY scripts/services/xstartup /home/$USERNAME/.vnc/xstartup
 RUN chmod 700 /home/$USERNAME/.vnc/xstartup
-RUN chown -R simuser:simuser /home/$USERNAME/.vnc
+RUN chown -R $USERNAME /home/$USERNAME/.vnc
 RUN chmod 777 -R  /home/$USERNAME/.vnc
 
 # ensure env is loaded for all shells
@@ -352,5 +352,5 @@ ENV SIMULATION_MODE=hpc
 # On HPC do not mount anythin on top of artifacts folder, so that the archive is not overwritten
 ENV BSB_NETWORK_FILE=/tmp/cerebellum_plastic_base.hdf5
 COPY . /sim/controller
-RUN chown -R simuser:simuser /sim/controller
+RUN chown -R ${USERNAME} /sim/controller
 RUN chmod -R a+rwX /sim
