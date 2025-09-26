@@ -13,6 +13,8 @@ from complete_control.neural.neural_models import SynapseBlock
 
 from .neural_models import PopulationSpikes
 
+import matplotlib.gridspec as gridspec
+
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
 FIGURE_EXT = "png"
 
@@ -77,7 +79,7 @@ def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", **kwargs):
     """Computes and plots the smoothed PSTH for a set of spike times."""
     if ts.size == 0 or pop_size == 0:
         ax.plot([], [], **kwargs)  # Plot empty to keep colors consistent
-        return
+        return 0
 
     time_end = time_v[-1] if len(time_v) > 0 else 0
     bins = np.arange(0, time_end + 1, buffer_sz)
@@ -94,6 +96,14 @@ def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", **kwargs):
     ax.set_xlabel("Time [ms]")
     ax.set_xlim(left=0, right=time_end)
     ax.set_ylim(bottom=0)
+
+    if (
+        rate_sm.size > 0
+    ):  # add return for keep max_value to scale the plot (if rate_sm is not empty)
+        ymax = np.max(rate_sm)
+        return ymax
+    else:
+        return 0
 
 
 def global_to_local_ids(x: PopulationSpikes, hist_logscale=False):
@@ -119,58 +129,78 @@ def plot_population(
     y_p = global_to_local_ids(pop_p_data)
     y_n = -global_to_local_ids(pop_n_data)
 
-    fig, ax = plt.subplots(2, 1, sharex=True, figsize=(10, 6))
+    fig = plt.figure(figsize=(10, 6))
+    gs = gridspec.GridSpec(4, 1, height_ratios=[3, 3, 1, 5], hspace=0.065)
+    ax = [None] * 3
+    ax[0] = fig.add_subplot(gs[0])
+    ax[1] = fig.add_subplot(gs[1], sharex=ax[0])
+    ax[2] = fig.add_subplot(gs[3], sharex=ax[0])
 
     # Raster plot
     ax[0].scatter(ts_p, y_p, marker=".", s=1, c="r", label="Positive")
-    ax[0].scatter(ts_n, y_n, marker=".", s=1, c="b", label="Negative")
-    ax[0].set_ylabel("raster", fontsize=15)
     ax[0].set_title(title, fontsize=16)
-    ax[0].set_ylim(
-        bottom=-(pop_n_data.population_size + 1), top=pop_p_data.population_size + 1
-    )
-    ax[0].legend(fontsize=16)
+    ax[0].set_ylim(bottom=-1, top=pop_p_data.population_size + 1)
+    ax[0].set_xticklabels([])
+    ax[0].legend(fontsize=16, loc="lower right")
+
+    ax[1].scatter(ts_n, y_n, marker=".", s=1, c="b", label="Negative")
+    ax[1].set_ylim(bottom=-(pop_n_data.population_size + 1), top=1)
+    ax[1].legend(fontsize=16, loc="upper right")
+
+    fig.text(0.045, 0.7, "Raster", va="center", rotation="vertical", fontsize=15)
 
     # Configure spines and subplot labels for both plots
+    cnt_ax = 0
     for i, axs in enumerate(ax):
         axs.spines["top"].set_visible(False)
         axs.spines["right"].set_visible(False)
         axs.spines["bottom"].set_visible(True)
         axs.spines["left"].set_visible(True)
-        # Add subplot labels (A, B)
-        axs.text(
-            -0.1,
-            1.1,
-            chr(65 + i),  # ASCII 65 is 'A'
-            transform=axs.transAxes,
-            fontsize=16,
-            fontweight="bold",
-            va="top",
-            ha="right",
-        )
+        # Add subplot labels (A, B), skip 2nd raster (y_n)
+        if i != 1:
+            axs.text(
+                -0.1,
+                1.1,
+                chr(65 + cnt_ax),  # ASCII 65 is 'A'
+                transform=axs.transAxes,
+                fontsize=16,
+                fontweight="bold",
+                va="top",
+                ha="right",
+            )
+            cnt_ax += 1
         axs.grid(True, which="both", linestyle="--", linewidth=0.5)
 
+    # set specific spines
+    ax[0].spines["bottom"].set_visible(False)
+    ax[0].tick_params(axis="x", which="both", length=0)
+
     # Plotting rates
-    plot_rate(
+    max_p = plot_rate(
         time_v,
         ts_p,
         pop_p_data.population_size,
         buffer_size,
-        ax=ax[1],
+        ax=ax[2],
         color="r",
         label="Positive",
     )
-    plot_rate(
+    max_n = plot_rate(
         time_v,
         ts_n,
         pop_n_data.population_size,
         buffer_size,
-        ax=ax[1],
+        ax=ax[2],
         color="b",
         title="PSTH (Hz)",
         label="Negative",
     )
-    ax[1].legend(fontsize=16)
+    ax[2].legend(fontsize=16)
+
+    # scale PSTH plot
+    max_y = max(max_p, max_n)
+    ax[2].set_ylim(top=max_y + 1)
+
     fig.tight_layout()
 
     if filepath:
@@ -217,7 +247,7 @@ def plot_population_single(
         )
         axs.grid(True, which="both", linestyle="--", linewidth=0.5)
 
-    plot_rate(
+    max_y = plot_rate(
         time_v,
         pop_data.times,
         pop_data.population_size,
@@ -226,6 +256,7 @@ def plot_population_single(
         color="r",
         title="PSTH (Hz)",
     )
+    ax[1].set_ylim(top=max_y + 1)
     fig.tight_layout()
 
     if filepath:
@@ -242,7 +273,7 @@ def plot_controller_outputs(run_paths: RunPaths):
     if MPI.COMM_WORLD.rank != 0:
         return  # Only rank 0 plots
 
-    with open(run_paths.params_json) as f:
+    with open(run_paths.params_json) as f:  ######à qua vede /runs/runs
         master_config = MasterParams.model_validate_json(f.read())
 
     path_fig = run_paths.figures
@@ -298,8 +329,10 @@ def plot_controller_outputs(run_paths: RunPaths):
         plot_name = file_prefix
         _log.debug(f"Plotting for {plot_name}...")
 
-        pop_p_path = path_data / f"{file_prefix}_p.json"
-        pop_n_path = path_data / f"{file_prefix}_n.json"
+        pop_p_path = (
+            path_data / f"{file_prefix}_p.json"
+        )  # separa popolazione positiva e negativa (quelli single hanno solo pos)
+        pop_n_path = path_data / f"{file_prefix}_n.json"  # quindi non serve intervenire
 
         plot_population(
             total_time_vect_concat,
