@@ -97,9 +97,7 @@ def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", **kwargs):
     ax.set_xlim(left=0, right=time_end)
     ax.set_ylim(bottom=0)
 
-    if (
-        rate_sm.size > 0
-    ):  # add return for keep max_value to scale the plot (if rate_sm is not empty)
+    if (rate_sm.size > 0):      # add return for keep max_value to scale the plot (if rate_sm is not empty)
         ymax = np.max(rate_sm)
         return ymax
     else:
@@ -273,7 +271,7 @@ def plot_controller_outputs(run_paths: RunPaths):
     if MPI.COMM_WORLD.rank != 0:
         return  # Only rank 0 plots
 
-    with open(run_paths.params_json) as f:  ######à qua vede /runs/runs
+    with open(run_paths.params_json) as f:
         master_config = MasterParams.model_validate_json(f.read())
 
     path_fig = run_paths.figures
@@ -329,10 +327,8 @@ def plot_controller_outputs(run_paths: RunPaths):
         plot_name = file_prefix
         _log.debug(f"Plotting for {plot_name}...")
 
-        pop_p_path = (
-            path_data / f"{file_prefix}_p.json"
-        )  # separa popolazione positiva e negativa (quelli single hanno solo pos)
-        pop_n_path = path_data / f"{file_prefix}_n.json"  # quindi non serve intervenire
+        pop_p_path = (path_data / f"{file_prefix}_p.json")
+        pop_n_path = path_data / f"{file_prefix}_n.json"
 
         plot_population(
             total_time_vect_concat,
