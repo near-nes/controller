@@ -98,7 +98,7 @@ def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", **kwargs):
     ax.set_ylim(bottom=0)
 
     # add return for keep max_value to scale the plot (if rate_sm is not empty)
-    if (rate_sm.size > 0):
+    if rate_sm.size > 0:
         ymax = np.max(rate_sm)
         return ymax
     else:
@@ -199,8 +199,6 @@ def plot_population(
     # scale PSTH plot
     max_y = max(max_p, max_n)
     ax[2].set_ylim(top=max_y + 1)
-
-    fig.tight_layout()
 
     if filepath:
         fig.savefig(filepath)
@@ -328,7 +326,7 @@ def plot_controller_outputs(run_paths: RunPaths):
         plot_name = file_prefix
         _log.debug(f"Plotting for {plot_name}...")
 
-        pop_p_path = (path_data / f"{file_prefix}_p.json")
+        pop_p_path = path_data / f"{file_prefix}_p.json"
         pop_n_path = path_data / f"{file_prefix}_n.json"
 
         plot_population(
