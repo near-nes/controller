@@ -7,6 +7,8 @@ from neural.nest_adapter import nest
 from neural.neural_models import PopulationSpikes, SynapseBlock, SynapseRecording
 from neural.population_view import PopView
 
+from complete_control.utils_common.profile import Profile
+
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(str(__file__))
 
 
@@ -75,11 +77,14 @@ def collapse_files(dir: Path, pops: list[PopView], comm: Comm = None):
         comm.barrier()
 
 
-def save_conn_weights(weights_history: dict, dir: Path, filename_prefix: str):
+def save_conn_weights(
+    weights_history: dict, dir: Path, filename_prefix: str, record_profile: Profile
+):
     """
     merge SynapseRecording objects with the same (source, target, type, trials_recorded),
     concatenate their weight_history, and save as a JSON array.
     """
+    rank = nest.Rank()
     for (source_pop, target_pop), inner in weights_history.items():
         label = f"{source_pop.label}>{target_pop.label}"
         recs = []
@@ -87,21 +92,23 @@ def save_conn_weights(weights_history: dict, dir: Path, filename_prefix: str):
             (source_neur, target_neur, synapse_id, synapse_model),
             weights,
         ) in inner.items():
-            recs.append(
-                SynapseRecording(
-                    source=source_neur,
-                    target=target_neur,
-                    syn_id=synapse_id,
-                    syn_type=synapse_model,
-                    weight_history=weights,
+            with record_profile.time():
+                recs.append(
+                    SynapseRecording(
+                        source=source_neur,
+                        target=target_neur,
+                        syn_id=synapse_id,
+                        syn_type=synapse_model,
+                        weight_history=weights,
+                    )
                 )
+        with record_profile.time():
+            s = SynapseBlock(
+                source_pop_label=source_pop.label,
+                target_pop_label=target_pop.label,
+                synapse_recordings=recs,
             )
-        s = SynapseBlock(
-            source_pop_label=source_pop.label,
-            target_pop_label=target_pop.label,
-            synapse_recordings=recs,
-        )
-        rec_path = dir / f"{filename_prefix}-{label}.json"
+        rec_path = dir / f"{filename_prefix}-{label}-{rank}.json"
         with open(rec_path, "w") as f:
             json_array = s.model_dump_json(indent=2)
             f.write(json_array)

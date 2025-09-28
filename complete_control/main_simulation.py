@@ -5,6 +5,8 @@ from pathlib import Path
 from timeit import default_timer as timer
 
 from neural.nest_adapter import initialize_nest, nest
+from neural.neural_models import SynapseBlock
+from utils_common.profile import Profile
 
 initialize_nest("MUSIC")
 
@@ -39,16 +41,43 @@ def run_simulation(
     """Runs the NEST simulation for the specified number of trials."""
     single_trial_ms = simulation_config.duration_single_trial_ms
     n_trials = simulation_config.n_trials
+    load_profile = Profile()
+    apply_profile = Profile()
+    RECORD = True
+    # LOAD = "20250925_131425" # MUSIC
+    # 0:03:25.931715
+    # LOAD = "20250925_132633" # NRP
+    # 0:03:57
+    LOAD = None
 
-    # --- Prepare for Data Collapsing ---
     pop_views = []
     for controller in controllers:
         pop_views.extend(controller.get_all_recorded_views())
+    if LOAD is not None:
+        with load_profile.time():
+            syn_blocks = []
+            for json_file in sorted(
+                Path("/sim/controller/runs/20250924_125457/data/neural").glob(
+                    f"weightrecord*-{nest.Rank()}.json"
+                )
+            ):
+                log.debug(f"opening file {json_file}")
+                with open(json_file, "r") as f:
+                    syn_blocks.append(SynapseBlock.model_validate_json(f.read()))
+        with apply_profile.time():
+            for controller in controllers:
+                controller.apply_synaptic_weights(syn_blocks)
+
+    nest.SyncProcesses()
+    log.warning(
+        f"total time spent loading weights: {load_profile.total_time}, applying: {apply_profile.total_time}"
+    )
 
     log.info("collected all popviews")
     controller = controllers[0]
     log.info("Starting Simulation")
-
+    record_profile = Profile()
+    run_profile = Profile()
     nest.Prepare()
     for trial in range(n_trials):
         current_sim_start_time = nest.GetKernelStatus("biological_time")
@@ -59,11 +88,12 @@ def run_simulation(
         )
         log.info(f"Current simulation time: {current_sim_start_time} ms")
         start_trial_time = timer()
+        with run_profile.time():
+            nest.Run(single_trial_ms)
 
-        nest.Run(single_trial_ms)
-
-        if controller.use_cerebellum:
-            controller.record_synaptic_weights(trial)
+        with record_profile.time():
+            if controller.use_cerebellum and RECORD:
+                controller.record_synaptic_weights()
 
         end_trial_time = timer()
         trial_wall_time = datetime.timedelta(seconds=end_trial_time - start_trial_time)
@@ -83,13 +113,14 @@ def run_simulation(
         pop_views,
         comm,
     )
-    if controller.use_cerebellum:
+    if controller.use_cerebellum and RECORD:
         log.info("Saving recorded synapse weights for all trials started...")
         save_conn_weights(
-            controller.weights_history,
-            path_data,
-            "weightrecord",
+            controller.weights_history, path_data, "weightrecord", record_profile
         )
+    log.warning(
+        f"total time spent recording weights: {record_profile.total_time}, running: {run_profile.total_time}"
+    )
 
     end_collapse_time = timer()
     collapse_wall_time = datetime.timedelta(

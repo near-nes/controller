@@ -67,7 +67,7 @@ class SimulationParams(BaseModel, frozen=True):
     time_prep: float = 150.0  # ms
     time_move: float = 500.0  # ms
     time_post: float = 350.0  # ms
-    n_trials: int = 2
+    n_trials: int = 1
 
     oracle: OracleData = Field(default_factory=lambda: OracleData())
 

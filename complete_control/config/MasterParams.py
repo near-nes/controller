@@ -25,9 +25,9 @@ class MasterParams(BaseModel):
     }
     run_paths: RunPaths
 
-    PLOT_AFTER_SIMULATE: bool = True
+    PLOT_AFTER_SIMULATE: bool = False
     USE_CEREBELLUM: bool = False
-    GUI_PYBULLET: bool = True
+    GUI_PYBULLET: bool = False
     USE_MUSIC: bool = False
 
     NJT: int = 1
@@ -45,11 +45,12 @@ class MasterParams(BaseModel):
     @computed_field
     @property
     def total_num_virtual_procs(self) -> int:
-        if self.USE_MUSIC:
-            # https://github.com/nest/nest-simulator/issues/3446
-            return None
-        else:
-            return int(os.getenv("NPROC", 1))
+        return 4
+        # if self.USE_MUSIC:
+        #     # https://github.com/nest/nest-simulator/issues/3446
+        #     return None
+        # else:
+        #     return int(os.getenv("NPROC", 1))
 
     @computed_field
     @property
