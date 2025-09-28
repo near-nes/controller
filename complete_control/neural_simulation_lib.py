@@ -41,7 +41,6 @@ def setup_environment(master_config: MasterParams):
         sys.exit(1)
 
 
-# --- NEST Kernel Setup ---
 def setup_nest_kernel(
     master_params: MasterParams,
     path_data: Path,
@@ -55,8 +54,8 @@ def setup_nest_kernel(
         "data_path": str(path_data),
         "rng_seed": simulation_config.seed,
     }
-    if not master_params.USE_MUSIC:
-        kernel_params["total_num_virtual_procs"] = master_params.total_num_virtual_procs
+    # if not master_params.USE_MUSIC:
+    kernel_params["total_num_virtual_procs"] = master_params.total_num_virtual_procs
 
     nest.SetKernelStatus(kernel_params)
     nest.set_verbosity("M_WARNING")

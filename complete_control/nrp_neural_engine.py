@@ -17,6 +17,8 @@ from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 from utils_common.profile import Profile
 
+from complete_control.neural.data_handling import save_conn_weights
+
 NANO_SEC = 1e-9
 
 
@@ -63,6 +65,7 @@ class Script(GrpcEngineScript):
         self.sim_profile = Profile()
         self.motor_profile = Profile()
         self.rest_profile = Profile()
+        self.record_profile = Profile()
 
         # joint_pos_rad (datapack<Double>)
         self._registerDataPack("joint_pos_rad", wrappers_pb2.DoubleValue)
@@ -132,6 +135,19 @@ class Script(GrpcEngineScript):
             time_motor=str(self.motor_profile.total_time),
             time_rest=str(self.rest_profile.total_time),
         )
+        with self.record_profile.time():
+            if self.controllers[0].use_cerebellum:
+                self.controllers[0].record_synaptic_weights()
+
+        with self.record_profile.time():
+            if self.controllers[0].use_cerebellum:
+                save_conn_weights(
+                    self.controllers[0].weights_history,
+                    self.run_paths.data_nest,
+                    "weightrecord",
+                    self.record_profile,
+                )
+
         from neural.data_handling import collapse_files
 
         pop_views = []
@@ -140,6 +156,9 @@ class Script(GrpcEngineScript):
         collapse_files(self.run_paths.data_nest, pop_views)
         if self.master_config.PLOT_AFTER_SIMULATE:
             plot_controller_outputs(self.run_paths)
+        self.log.warning(
+            f"total time spent recording weights: {self.record_profile.total_time}"
+        )
 
         # nest.Cleanup()
 

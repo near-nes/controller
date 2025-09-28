@@ -1,4 +1,5 @@
 from collections import defaultdict
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -17,6 +18,8 @@ from config.population_params import PopulationsParams
 from neural.nest_adapter import nest
 from plant.sensoryneuron import SensoryNeuron
 from utils_common.generate_signals import generate_traj
+
+from complete_control.neural.neural_models import SynapseBlock
 
 from .ControllerPopulations import ControllerPopulations
 from .motorcortex import MotorCortex
@@ -157,7 +160,7 @@ class Controller:
 
         self.log.info("Controller initialization complete.")
 
-    def record_synaptic_weights(self, trial: int):
+    def record_synaptic_weights(self):
         PF_to_purkinje_conns = (
             self.cerebellum_handler.get_synapse_connections_PF_to_PC()
         )
@@ -176,9 +179,25 @@ class Controller:
                         ],
                     )[0]
                 )
-                self.weights_history[(pre_pop, post_pop)][
-                    (source_neur, target_neur, synapse_id, synapse_model)
-                ].append(weight)
+                if synapse_model != "static_synapse":
+                    self.weights_history[(pre_pop, post_pop)][
+                        (source_neur, target_neur, synapse_id, synapse_model)
+                    ].append(weight)
+
+    def apply_synaptic_weights(self, syn_blocks: list[SynapseBlock]):
+        plastic_conns = self.cerebellum_handler.get_plastic_connections()
+        self.log.debug(
+            f"found {len(plastic_conns)} plastic connections, and was given {sum(len(i.synapse_recordings) for i in syn_blocks)} weights"
+        )
+        nest.SyncProcesses()
+        for block in syn_blocks:
+            for i, rec in enumerate(block.synapse_recordings):
+                if rec.syn_type != "static_synapse":
+                    # apparently synapse ID is not stable
+                    nest.SetStatus(
+                        plastic_conns[(rec.source, rec.target, rec.syn_type)],
+                        {"weight": rec.weight_history[0]},
+                    )
 
     def _instantiate_cerebellum_handler(self, controller_pops: ControllerPopulations):
         from .CerebellumHandler import CerebellumHandler

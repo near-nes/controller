@@ -124,9 +124,7 @@ class CerebellumHandler:
 
         self.log.info("CerebellumHandler initialization complete.")
 
-    def _create_pop_view(
-        self, nest_pop: nest.NodeCollection, base_label: str
-    ) -> PopView:
+    def _create_pop_view(self, nest_pop, base_label: str) -> PopView:
         """Helper to create PopView instance."""
         full_label = f"{self.label_prefix}{base_label}"
         # Use path_data implicitly if to_file=True
@@ -163,6 +161,49 @@ class CerebellumHandler:
             )
             conns[(pre_pop, post_pop)] = c
             tot_syn += len(c)
+        self.log.warning(f"total number of synapses: {tot_syn}")
+        return conns
+
+    def get_plastic_connections(self):
+        """
+        Returns a dict of NEST connection handles for all PF→Purkinje non-static connections.
+
+        (source,target,synapse_model) -> nest.Connection
+        """
+        conns = {}
+        pairs = [
+            (
+                self.cerebellum.populations.forw_grc_view,
+                self.cerebellum.populations.forw_pc_p_view,
+            ),
+            (
+                self.cerebellum.populations.forw_grc_view,
+                self.cerebellum.populations.forw_pc_n_view,
+            ),
+            (
+                self.cerebellum.populations.inv_grc_view,
+                self.cerebellum.populations.inv_pc_p_view,
+            ),
+            (
+                self.cerebellum.populations.inv_grc_view,
+                self.cerebellum.populations.inv_pc_n_view,
+            ),
+        ]
+        tot_syn = 0
+        for pre_pop, post_pop in pairs:
+            c = nest.GetConnections(
+                source=pre_pop.pop,
+                target=post_pop.pop,
+            )
+            self.log.debug(
+                f"working on {pre_pop.label}>{post_pop.label} ({len(c)} synapses). done {tot_syn}"
+            )
+            for ic in c:
+                st = nest.GetStatus(ic)[0]
+                if st["synapse_model"] != "static_synapse":
+                    key = (st["source"], st["target"], st["synapse_model"])
+                    conns[key] = ic
+                    tot_syn += 1
         self.log.warning(f"total number of synapses: {tot_syn}")
         return conns
 
