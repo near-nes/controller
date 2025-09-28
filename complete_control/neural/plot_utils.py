@@ -97,7 +97,8 @@ def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", **kwargs):
     ax.set_xlim(left=0, right=time_end)
     ax.set_ylim(bottom=0)
 
-    if (rate_sm.size > 0):      # add return for keep max_value to scale the plot (if rate_sm is not empty)
+    # add return for keep max_value to scale the plot (if rate_sm is not empty)
+    if (rate_sm.size > 0):
         ymax = np.max(rate_sm)
         return ymax
     else:
