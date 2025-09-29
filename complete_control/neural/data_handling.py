@@ -26,8 +26,10 @@ def collapse_files(dir: Path, pops: list[PopView], comm: Comm = None):
     Files are processed only by rank 0 process. For each population, files starting with
     the population name are combined, duplicates are removed, and original files are deleted.
     """
-    if comm is None or comm.rank == 0:
-        for pop in pops:
+    for pop in pops:
+        gids = nest.GetStatus(pop.pop, "global_id")
+        neuron_model = nest.GetStatus(pop.pop, "model")[0]
+        if comm is None or nest.Rank() == 0:
             name = pop.label
             file_list = [
                 i
@@ -52,9 +54,6 @@ def collapse_files(dir: Path, pops: list[PopView], comm: Comm = None):
                 senders.append(int(sender))
                 times.append(float(time))
 
-            gids = nest.GetStatus(pop.pop, "global_id")
-            neuron_model = nest.GetStatus(pop.pop, "model")[0]
-
             pop_spikes = PopulationSpikes(
                 label=name,
                 gids=np.array(gids),
@@ -72,7 +71,7 @@ def collapse_files(dir: Path, pops: list[PopView], comm: Comm = None):
             for f in file_list:
                 f.unlink()
     if comm is not None:
-        comm.barrier()
+        nest.SyncProcesses()
 
 
 def save_conn_weights(weights_history: dict, dir: Path, filename_prefix: str):

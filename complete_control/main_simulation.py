@@ -30,15 +30,18 @@ from complete_control.neural_simulation_lib import (
 
 
 def run_simulation(
-    simulation_config: SimulationParams,
+    master_config: MasterParams,
     path_data: Path,
     controllers: list[Controller],
     comm: MPI.Comm,
 ):
-    log: structlog.stdlib.BoundLogger = structlog.get_logger("main.simulation_loop")
     """Runs the NEST simulation for the specified number of trials."""
-    single_trial_ms = simulation_config.duration_single_trial_ms
-    n_trials = simulation_config.n_trials
+
+    log: structlog.stdlib.BoundLogger = structlog.get_logger(
+        "main.simulation_loop", log_all_ranks=True
+    )
+    single_trial_ms = master_config.simulation.duration_single_trial_ms
+    n_trials = master_config.simulation.n_trials
 
     # --- Prepare for Data Collapsing ---
     pop_views = []
@@ -74,6 +77,7 @@ def run_simulation(
         )
     nest.Cleanup()
     log.info("--- All Trials Finished ---")
+    nest.SyncProcesses()
 
     # --- Data Collapsing (after all trials) ---
     log.info("Attempting data collapsing for all trials...")
@@ -83,7 +87,7 @@ def run_simulation(
         pop_views,
         comm,
     )
-    if controller.use_cerebellum:
+    if controller.use_cerebellum and master_config.SAVE_WEIGHTS_CEREB:
         log.info("Saving recorded synapse weights for all trials started...")
         save_conn_weights(
             controller.weights_history,
@@ -173,7 +177,7 @@ if __name__ == "__main__":
     controllers = create_controllers(master_config, comm=comm)
 
     # Run simulation
-    run_simulation(master_config.simulation, run_paths.data_nest, controllers, comm)
+    run_simulation(master_config, run_paths.data_nest, controllers, comm)
 
     # Plotting (Rank 0 Only)
     if rank == 0 and master_config.PLOT_AFTER_SIMULATE:

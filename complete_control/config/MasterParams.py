@@ -25,10 +25,11 @@ class MasterParams(BaseModel):
     }
     run_paths: RunPaths
 
-    PLOT_AFTER_SIMULATE: bool = True
+    PLOT_AFTER_SIMULATE: bool = False
     USE_CEREBELLUM: bool = False
-    GUI_PYBULLET: bool = True
+    GUI_PYBULLET: bool = False
     USE_MUSIC: bool = False
+    SAVE_WEIGHTS_CEREB: bool = False
 
     NJT: int = 1
     simulation: SimulationParams = Field(default_factory=lambda: SimulationParams())
