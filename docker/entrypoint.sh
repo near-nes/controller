@@ -28,7 +28,7 @@ SIMULATION_MODE="${SIMULATION_MODE}"
 if [ "$SIMULATION_MODE" = "dev" ]; then
     echo "Running in 'dev' mode. Synchronizing UID/GID..."
 
-    # CRITICAL CHECK: Ensure the target directory (bind mount) exists
+    # Ensure the target directory (bind mount) exists
     if [ ! -d "$TARGET_DIR" ]; then
         echo "Error: Target directory $TARGET_DIR not found or not a directory." >&2
         echo "This directory must be bind-mounted from the host for dev mode." >&2
@@ -40,29 +40,29 @@ if [ "$SIMULATION_MODE" = "dev" ]; then
     DIR_GID=$(stat -c "%g" "$TARGET_DIR")
     echo "Mounted directory $TARGET_DIR owned by UID: $DIR_UID, GID: $DIR_GID"
 
-    # Get current container user's UID and GID
+    # Get current container user's UID
     CURRENT_UID=$(id -u "$USERNAME")
-    CURRENT_GID=$(id -g "$USERNAME")
+    # CURRENT_GID=$(id -g "$USERNAME")
 
-    # If UID/GID don't match the directory, change the container user's UID/GID
-    if [ "$CURRENT_UID" != "$DIR_UID" ] || [ "$CURRENT_GID" != "$DIR_GID" ]; then
-        echo "Current $USERNAME UID/GID ($CURRENT_UID/$CURRENT_GID) differs from target ($DIR_UID/$DIR_GID). Adjusting..."
+    # If UID don't match the directory, change the container user's UID
+    if [ "$CURRENT_UID" != "$DIR_UID" ]; then
+        echo "Current $USERNAME UID ($CURRENT_UID) differs from target ($DIR_UID). Adjusting..."
 
-        # Ensure the target GID exists or modify the existing group
-        if ! getent group "$DIR_GID" > /dev/null; then
-            echo "Modifying group $USERNAME to GID $DIR_GID..."
-            groupmod -o -g "$DIR_GID" "$USERNAME"
-        else
-            EXISTING_GROUP_NAME=$(getent group "$DIR_GID" | cut -d: -f1)
-            if [ "$EXISTING_GROUP_NAME" != "$USERNAME" ]; then
-                 echo "Target GID $DIR_GID exists with name $EXISTING_GROUP_NAME. Modifying $USERNAME's primary group GID to $DIR_GID."
-                 if id -G "$USERNAME" | grep -qw "$DIR_GID"; then
-                     usermod -g "$DIR_GID" "$USERNAME"
-                 else
-                     groupmod -o -g "$DIR_GID" "$USERNAME"
-                 fi
-            fi
-        fi
+        # # Ensure the target GID exists or modify the existing group
+        # if ! getent group "$DIR_GID" > /dev/null; then
+        #     echo "Modifying group $USERNAME to GID $DIR_GID..."
+        #     groupmod -o -g "$DIR_GID" "$USERNAME"
+        # else
+        #     EXISTING_GROUP_NAME=$(getent group "$DIR_GID" | cut -d: -f1)
+        #     if [ "$EXISTING_GROUP_NAME" != "$USERNAME" ]; then
+        #          echo "Target GID $DIR_GID exists with name $EXISTING_GROUP_NAME. Modifying $USERNAME's primary group GID to $DIR_GID."
+        #          if id -G "$USERNAME" | grep -qw "$DIR_GID"; then
+        #              usermod -g "$DIR_GID" "$USERNAME"
+        #          else
+        #              groupmod -o -g "$DIR_GID" "$USERNAME"
+        #          fi
+        #     fi
+        # fi
 
         # Modify User: Change the user's UID
         echo "Modifying user $USERNAME to UID $DIR_UID..."
@@ -70,14 +70,14 @@ if [ "$SIMULATION_MODE" = "dev" ]; then
 
         # Adjust ownership of internal directories
         echo "Adjusting ownership of internal directories..."
-        chown -R "$DIR_UID:$DIR_GID" "$VENV_PATH" "/home/$USERNAME" "$SHARED_DATA_DIR" "$NEST_MODULE_PATH"
+        chown -R "$DIR_UID" "$VENV_PATH" "/home/$USERNAME" "$SHARED_DATA_DIR" "$NEST_MODULE_PATH"
 
-        echo "$USERNAME user adjusted to UID: $DIR_UID, GID: $DIR_GID"
+        echo "$USERNAME user adjusted to UID: $DIR_UID"
     else
-        echo "$USERNAME UID/GID ($CURRENT_UID/$CURRENT_GID) matches target ($DIR_UID/$DIR_GID). No changes needed."
+        echo "$USERNAME UID ($CURRENT_UID) matches target ($DIR_UID). No changes needed."
     fi
     USER_ID_TO_USE=$DIR_UID
-    GROUP_ID_TO_USE=$DIR_GID
+    # GROUP_ID_TO_USE=$DIR_GID
 else
     echo "Running in 'hpc' mode. Skipping UID/GID synchronization."
     # In HPC mode, we use the default user and group IDs from the image build
@@ -93,7 +93,7 @@ if [ ! -f "${BSB_NETWORK_FILE}" ]; then
     echo "Found compressed file ${COMPRESSED_BSB_NETWORK_FILE}. Decompressing..."
     gzip -d -c "${COMPRESSED_BSB_NETWORK_FILE}" > "${BSB_NETWORK_FILE}"
     echo "moving ownership to current user.."
-    chown -R "$USER_ID_TO_USE:$GROUP_ID_TO_USE" $BSB_NETWORK_FILE
+    chown -R "$USER_ID_TO_USE" $BSB_NETWORK_FILE
     echo "ownership changed"
 else
     echo "Uncompressed network file ${BSB_NETWORK_FILE} already exists. Skipping decompression."
@@ -123,7 +123,7 @@ gosu "$USERNAME" /usr/local/bin/start-vnc.sh
 echo "Entrypoint: Executing custom command as user '$USERNAME': $@"
 
 echo "----------------------------------------"
-echo "Switching to user $USERNAME (UID: $USER_ID_TO_USE, GID: $GROUP_ID_TO_USE) and executing command: $@"
+echo "Switching to user $USERNAME (UID: $USER_ID_TO_USE) and executing command: $@"
 echo "----------------------------------------"
 
 
