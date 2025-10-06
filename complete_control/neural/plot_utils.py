@@ -337,8 +337,87 @@ def plot_population_trial(
     return fig, ax
 
 
+def handle_trial(
+    trials2plot,
+    lgd,
+    i,
+    populations_to_plot_trial,
+    path_data,
+    single_trial_time_vect_concat,
+    single_trial_duration,
+    path_fig="",
+):
+    all_trials_imgs = []
+    for nt in trials2plot:
+        trial_imgs = {}
+
+        for file_prefix in populations_to_plot_trial:
+            plot_name_t = file_prefix
+            _log.debug(f"Plotting trial {nt} for {plot_name_t}...")
+
+            pop_p_path_t = path_data / f"{file_prefix}_p.json"
+            pop_n_path_t = path_data / f"{file_prefix}_n.json"
+
+            fig_ipop, ax_ipop = plot_population_trial(
+                nt,
+                single_trial_time_vect_concat,
+                single_trial_duration,
+                pop_p_path_t,
+                pop_n_path_t,
+                title=f"{plot_name_t.replace('_', ' ').title()} {lgd} Trial {nt}",
+                buffer_size=15,
+            )
+
+            if path_fig:
+                trial_plot_path = path_fig / "Trials" / f"{plot_name_t}_{i}"
+                trial_plot_path.mkdir(parents=True, exist_ok=True)
+                fig_ipop.savefig(trial_plot_path / f"Trial_{nt}.{FIGURE_EXT}")
+                _log.debug(
+                    f"Saved plot at {trial_plot_path} / Trial_{nt}_{plot_name_t}_{i}.{FIGURE_EXT}"
+                )
+                plt.close(fig_ipop)
+
+                # save img (no fig) for collage
+                trial_img = Image.open(trial_plot_path / f"Trial_{nt}.{FIGURE_EXT}")
+                trial_imgs[plot_name_t] = trial_img
+
+        all_trials_imgs.append(trial_imgs)
+
+    return all_trials_imgs
+
+
+def create_collage(
+    all_trials_imgs,
+    pop_collage,
+    path_fig,
+):
+    _log.debug(f"Generating per trial collage for {pop_collage} populations...")
+
+    width, height = all_trials_imgs[0][pop_collage[0]].size
+    collage = Image.new(
+        "RGB",
+        (width, height * len(pop_collage)),
+        color=(255, 255, 255),
+    )
+
+    for nt, trial_dict in enumerate(all_trials_imgs):
+        cnt_p = 0
+        for pop, img in trial_dict.items():
+            if pop in pop_collage:
+                collage.paste(img, (0, height * cnt_p))
+                cnt_p += 1
+
+        if path_fig:
+            collage_path = path_fig / "Collage"
+            collage_path.mkdir(parents=True, exist_ok=True)
+            collage.save(collage_path / f"Trial_{nt}_collage.{FIGURE_EXT}")
+            _log.debug(f"Saved plot at {collage_path}")
+
+    return
+
+
 def plot_controller_outputs(run_paths: RunPaths):
-    """Plots outputs for various populations from a simulation run directory."""
+    """Plots outputs for various populations from a simulation run directory. Both entire simulation and per trial plots"""
 
     if MPI.COMM_WORLD.rank != 0:
         return  # Only rank 0 plots
@@ -461,11 +540,39 @@ def plot_controller_outputs(run_paths: RunPaths):
         "state",
     ]
 
+    populations_to_collage = [
+        # "sensoryneur",
+        # "cereb_core_forw_dcnp",
+        # "cereb_core_forw_io",
+        # "cereb_core_forw_pc",
+        # "cereb_feedback",
+        "cereb_error",
+        "pred",
+        "state",
+    ]
+
     # Set trials to plot
     trials2plot = "all"  # [1,15,30]
     if trials2plot == "all":
         trials2plot = list(range(N_trials))
 
+    trials_imgs = handle_trial(
+        trials2plot,
+        lgd,
+        i,
+        populations_to_plot_trial,
+        path_data,
+        single_trial_time_vect_concat,
+        single_trial_duration,
+        path_fig,
+    )
+
+    create_collage(
+        trials_imgs,
+        populations_to_collage,
+        path_fig,
+    )
+    """
     for nt in trials2plot:
         all_trial_imgs = []
 
@@ -512,7 +619,7 @@ def plot_controller_outputs(run_paths: RunPaths):
             collage_path.mkdir(parents=True, exist_ok=True)
             collage.save(collage_path / f"Trial_{nt}_collage.{FIGURE_EXT}")
             _log.debug(f"Saved plot at {collage_path}")
-
+    """
     for json_file in sorted(run_paths.data_nest.glob("weightrecord*.json")):
         try:
             fig_filename = (
