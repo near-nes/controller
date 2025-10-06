@@ -545,7 +545,7 @@ def plot_controller_outputs(run_paths: RunPaths):
         # "cereb_core_forw_dcnp",
         # "cereb_core_forw_io",
         # "cereb_core_forw_pc",
-        # "cereb_feedback",
+        "cereb_feedback",
         "cereb_error",
         "pred",
         "state",
