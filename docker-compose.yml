@@ -21,6 +21,8 @@ services:
     <<: *simulation-base
     image: simulation:dev
     command: bash
+    ports:
+      - "127.0.0.1:5901:5901"
 
   simulation-music:
     <<: *simulation-base
@@ -29,6 +31,8 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       target: hpc
+    ports:
+      - "127.0.0.1:5902:5901"
     command: gosu simuser mpirun -np 5 music /sim/controller/complete_control/complete.music
 
   simulation-nrp:
@@ -38,6 +42,8 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       target: hpc
+    ports:
+      - "127.0.0.1:5904:5901"
     command: sh -c "export EXEC_TIMESTAMP=$$(date +%Y%m%d_%H%M%S) && NRPCoreSim -c /sim/controller/nrp_simulation_config_nest_docker_compose.json --cloglevel debug --logdir /home/simuser/logs && python /sim/controller/complete_control/plot_from_run.py /sim/controller/runs/$$EXEC_TIMESTAMP"
     # command: sh -c "export EXEC_TIMESTAMP=$(date +%Y%m%d_%H%M%S) && NRPCoreSim -c /sim/controller/nrp_simulation_config_nest_docker_compose.json --cloglevel debug --logdir /home/simuser/logs && python /sim/controller/complete_control/plot_from_run.py /sim/controller/runs/$EXEC_TIMESTAMP"
     # depends_on:
