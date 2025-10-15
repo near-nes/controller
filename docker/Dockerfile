@@ -160,7 +160,7 @@ RUN git clone https://github.com/INCF/MUSIC \
     && make -j$(nproc) \
     && make install
 
-####################### NEST 3.7 #######################
+####################### NEST 3.9 #######################
 ENV NEST_VERSION=3.9
 
 # Install NEST 3.9
