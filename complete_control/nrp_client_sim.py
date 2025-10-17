@@ -8,7 +8,8 @@ from config.nrp_sim_config import SimulationConfig
 from config.paths import RunPaths
 from config.MasterParams import MasterParams
 from timeit import default_timer as timer
-from neural.plot_utils_trials import plot_controller_outputs
+from neural.plot_utils import plot_controller_outputs
+from plant.plant_plotting import plot_plant_outputs
 import structlog
 from tqdm import tqdm
 
@@ -92,6 +93,7 @@ if master_config.PLOT_AFTER_SIMULATE:
     client_log.info("--- Generating Plots (Standalone) ---")
     plot_start_time = timer()
     plot_controller_outputs(run_paths)
+    plot_plant_outputs(run_paths)
     plot_end_time = timer()
     total_plot_time = datetime.timedelta(seconds=plot_end_time - plot_start_time)
     client_log.info(f"Plotting Finished. {total_plot_time.total_seconds():.1f} s")

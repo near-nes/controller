@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 
-import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -13,6 +12,9 @@ from mpi4py import MPI
 from complete_control.neural.neural_models import SynapseBlock
 
 from .neural_models import PopulationSpikes
+
+import matplotlib.gridspec as gridspec
+from PIL import Image
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
 FIGURE_EXT = "png"
@@ -74,7 +76,7 @@ def plot_synaptic_weight_evolution(synapse_json_path, max_synapses=10, fig_path=
         fig.savefig(fig_path)
 
 
-def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", **kwargs):
+def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", normalize=False, **kwargs):
     """Computes and plots the smoothed PSTH for a set of spike times."""
     if ts.size == 0 or pop_size == 0:
         ax.plot([], [], **kwargs)  # Plot empty to keep colors consistent
@@ -89,12 +91,16 @@ def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", **kwargs):
     rate_padded = np.pad(rate, pad_width=2, mode="reflect")
     rate_sm = np.convolve(rate_padded, np.ones(5) / 5, mode="valid")
 
+    if normalize:
+        rate_sm = rate_sm / np.max(rate_sm) if np.max(rate) > 0 else rate
+
     ax.plot(bins[:-1], rate_sm, **kwargs)
     if title:
         ax.set_ylabel(title, fontsize=15)
     ax.set_xlabel("Time [ms]")
-    ax.set_xlim(left=0, right=time_end)
-    ax.set_ylim(bottom=0)
+
+    if normalize:
+        ax.set_ylim(0, 1)
 
     # add return for keep max_value to scale the plot (if rate_sm is not empty)
     if rate_sm.size > 0:
@@ -109,30 +115,23 @@ def global_to_local_ids(x: PopulationSpikes, hist_logscale=False):
     return np.array([old2newid[i] for i in x.senders])
 
 
-def plot_population(
+def generate_plot_fig(
     time_v,
-    pop_p_path: Path,
-    pop_n_path: Path,
-    title="",
-    buffer_size=15,
-    filepath=None,
+    pop_p_data,
+    pop_n_data,
+    title,
+    buffer_size,
+    ts_p,
+    ts_n,
+    y_p,
+    y_n,
 ):
-    """Plots raster and PSTH for a population pair from data files."""
-    pop_p_data = load_spike_data_from_file(pop_p_path)
-    pop_n_data = load_spike_data_from_file(pop_n_path)
-
-    ts_p = pop_p_data.times
-    ts_n = pop_n_data.times
-
-    y_p = global_to_local_ids(pop_p_data)
-    y_n = -global_to_local_ids(pop_n_data)
-
     fig = plt.figure(figsize=(10, 6))
     gs = gridspec.GridSpec(4, 1, height_ratios=[3, 3, 1, 5], hspace=0.065)
     ax = [None] * 3
     ax[0] = fig.add_subplot(gs[0])
-    ax[1] = fig.add_subplot(gs[1], sharex=ax[0])
-    ax[2] = fig.add_subplot(gs[3], sharex=ax[0])
+    ax[1] = fig.add_subplot(gs[1])
+    ax[2] = fig.add_subplot(gs[3])
 
     # Raster plot
     ax[0].scatter(ts_p, y_p, marker=".", s=1, c="r", label="Positive")
@@ -182,6 +181,7 @@ def plot_population(
         ax=ax[2],
         color="r",
         label="Positive",
+        normalize=False,
     )
     max_n = plot_rate(
         time_v,
@@ -192,12 +192,53 @@ def plot_population(
         color="b",
         title="PSTH (Hz)",
         label="Negative",
+        normalize=False,
     )
     ax[2].legend(fontsize=16)
 
     # scale PSTH plot
     max_y = max(max_p, max_n)
-    ax[2].set_ylim(top=max_y + 1)
+    ax[2].set_ylim(bottom=0, top=max_y + 1)
+
+    # Align plot on x-axis
+    time_end = time_v[-1] if len(time_v) > 0 else 0
+    for i, axs in enumerate(ax):
+        axs.set_xlim(left=0, right=time_end)
+    ax[1].tick_params(labelbottom=True)
+    ax[2].tick_params(labelbottom=True)
+
+    return fig, ax
+
+
+def plot_population(
+    time_v,
+    pop_p_path: Path,
+    pop_n_path: Path,
+    title="",
+    buffer_size=15,
+    filepath=None,
+):
+    """Plots raster and PSTH for a population pair from data files."""
+    pop_p_data = load_spike_data_from_file(pop_p_path)
+    pop_n_data = load_spike_data_from_file(pop_n_path)
+
+    ts_p = pop_p_data.times
+    ts_n = pop_n_data.times
+
+    y_p = global_to_local_ids(pop_p_data)
+    y_n = -global_to_local_ids(pop_n_data)
+
+    fig, ax = generate_plot_fig(
+        time_v,
+        pop_p_data,
+        pop_n_data,
+        title,
+        buffer_size,
+        ts_p,
+        ts_n,
+        y_p,
+        y_n,
+    )
 
     if filepath:
         fig.savefig(filepath)
@@ -224,6 +265,7 @@ def plot_population_single(
     ax[0].set_ylabel("raster", fontsize=15)
     ax[0].set_title(title, fontsize=16)
     ax[0].set_ylim(bottom=0, top=pop_data.population_size + 1)
+    ax[0].tick_params(labelbottom=True)
 
     for i, axs in enumerate(ax):
         axs.spines["top"].set_visible(False)
@@ -251,8 +293,9 @@ def plot_population_single(
         ax=ax[1],
         color="r",
         title="PSTH (Hz)",
+        normalize=False,
     )
-    ax[1].set_ylim(top=max_y + 1)
+    ax[1].set_ylim(bottom=0, top=max_y + 1)
     fig.tight_layout()
 
     if filepath:
@@ -263,8 +306,212 @@ def plot_population_single(
     return fig, ax
 
 
+def plot_population_trial(
+    nt,
+    time_s,
+    time_trial,
+    pop_p_path: Path,
+    pop_n_path: Path,
+    title="",
+    buffer_size=15,
+):
+    """Plots raster and PSTH for a population pair from data files."""
+    pop_p_data = load_spike_data_from_file(pop_p_path)
+    pop_n_data = load_spike_data_from_file(pop_n_path)
+
+    t0 = nt * time_trial
+    t1 = (nt + 1) * time_trial
+
+    mask_p = (pop_p_data.times >= t0) & (pop_p_data.times < t1)
+    mask_n = (pop_n_data.times >= t0) & (pop_n_data.times < t1)
+
+    ts_p = pop_p_data.times[mask_p] - t0
+    ts_n = pop_n_data.times[mask_n] - t0
+
+    y_p = global_to_local_ids(pop_p_data)[mask_p]
+    y_n = -global_to_local_ids(pop_n_data)[mask_n]
+
+    fig, ax = generate_plot_fig(
+        time_s,
+        pop_p_data,
+        pop_n_data,
+        title,
+        buffer_size,
+        ts_p,
+        ts_n,
+        y_p,
+        y_n,
+    )
+
+    return fig, ax
+
+
+def handle_trial(
+    trials2plot,
+    lgd,
+    i,
+    populations_to_plot_trial,
+    path_data,
+    single_trial_time_vect_concat,
+    single_trial_duration,
+    path_fig="",
+):
+    all_trials_imgs = []
+    for nt in trials2plot:
+        trial_imgs = {}
+
+        for file_prefix in populations_to_plot_trial:
+            plot_name_t = file_prefix
+            _log.debug(f"Plotting trial {nt} for {plot_name_t}...")
+
+            pop_p_path_t = path_data / f"{file_prefix}_p.json"
+            pop_n_path_t = path_data / f"{file_prefix}_n.json"
+
+            fig_ipop, ax_ipop = plot_population_trial(
+                nt,
+                single_trial_time_vect_concat,
+                single_trial_duration,
+                pop_p_path_t,
+                pop_n_path_t,
+                title=f"{plot_name_t.replace('_', ' ').title()} {lgd} Trial {nt}",
+                buffer_size=15,
+            )
+
+            if path_fig:
+                trial_plot_path = path_fig / "Trials" / f"{plot_name_t}_{i}"
+                trial_plot_path.mkdir(parents=True, exist_ok=True)
+                fig_ipop.savefig(
+                    trial_plot_path / f"Trial_{nt}_{plot_name_t}_{i}.{FIGURE_EXT}"
+                )
+                _log.debug(
+                    f"Saved plot at {trial_plot_path} / Trial_{nt}_{plot_name_t}_{i}.{FIGURE_EXT}"
+                )
+                plt.close(fig_ipop)
+
+                # save img (no fig) for collage
+                trial_img = Image.open(
+                    trial_plot_path / f"Trial_{nt}_{plot_name_t}_{i}.{FIGURE_EXT}"
+                )
+                trial_imgs[plot_name_t] = trial_img
+
+        all_trials_imgs.append(trial_imgs)
+
+    return all_trials_imgs
+
+
+def create_collage(
+    all_trials_imgs,
+    pop_collage,
+    path_fig,
+):
+    _log.debug(f"Generating per trial collage for {pop_collage} populations...")
+
+    width, height = all_trials_imgs[0][pop_collage[0]].size
+    collage = Image.new(
+        "RGB",
+        (width, height * len(pop_collage)),
+        color=(255, 255, 255),
+    )
+
+    for nt, trial_dict in enumerate(all_trials_imgs):
+        cnt_p = 0
+        for pop, img in trial_dict.items():
+            if pop in pop_collage:
+                collage.paste(img, (0, height * cnt_p))
+                cnt_p += 1
+
+        if path_fig:
+            collage_path = path_fig / "Collage"
+            collage_path.mkdir(parents=True, exist_ok=True)
+            collage.save(collage_path / f"Trial_{nt}_collage.{FIGURE_EXT}")
+            _log.debug(f"Saved plot at {collage_path}")
+
+    return
+
+
+def plot_overlay(
+    trials2plot,
+    populations_to_overlay: list,
+    path_data,
+    single_trial_time_vect_concat,
+    time_trial,
+    path_fig,
+    normalize=False,
+):
+
+    for nt in trials2plot:
+        fig_overl, ax_overl = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
+        _log.debug(f"Generating overlayed plot for trial {nt}...")
+
+        for file_prefix in populations_to_overlay:
+            plot_name_t = file_prefix
+
+            pop_p_path = path_data / f"{file_prefix}_p.json"
+            pop_n_path = path_data / f"{file_prefix}_n.json"
+
+            pop_p_data = load_spike_data_from_file(pop_p_path)
+            pop_n_data = load_spike_data_from_file(pop_n_path)
+
+            t0 = nt * time_trial
+            t1 = (nt + 1) * time_trial
+
+            mask_p = (pop_p_data.times >= t0) & (pop_p_data.times < t1)
+            mask_n = (pop_n_data.times >= t0) & (pop_n_data.times < t1)
+
+            ts_p = pop_p_data.times[mask_p] - t0
+            ts_n = pop_n_data.times[mask_n] - t0
+
+            plot_rate(
+                single_trial_time_vect_concat,
+                ts_p,
+                pop_p_data.population_size,
+                buffer_sz=15,
+                ax=ax_overl[0],
+                label=f"{plot_name_t}_p",
+                normalize=normalize,
+            )
+
+            plot_rate(
+                single_trial_time_vect_concat,
+                ts_n,
+                pop_n_data.population_size,
+                buffer_sz=15,
+                ax=ax_overl[1],
+                label=f"{plot_name_t}_p",
+                normalize=normalize,
+            )
+
+        for ax in ax_overl:
+            ax.legend(fontsize=8)
+            if normalize:
+                ax.set_ylabel("Normalized rate")
+            else:
+                ax.set_ylabel("Rate (Hz)")
+
+        ax_overl[0].set_title("Overlayed positive populations (PSTH)")
+        ax_overl[1].set_title("Overlayed negative populations (PSTH)")
+
+        fig_overl.tight_layout()
+
+        if path_fig:
+            overl_path = path_fig / "Overlayed plots"
+            if normalize:
+                overl_path = overl_path / "Normalized"
+            overl_path.mkdir(parents=True, exist_ok=True)
+
+            if normalize:
+                fig_overl.savefig(overl_path / f"Trial_{nt}_normalized.{FIGURE_EXT}")
+            else:
+                fig_overl.savefig(overl_path / f"Trial_{nt}.{FIGURE_EXT}")
+            _log.debug(
+                f"Saved overlayed plot at {overl_path} / Trial_{nt}.{FIGURE_EXT}"
+            )
+            plt.close(fig_overl)
+    return
+
+
 def plot_controller_outputs(run_paths: RunPaths):
-    """Plots outputs for various populations from a simulation run directory."""
+    """Plots outputs for various populations from a simulation run directory. Both entire simulation and per trial plots"""
 
     if MPI.COMM_WORLD.rank != 0:
         return  # Only rank 0 plots
@@ -279,6 +526,7 @@ def plot_controller_outputs(run_paths: RunPaths):
 
     # Get parameters from config
     njt = master_config.NJT
+    N_trials = master_config.simulation.n_trials
     # pop_size = master_config.brain.population_size # No longer needed, obtained from PopulationSpikes
     res = master_config.simulation.resolution
     total_sim_duration = master_config.simulation.total_duration_all_trials_ms
@@ -286,6 +534,13 @@ def plot_controller_outputs(run_paths: RunPaths):
         0,
         total_sim_duration,
         num=int(np.round(total_sim_duration / res)),
+        endpoint=True,
+    )
+    single_trial_duration = master_config.simulation.duration_single_trial_ms
+    single_trial_time_vect_concat = np.linspace(
+        0,
+        single_trial_duration,
+        num=int(np.round(single_trial_duration / res)),
         endpoint=True,
     )
 
@@ -366,6 +621,99 @@ def plot_controller_outputs(run_paths: RunPaths):
             buffer_size=15,
             filepath=path_fig / f"{plot_name}_{i}.{FIGURE_EXT}",
         )
+
+    # PLOT PER TRIALS
+    populations_to_plot_trial = [
+        "planner",
+        "brainstem",
+        "mc_out",
+        "mc_m1",
+        "mc_ffwd",
+        "mc_fbk",
+        "state",
+        "sensoryneur",
+        "cereb_core_forw_dcnp",
+        "cereb_core_forw_io",
+        "cereb_core_forw_pc",
+        "cereb_core_inv_dcnp",
+        "cereb_core_inv_io",
+        "cereb_core_inv_pc",
+        "cereb_error",
+        "cereb_error_inv",
+        "cereb_feedback",
+        "cereb_feedback_inv",
+        "cereb_motor_prediction",
+        "cereb_state_to_inv",
+        "fbk_smooth",
+        "pred",
+    ]
+
+    populations_to_collage = [
+        "planner",
+        "sensoryneur",
+        # "cereb_core_forw_dcnp",
+        # "cereb_core_forw_io",
+        # "cereb_core_forw_pc",
+        "cereb_feedback",
+        "cereb_error",
+        "pred",
+        "state",
+    ]
+
+    populations_to_overlay = [
+        "planner",
+        # "sensoryneur",
+        # "cereb_core_forw_dcnp",
+        # "cereb_core_forw_io",
+        # "cereb_core_forw_pc",
+        "cereb_feedback",
+        # "cereb_error",
+        "pred",
+        "state",
+    ]
+
+    # Set trials to plot
+    trials2plot = "all"  # [1,15,30]
+    if trials2plot == "all":
+        trials2plot = list(range(N_trials))
+
+    trials_imgs = handle_trial(
+        trials2plot,
+        lgd,
+        i,
+        populations_to_plot_trial,
+        path_data,
+        single_trial_time_vect_concat,
+        single_trial_duration,
+        path_fig,
+    )
+
+    create_collage(
+        trials_imgs,
+        populations_to_collage,
+        path_fig,
+    )
+
+    # plot both normalized and not normalized overlayed plots
+    plot_overlay(
+        trials2plot,
+        populations_to_overlay,
+        path_data,
+        single_trial_time_vect_concat,
+        single_trial_duration,
+        path_fig,
+        normalize=True,
+    )
+
+    plot_overlay(
+        trials2plot,
+        populations_to_overlay,
+        path_data,
+        single_trial_time_vect_concat,
+        single_trial_duration,
+        path_fig,
+        normalize=False,
+    )
 
     for json_file in sorted(run_paths.data_nest.glob("weightrecord*.json")):
         try:
