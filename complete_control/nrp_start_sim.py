@@ -54,11 +54,6 @@ start_time = timer()
 nrp.initialize()
 client_log.debug("Nrp server initialized successfully")
 
-"""
-data = wrappers_pb2.DoubleValue()
-data.value = 123.456
-nrp.set_proto_datapack("client_datapack", "bullet_simulator", data)
-"""
 # run loop
 loop_start_time = timer()
 n_it_trial = int((time_prep + time_move + time_post) / resolution)
