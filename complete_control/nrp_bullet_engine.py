@@ -50,17 +50,20 @@ class Script(GrpcEngineScript):
         proto_wrapper = nrpgenericproto_pb2.ArrayDouble()
         proto_wrapper.array.extend([0.0, 0.0])
         self._setDataPack("control_cmd", proto_wrapper)
+        """
         # datapack for the nrp_client
         self._registerDataPack("client_datapack", wrappers_pb2.DoubleValue)
+        """
 
         self.log.info("NRP Bullet Engine: Initialization complete.")
 
     def runLoop(self, timestep):
+        """
         # test client datapack processing
         client_data = self._getDataPack("client_datapack").value
         if client_data:
             self.log.info("The value got from the py-nrp-client", data=client_data)
-
+        """
         self.rest_profile.end()
         if self.step % 50 == 0:
             self.log.debug("[bullet] starting update...")

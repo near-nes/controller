@@ -190,7 +190,7 @@ if __name__ == "__main__":
     with open(run_paths.params_json, "w") as f:
         f.write(master_config.model_dump_json(indent=2))
 
-    main_log.info("MasterParams initialized in main_simulation.")
+    main_log.info("MasterParams initialized in music_start_sim.")
 
     module_params = master_config.modules
     pops_params = master_config.populations

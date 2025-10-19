@@ -13,4 +13,4 @@ opencv-python~=4.11
 numpy~=1.26
 python-on-whales
 pyyaml
-protobuf
+protobuf==6.32.1

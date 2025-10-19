@@ -54,10 +54,11 @@ start_time = timer()
 nrp.initialize()
 client_log.debug("Nrp server initialized successfully")
 
+"""
 data = wrappers_pb2.DoubleValue()
 data.value = 123.456
 nrp.set_proto_datapack("client_datapack", "bullet_simulator", data)
-
+"""
 # run loop
 loop_start_time = timer()
 n_it_trial = int((time_prep + time_move + time_post) / resolution)
@@ -65,6 +66,7 @@ n_it = n_it_trial * n_trials
 
 client_log.info(f"Start run loop. {n_trials} trials ({n_it} total iterations)")
 
+it_step = int(n_it_trial / 100)
 with tqdm(total=n_trials, desc="Total Simulation", unit="trial") as pbar_total:
     for trial_idx in range(n_trials):
         with tqdm(
@@ -73,9 +75,10 @@ with tqdm(total=n_trials, desc="Total Simulation", unit="trial") as pbar_total:
             unit="iter",
             leave=False,
         ) as pbar_trial:
-            for i in range(n_it_trial):
-                nrp.run_loop(1)
-                pbar_trial.update(1)
+
+            for i in range(int(n_it_trial / it_step)):
+                nrp.run_loop(it_step)
+                pbar_trial.update(it_step)
 
             pbar_total.update(1)
 

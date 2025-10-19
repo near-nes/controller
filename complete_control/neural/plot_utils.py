@@ -214,19 +214,26 @@ def plot_population(
     time_v,
     pop_p_path: Path,
     pop_n_path: Path,
+    t0=0,
+    t1=None,
     title="",
     buffer_size=15,
-    filepath=None,
 ):
     """Plots raster and PSTH for a population pair from data files."""
     pop_p_data = load_spike_data_from_file(pop_p_path)
     pop_n_data = load_spike_data_from_file(pop_n_path)
 
-    ts_p = pop_p_data.times
-    ts_n = pop_n_data.times
+    if t1 is None:
+        t1 = time_v[-1]
 
-    y_p = global_to_local_ids(pop_p_data)
-    y_n = -global_to_local_ids(pop_n_data)
+    mask_p = (pop_p_data.times >= t0) & (pop_p_data.times < t1)
+    mask_n = (pop_n_data.times >= t0) & (pop_n_data.times < t1)
+
+    ts_p = pop_p_data.times[mask_p] - t0
+    ts_n = pop_n_data.times[mask_n] - t0
+
+    y_p = global_to_local_ids(pop_p_data)[mask_p]
+    y_n = -global_to_local_ids(pop_n_data)[mask_n]
 
     fig, ax = generate_plot_fig(
         time_v,
@@ -239,11 +246,6 @@ def plot_population(
         y_p,
         y_n,
     )
-
-    if filepath:
-        fig.savefig(filepath)
-        _log.debug(f"Saved plot at {filepath}")
-        plt.close(fig)
 
     return fig, ax
 
@@ -306,47 +308,7 @@ def plot_population_single(
     return fig, ax
 
 
-def plot_population_trial(
-    nt,
-    time_s,
-    time_trial,
-    pop_p_path: Path,
-    pop_n_path: Path,
-    title="",
-    buffer_size=15,
-):
-    """Plots raster and PSTH for a population pair from data files."""
-    pop_p_data = load_spike_data_from_file(pop_p_path)
-    pop_n_data = load_spike_data_from_file(pop_n_path)
-
-    t0 = nt * time_trial
-    t1 = (nt + 1) * time_trial
-
-    mask_p = (pop_p_data.times >= t0) & (pop_p_data.times < t1)
-    mask_n = (pop_n_data.times >= t0) & (pop_n_data.times < t1)
-
-    ts_p = pop_p_data.times[mask_p] - t0
-    ts_n = pop_n_data.times[mask_n] - t0
-
-    y_p = global_to_local_ids(pop_p_data)[mask_p]
-    y_n = -global_to_local_ids(pop_n_data)[mask_n]
-
-    fig, ax = generate_plot_fig(
-        time_s,
-        pop_p_data,
-        pop_n_data,
-        title,
-        buffer_size,
-        ts_p,
-        ts_n,
-        y_p,
-        y_n,
-    )
-
-    return fig, ax
-
-
-def handle_trial(
+def plot_populations_per_trial(
     trials2plot,
     lgd,
     i,
@@ -367,12 +329,15 @@ def handle_trial(
             pop_p_path_t = path_data / f"{file_prefix}_p.json"
             pop_n_path_t = path_data / f"{file_prefix}_n.json"
 
-            fig_ipop, ax_ipop = plot_population_trial(
-                nt,
+            tstart_trial = nt * single_trial_duration
+            tend_trial = (nt + 1) * single_trial_duration
+
+            fig_ipop, ax_ipop = plot_population(
                 single_trial_time_vect_concat,
-                single_trial_duration,
                 pop_p_path_t,
                 pop_n_path_t,
+                tstart_trial,
+                tend_trial,
                 title=f"{plot_name_t.replace('_', ' ').title()} {lgd} Trial {nt}",
                 buffer_size=15,
             )
@@ -583,14 +548,19 @@ def plot_controller_outputs(run_paths: RunPaths):
         pop_p_path = path_data / f"{file_prefix}_p.json"
         pop_n_path = path_data / f"{file_prefix}_n.json"
 
-        plot_population(
+        fig_pop, ax_pop = plot_population(
             total_time_vect_concat,
             pop_p_path,
             pop_n_path,
             title=f"{plot_name.replace('_', ' ').title()} {lgd}",
             buffer_size=15,
-            filepath=path_fig / f"{plot_name}_{i}.{FIGURE_EXT}",
         )
+
+        filepath = path_fig / f"{plot_name}_{i}.{FIGURE_EXT}"
+        if filepath:
+            fig_pop.savefig(filepath)
+            _log.debug(f"Saved plot at {filepath}")
+            plt.close(fig_pop)
 
     populations_to_plot_single = [
         "cereb_motor_commands",
@@ -677,7 +647,7 @@ def plot_controller_outputs(run_paths: RunPaths):
     if trials2plot == "all":
         trials2plot = list(range(N_trials))
 
-    trials_imgs = handle_trial(
+    trials_imgs = plot_populations_per_trial(
         trials2plot,
         lgd,
         i,
