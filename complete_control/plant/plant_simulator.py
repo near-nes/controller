@@ -16,7 +16,7 @@ from .sensoryneuron import SensoryNeuron
 
 
 class TrialSection(Enum):
-    TIME_START, TIME_PREP, TIME_MOVE, TIME_POST, TIME_END_TRIAL = range(5)
+    TIME_START, TIME_PREP, TIME_MOVE, TIME_GRASP, TIME_POST, TIME_END_TRIAL = range(6)
 
 
 class PlantSimulator:
@@ -249,21 +249,25 @@ class PlantSimulator:
 
         return rate_pos_hz, rate_neg_hz
 
-    def _move_shoulder_if_target_close(self, direction):
+    def _grasp_if_target_close(self):
         if not self.checked_proximity:
             self.log.debug(
-                "In TIME_POST. Verifying whether EE is in range for attachment..."
+                "In TIME_GRASP. Verifying whether EE is in range for attachment..."
             )
             self.checked_proximity = True
             if self.plant.check_target_proximity():
-                self.log.debug("EE is in range. Attaching and moving shoulder...")
+                self.log.debug("EE is in range. Attaching...")
                 self.target_attached = True
-                self.plant.move_shoulder(direction)
+                self.plant.grasp()
             else:
                 self.target_attached = False
-                self.log.debug(
-                    "EE is not in range. not attaching and not moving shoulder."
-                )
+                self.log.debug("EE is not in range. not attaching.")
+
+    def _move_shoulder(self, direction):
+        if self.target_attached and not self.shoulder_moving:
+            self.log.debug("Moving shoulder...")
+            self.plant.move_shoulder(direction)
+            self.shoulder_moving = True
         if self.target_attached:
             self.plant.update_ball_position()
 
@@ -275,8 +279,12 @@ class PlantSimulator:
         time_in_trial = curr_time_s % self.config.TIME_TRIAL_S
         if time_in_trial <= self.config.TIME_PREP_S:
             return TrialSection.TIME_PREP
-        elif time_in_trial <= self.config.TIME_MOVE_S + self.config.TIME_PREP_S:
+        elif time_in_trial <= (self.config.TIME_MOVE_S + self.config.TIME_PREP_S):
             return TrialSection.TIME_MOVE
+        elif time_in_trial <= (
+            self.config.TIME_MOVE_S + self.config.TIME_PREP_S + self.config.TIME_GRASP_S
+        ):
+            return TrialSection.TIME_GRASP
         else:
             return TrialSection.TIME_POST
 
@@ -319,16 +327,16 @@ class PlantSimulator:
         # Enable perturbation/gravity
         self._check_gravity(current_sim_time_s)
 
-        if (
-            curr_section == TrialSection.TIME_PREP
-            or curr_section == TrialSection.TIME_POST
-        ):
-            self.plant.lock_elbow_joint()
+        if curr_section == TrialSection.TIME_MOVE:
+            self.plant.set_elbow_joint_torque([elbow_torque])
         else:
-            self.plant.set_elbow_joint_torque([input_torque])
+            self.plant.lock_elbow_joint()
+
+        if curr_section == TrialSection.TIME_GRASP:
+            self._grasp_if_target_close()
 
         if curr_section == TrialSection.TIME_POST:
-            self._move_shoulder_if_target_close(self.direction)
+            self._move_shoulder(self.direction)
 
         # Step PyBullet simulation
         self.plant.simulate_step(self.config.RESOLUTION_S)

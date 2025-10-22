@@ -42,9 +42,13 @@ class RoboticPlant:
         self.bullet_robot = self.bullet_world.LoadRobot()
         self.robot_id = self.bullet_robot._body_id
         self.shoulder_joint_id = self.bullet_robot.SHOULDER_A_JOINT_ID
+        self.hand_joint_id = (
+            self.bullet_robot.HAND_LINK_ID
+        )  # TODO this only works because the link id of the hand is the same as the joint id of the knuckles. fix it!
         self.elbow_joint_locked = False
         self.ball = None
         self.bullet_world.LoadPlane()
+        self.ball_hand_rel_pos = self.ball_hand_rel_orn = None
 
         self.target_position = self._set_EE_pos(
             config.target_joint_pos_rad
@@ -221,6 +225,18 @@ class RoboticPlant:
             controlMode=self.p.VELOCITY_CONTROL,
             targetVelocity=0,
         )
+        self.p.resetJointState(
+            bodyUniqueId=self.robot_id,
+            jointIndex=self.bullet_robot.HAND_LINK_ID,
+            targetValue=0,
+            targetVelocity=0.0,
+        )
+        move_hand = self.p.setJointMotorControl2(
+            self.bullet_robot._body_id,
+            self.bullet_robot.HAND_LINK_ID,
+            controlMode=self.p.VELOCITY_CONTROL,
+            targetVelocity=0,
+        )
         self.update_stats()
         self.log.debug(
             "Plant reset to initial position and zero velocity.",
@@ -291,28 +307,44 @@ class RoboticPlant:
             ),
         )
 
+    def grasp(self) -> None:
+        move_hand = self.p.setJointMotorControl2(
+            self.bullet_robot._body_id,
+            self.bullet_robot.HAND_LINK_ID,
+            controlMode=self.p.VELOCITY_CONTROL,
+            targetVelocity=0.2,
+        )
+
     def move_shoulder(self, speed: float) -> None:
-        hand_state = self.p.getLinkState(
-            self.bullet_robot._body_id, self.bullet_robot.HAND_LINK_ID
-        )
-        hand_pos, hand_orn = hand_state[0], hand_state[1]
-        inv_hand_pos, inv_hand_orn = self.p.invertTransform(hand_pos, hand_orn)
-
-        ball_pos, ball_orn = self.p.getBasePositionAndOrientation(self.ball)
-        self.ball_hand_rel_pos, self.ball_hand_rel_orn = self.p.multiplyTransforms(
-            inv_hand_pos, inv_hand_orn, ball_pos, ball_orn
-        )
-
         move = self.p.setJointMotorControl2(
             self.bullet_robot._body_id,
             self.bullet_robot.SHOULDER_A_JOINT_ID,
             controlMode=self.p.VELOCITY_CONTROL,
             targetVelocity=speed,
         )
+        move_hand = self.p.setJointMotorControl2(
+            self.bullet_robot._body_id,
+            self.bullet_robot.HAND_LINK_ID,
+            controlMode=self.p.VELOCITY_CONTROL,
+            targetVelocity=0,
+        )
 
     def update_ball_position(self):
+        if self.ball_hand_rel_pos is None or self.ball_hand_rel_orn is None:
+            # assume that we want to maintain the relative pos/orient of the first
+            # time update_ball_position is called for all subsequent calls
+            hand_state = self.p.getLinkState(
+                self.bullet_robot._body_id, self.bullet_robot.FOREARM_LINK_ID
+            )
+            hand_pos, hand_orn = hand_state[0], hand_state[1]
+            inv_hand_pos, inv_hand_orn = self.p.invertTransform(hand_pos, hand_orn)
+            ball_pos, ball_orn = self.p.getBasePositionAndOrientation(self.ball)
+            self.ball_hand_rel_pos, self.ball_hand_rel_orn = self.p.multiplyTransforms(
+                inv_hand_pos, inv_hand_orn, ball_pos, ball_orn
+            )
+
         hand_state = self.p.getLinkState(
-            self.bullet_robot._body_id, self.bullet_robot.HAND_LINK_ID
+            self.bullet_robot._body_id, self.bullet_robot.FOREARM_LINK_ID
         )
         hand_pos, hand_orn = hand_state[0], hand_state[1]
         ball_pos, ball_orn = self.p.multiplyTransforms(

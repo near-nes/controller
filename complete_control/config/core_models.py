@@ -66,7 +66,8 @@ class SimulationParams(BaseModel, frozen=True):
     resolution: float = 0.1  # ms
     time_prep: float = 150.0  # ms
     time_move: float = 500.0  # ms
-    time_post: float = 350.0  # ms
+    time_grasp: float = 100.0  # ms
+    time_post: float = 250.0  # ms
     n_trials: int = 2
 
     oracle: OracleData = Field(default_factory=lambda: OracleData())
@@ -76,7 +77,7 @@ class SimulationParams(BaseModel, frozen=True):
     @computed_field
     @property
     def duration_single_trial_ms(self) -> float:
-        return self.time_prep + self.time_move + self.time_post
+        return self.time_prep + self.time_move + self.time_grasp + self.time_post
 
     @computed_field
     @property
@@ -102,7 +103,7 @@ class SimulationParams(BaseModel, frozen=True):
 
     @property
     def manual_control_steps(self) -> int:
-        return int(self.time_post / self.resolution)
+        return int((self.time_grasp + self.time_post) / self.resolution)
 
 
 class BrainParams(BaseModel, frozen=True):
