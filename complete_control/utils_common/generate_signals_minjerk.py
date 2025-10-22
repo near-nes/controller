@@ -31,7 +31,7 @@ def generate_trajectory_minjerk(sim: SimulationParams):
     n_trials = sim.n_trials
     time_sim = sim.time_move
     time_prep = sim.time_prep
-    time_post = sim.time_post
+    time_post = sim.time_grasp + sim.time_post
 
     time_sim_vec = np.linspace(
         0, time_sim, num=int(np.round(time_sim / res)), endpoint=True
@@ -60,7 +60,7 @@ def generate_motor_commands_minjerk(sim: SimulationParams):
     n_trials = sim.n_trials
     time_sim = sim.time_move
     time_prep = sim.time_prep
-    time_post = sim.time_post
+    time_post = sim.time_grasp + sim.time_post
 
     time_sim_vec = np.linspace(
         0, time_sim, num=int(np.round(time_sim / res)), endpoint=True

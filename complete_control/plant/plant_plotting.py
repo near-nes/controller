@@ -13,36 +13,10 @@ from pydantic import BaseModel
 from complete_control.utils_common.draw_schema import draw_schema
 from complete_control.utils_common.generate_signals import PlannerData
 
-from .plant_utils import JointData
+from .plant_models import JointState, JointStates, PlantPlotData
 
+(SHOULDER, ELBOW, HAND) = range(3)
 log = structlog.get_logger(__name__)
-
-
-class PlantPlotData(BaseModel):
-    """Holds all data needed for plotting."""
-
-    joint_data: List[JointData]
-    errors_per_trial: List[float]
-    init_hand_pos_ee: List[float]
-    trgt_hand_pos_ee: List[float]
-
-    model_config: ClassVar = {
-        "arbitrary_types_allowed": True,
-    }
-
-    def save(self, params_path: Path):
-        """Saves all collected simulation data to a single JSON file."""
-        log.info(f"Saving all simulation data to {params_path}")
-        with open(params_path, "w") as f:
-            f.write(self.model_dump_json(indent=2))
-        log.info("Finished saving all data.")
-
-    @classmethod
-    def load(cls, params_path: Path):
-        """Loads the main plant data model from a JSON file."""
-        log.info(f"Loading plant data from {params_path}")
-        with open(params_path, "r") as f:
-            return cls.model_validate_json(f.read())
 
 
 def plot_joint_space(
@@ -240,8 +214,7 @@ def plot_plant_outputs(run_paths: RunPaths):
         log.error("No joint data found.")
         return
 
-    # For now, plotting is only supported for the first joint
-    joint_data = plant_data.joint_data[0]
+    joint_data = plant_data.joint_data[ELBOW]
     with open(run_paths.trajectory, "r") as f:
         planner_data: PlannerData = PlannerData.model_validate_json(f.read())
 

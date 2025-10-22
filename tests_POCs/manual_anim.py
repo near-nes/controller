@@ -89,7 +89,7 @@ if __name__ == "__main__":
         for frame in range(TOTAL_FRAMES):
             frame_lexicographic = f"{frame:0{len_max_frame_name}d}"
             if frame < FRAME_MOVE:
-                plant._set_EE_pos(current_angle_elbow)
+                plant._set_rad_elbow(current_angle_elbow)
                 current_angle_elbow -= ANGLE_INCREMENT_ELBOW
             elif not GRASP_OCCURS:
                 pass
@@ -99,7 +99,7 @@ if __name__ == "__main__":
                     prep_shoulder = True
                 plant.simulate_step(PYBULLET_STEP)
             else:
-                plant._set_EE_pos_shoulder(current_angle_shoulder)
+                plant._set_rad_shoulder(current_angle_shoulder)
                 plant.update_ball_position()
                 current_angle_shoulder -= ANGLE_INCREMENT_SHOULDER
 

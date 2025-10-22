@@ -32,6 +32,7 @@ class MasterParams(BaseModel):
     SAVE_WEIGHTS_CEREB: bool = False
 
     NJT: int = 1
+    JOINTS_NO_CONTROL: int = 2
     plotting: PlottingParams = Field(default_factory=lambda: PlottingParams())
     simulation: SimulationParams = Field(default_factory=lambda: SimulationParams())
     experiment: ExperimentParams = Field(default_factory=lambda: ExperimentParams())

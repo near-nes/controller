@@ -10,7 +10,7 @@ from utils_common.log import tqdm
 from complete_control.config.core_models import TargetColor
 
 from . import plant_utils
-from .plant_models import PlantPlotData
+from .plant_models import EEData, JointData, PlantPlotData
 from .robotic_plant import RoboticPlant
 from .sensoryneuron import SensoryNeuron
 
@@ -62,10 +62,13 @@ class PlantSimulator:
             self.log.debug("MUSIC communication and SensorySystem setup complete.")
 
         self.num_total_steps = len(self.config.time_vector_total_s)
+        total_num_joints = (
+            self.config.master_config.NJT + self.config.master_config.JOINTS_NO_CONTROL
+        )
         self.joint_data = [
-            plant_utils.JointData.empty(self.num_total_steps)
-            for _ in range(self.config.NJT)
+            JointData.empty(self.num_total_steps) for _ in range(total_num_joints)
         ]
+        self.ee_data: EEData = EEData.empty(self.num_total_steps)
         # For storing raw received spikes before processing (per joint)
         self.received_spikes_pos: List[List[Tuple[float, int]]] = [
             [] for _ in range(self.config.NJT)
@@ -76,6 +79,7 @@ class PlantSimulator:
         self.errors_per_trial: List[float] = []  # Store final error of each trial
         self.plant._capture_state_and_save(self.config.run_paths.input_image)
         self.checked_proximity = False
+        self.shoulder_moving = False
 
         # TODO this has to be saved from planner, and currently it's not. mock it!
         if (
@@ -302,7 +306,8 @@ class PlantSimulator:
             where ee_pos_m and ee_vel_m_list are lists representing end effector
             position and velocity
         """
-        joint_pos_rad, joint_vel_rad_s = self.plant.get_joint_state()
+        joint_states = self.plant.get_joint_states()
+        joint_pos_rad, joint_vel_rad_s = joint_states.elbow
         ee_pos_m, ee_vel_m_list = self.plant.get_ee_pose_and_velocity()
         curr_section = self.get_current_section(current_sim_time_s)
 
@@ -313,10 +318,10 @@ class PlantSimulator:
                 max_steps=self.num_total_steps,
                 sim_time=current_sim_time_s,
             )
-            return joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list
+            return joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list, curr_section
 
         net_rate_hz = rate_pos_hz - rate_neg_hz
-        input_torque = net_rate_hz / self.config.SCALE_TORQUE
+        elbow_torque = net_rate_hz / self.config.SCALE_TORQUE
 
         if not (step % 500):
             self.log.debug(
@@ -340,18 +345,15 @@ class PlantSimulator:
 
         # Step PyBullet simulation
         self.plant.simulate_step(self.config.RESOLUTION_S)
-        # Record data for this step (For NJT=1)
-        self.joint_data[0].record_step(
-            step=step,
-            joint_pos_rad=joint_pos_rad,
-            joint_vel_rad_s=joint_vel_rad_s,
-            ee_pos_m=ee_pos_m,
-            ee_vel_m_s=ee_vel_m_list,
-            spk_rate_pos_hz=rate_pos_hz,
-            spk_rate_neg_hz=rate_neg_hz,
-            spk_rate_net_hz=net_rate_hz,
-            input_cmd_torque=input_torque,
-        )
+
+        imposed_torques = [elbow_torque, None, None]
+        for torque, (i, state) in zip(
+            imposed_torques,
+            enumerate(joint_states),
+        ):
+            self.joint_data[i].record_step(step, state.pos, state.vel, torque)
+
+        self.ee_data.record_step(step, ee_pos_m, ee_vel_m_list)
 
         # Trial end logic (reset plant if needed)
         if curr_section == TrialSection.TIME_END_TRIAL:
@@ -431,6 +433,7 @@ class PlantSimulator:
 
         plot_data = PlantPlotData(
             joint_data=self.joint_data,
+            ee_data=self.ee_data,
             errors_per_trial=self.errors_per_trial,
             init_hand_pos_ee=list(self.plant.init_hand_pos_ee),
             trgt_hand_pos_ee=list(self.plant.trgt_hand_pos_ee),

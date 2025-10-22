@@ -1,5 +1,5 @@
 import math
-import time
+from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
@@ -7,6 +7,7 @@ import structlog
 from bullet_muscle_sim.arm_1dof.bullet_arm_1dof import BulletArm1Dof
 from bullet_muscle_sim.arm_1dof.robot_arm_1dof import RobotArm1Dof
 from config.plant_config import PlantConfig
+from plant.plant_models import JointState, JointStates
 
 
 class RoboticPlant:
@@ -50,7 +51,7 @@ class RoboticPlant:
         self.bullet_world.LoadPlane()
         self.ball_hand_rel_pos = self.ball_hand_rel_orn = None
 
-        self.target_position = self._set_EE_pos(
+        self.target_position = self._set_rad_elbow(
             config.target_joint_pos_rad
             + config.master_config.simulation.oracle.tgt_visual_offset_rad
         )
@@ -72,7 +73,7 @@ class RoboticPlant:
             initial_pos_rad=self.initial_joint_position_rad,
         )
 
-    def _set_EE_pos(self, position_rad) -> np.ndarray:
+    def _set_rad_elbow(self, position_rad) -> np.ndarray:
         """Sets joint to position_rad and returns EE (cartesian) position"""
         self.p.resetJointState(
             self.bullet_robot._body_id,
@@ -83,7 +84,35 @@ class RoboticPlant:
             self.bullet_robot._body_id, RobotArm1Dof.HAND_LINK_ID
         )[0]
 
-    def _capture_state_and_save(self, image_path) -> None:
+    def _set_pos_all_joints(self, state: JointStates):
+        self.p.resetJointState(
+            self.bullet_robot._body_id,
+            self.shoulder_joint_id,
+            state.shoulder.pos,
+        )
+        self.p.resetJointState(
+            self.bullet_robot._body_id,
+            self.elbow_joint_id,
+            state.elbow.pos,
+        )
+        self.p.resetJointState(
+            self.bullet_robot._body_id,
+            self.hand_joint_id,
+            state.hand.pos,
+        )
+
+    def _set_rad_shoulder(self, position_rad) -> np.ndarray:
+        """Sets joint to position_rad and returns EE (cartesian) position"""
+        self.p.resetJointState(
+            self.bullet_robot._body_id,
+            RobotArm1Dof.SHOULDER_A_JOINT_ID,
+            position_rad,
+        )
+        return self.p.getLinkState(
+            self.bullet_robot._body_id, RobotArm1Dof.SHOULDER_A_JOINT_ID
+        )[0]
+
+    def _capture_state_and_save(self, image_path: Path, axis="y") -> None:
         from PIL import Image
 
         self.log.debug("setting up camera...")
@@ -117,8 +146,8 @@ class RoboticPlant:
         self.log.info(f"saved input image at {str(image_path)}")
 
     def _test_init_tgt_positions(self) -> None:
-        self.init_hand_pos_ee = self._set_EE_pos(self.initial_joint_position_rad)
-        self.trgt_hand_pos_ee = self._set_EE_pos(self.target_joint_position_rad)
+        self.init_hand_pos_ee = self._set_rad_elbow(self.initial_joint_position_rad)
+        self.trgt_hand_pos_ee = self._set_rad_elbow(self.target_joint_position_rad)
         self.log.debug(
             "verified setting init and tgt and saved EE pos: ",
             init=self.init_hand_pos_ee,
@@ -141,16 +170,24 @@ class RoboticPlant:
         """Updates the underlying robot's statistics (e.g., joint states)."""
         self.bullet_robot.UpdateStats()
 
-    def get_joint_state(self) -> Tuple[float, float]:
+    def get_joint_states(self) -> JointStates:
         """
-        Gets the current state (position and velocity) of the elbow joint.
-
-        Returns:
-            A tuple (position_rad, velocity_rad_per_s).
+        Gets the current state (position and velocity) all joints.
         """
-        pos = self.bullet_robot.JointPos(self.elbow_joint_id)
-        vel = self.bullet_robot.JointVel(self.elbow_joint_id)
-        return float(pos), float(vel)
+        s = self.p.getJointState(
+            bodyUniqueId=self.robot_id, jointIndex=self.shoulder_joint_id
+        )
+        e = self.p.getJointState(
+            bodyUniqueId=self.robot_id, jointIndex=self.elbow_joint_id
+        )
+        h = self.p.getJointState(
+            bodyUniqueId=self.robot_id, jointIndex=self.hand_joint_id
+        )
+        return JointStates(
+            shoulder=JointState(s[0], s[1]),
+            elbow=JointState(e[0], e[1]),
+            hand=JointState(h[0], h[1]),
+        )
 
     def get_ee_pose_and_velocity(self) -> Tuple[List[float], List[float]]:
         """
@@ -255,7 +292,7 @@ class RoboticPlant:
         """Lock elbow joint at its current position using position control."""
         if not self.elbow_joint_locked:
             self.log.debug("setting joint torque to zero")
-            current_joint_pos_rad, vel = self.get_joint_state()
+            current_joint_pos_rad, vel = self.get_joint_states().elbow
             self.log.debug("current joint state", pos=current_joint_pos_rad, vel=vel)
 
             # First reset state with zero velocity
@@ -286,7 +323,7 @@ class RoboticPlant:
 
     def unlock_joint(self) -> None:
         """Unlock joint by setting it to velocity control mode."""
-        current_joint_pos_rad, vel = self.get_joint_state()
+        current_joint_pos_rad, vel = self.get_joint_states().elbow
         self.p.setJointMotorControl2(
             bodyIndex=self.robot_id,
             jointIndex=self.elbow_joint_id,
