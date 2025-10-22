@@ -14,7 +14,7 @@ from complete_control.neural.neural_models import SynapseBlock
 from .neural_models import PopulationSpikes
 
 import matplotlib.gridspec as gridspec
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
 FIGURE_EXT = "png"
@@ -308,6 +308,12 @@ def plot_population_single(
     return fig, ax
 
 
+def list_depth(lst):
+    if isinstance(lst, list):
+        return 1 + max((list_depth(i) for i in lst), default=0)
+    return 0
+
+
 def plot_populations_per_trial(
     trials2plot,
     lgd,
@@ -318,11 +324,28 @@ def plot_populations_per_trial(
     single_trial_duration,
     path_fig="",
 ):
-    all_trials_imgs = []
-    for nt in trials2plot:
+    all_trials_imgs = {}
+
+    pop_list_depth = list_depth(populations_to_plot_trial)
+
+    if pop_list_depth != 1 and pop_list_depth != 2:
+        raise ValueError(
+            f"The depth of the population_to_plot_trial list is {pop_list_depth}. Must be 1 or 2! "
+        )
+    elif pop_list_depth == 2 and len(populations_to_plot_trial) != len(trials2plot):
+        raise ValueError(
+            f"populations_to_plot_trial has {len(populations_to_plot_trial)} elements, but trials2plot has {len(trials2plot)}."
+        )
+
+    for tidx, nt in enumerate(trials2plot):
         trial_imgs = {}
 
-        for file_prefix in populations_to_plot_trial:
+        if pop_list_depth == 1:
+            pops_to_plot = populations_to_plot_trial
+        elif pop_list_depth == 2:
+            pops_to_plot = populations_to_plot_trial[tidx]
+
+        for file_prefix in pops_to_plot:
             plot_name_t = file_prefix
             _log.debug(f"Plotting trial {nt} for {plot_name_t}...")
 
@@ -359,7 +382,7 @@ def plot_populations_per_trial(
                 )
                 trial_imgs[plot_name_t] = trial_img
 
-        all_trials_imgs.append(trial_imgs)
+        all_trials_imgs[nt] = trial_imgs
 
     return all_trials_imgs
 
@@ -371,19 +394,43 @@ def create_collage(
 ):
     _log.debug(f"Generating per trial collage for {pop_collage} populations...")
 
-    width, height = all_trials_imgs[0][pop_collage[0]].size
-    collage = Image.new(
-        "RGB",
-        (width, height * len(pop_collage)),
-        color=(255, 255, 255),
-    )
+    first_img = None
+    for trial_imgs in all_trials_imgs.values():
+        for img in trial_imgs.values():
+            first_img = img
+            break
+        if first_img:
+            break
+    if first_img is None:
+        _log.warning("No images found in all_trials_imgs.")
+        return
 
-    for nt, trial_dict in enumerate(all_trials_imgs):
-        cnt_p = 0
-        for pop, img in trial_dict.items():
-            if pop in pop_collage:
-                collage.paste(img, (0, height * cnt_p))
-                cnt_p += 1
+    width, height = first_img.size
+
+    for nt, trial_dict in all_trials_imgs.items():
+        collage = Image.new(
+            "RGB",
+            (width, height * len(pop_collage)),
+            color=(255, 255, 255),
+        )
+        draw = ImageDraw.Draw(collage)
+
+        for i, pop in enumerate(pop_collage):
+            if pop in trial_dict:
+                img = trial_dict[pop]
+                collage.paste(img, (0, height * i))
+            else:
+                draw.rectangle(
+                    [(0, height * i), (width, height * (i + 1))],
+                    fill=(230, 230, 230),
+                    outline=(150, 150, 150),
+                )
+                text = f"{pop}: Plot not generated"
+                draw.text(
+                    (width // 2 - 20, height * i + height // 2 - 20),
+                    text,
+                    fill=(0, 0, 0),
+                )
 
         if path_fig:
             collage_path = path_fig / "Collage"
@@ -617,7 +664,14 @@ def plot_controller_outputs(run_paths: RunPaths):
         "fbk_smooth",
         "pred",
     ]
-
+    """
+    # If you want to specify the population to plot in each trial
+    populations_to_plot_trial = [
+        ["planner", "sensoryneur", "pred"],
+        ["planner", "brainstem"],
+        ["planner", "brainstem", "pred"],
+    ]
+    """
     populations_to_collage = [
         "planner",
         "sensoryneur",
@@ -643,7 +697,7 @@ def plot_controller_outputs(run_paths: RunPaths):
     ]
 
     # Set trials to plot
-    trials2plot = "all"  # [1,15,30]
+    trials2plot = "all"  # [0,15,29]
     if trials2plot == "all":
         trials2plot = list(range(N_trials))
 
