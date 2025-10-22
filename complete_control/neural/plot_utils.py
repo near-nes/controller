@@ -14,6 +14,7 @@ from complete_control.neural.neural_models import SynapseBlock
 from .neural_models import PopulationSpikes
 
 import matplotlib.gridspec as gridspec
+
 from PIL import Image, ImageDraw, ImageFont
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
@@ -324,6 +325,7 @@ def plot_populations_per_trial(
     single_trial_duration,
     path_fig="",
 ):
+
     all_trials_imgs = {}
 
     pop_list_depth = list_depth(populations_to_plot_trial)
@@ -664,6 +666,7 @@ def plot_controller_outputs(run_paths: RunPaths):
         "fbk_smooth",
         "pred",
     ]
+
     """
     # If you want to specify the population to plot in each trial
     populations_to_plot_trial = [
