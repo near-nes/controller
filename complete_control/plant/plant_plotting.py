@@ -5,9 +5,12 @@ from typing import ClassVar, List
 import matplotlib.pyplot as plt
 import numpy as np
 import structlog
+import tqdm
 from config.MasterParams import MasterParams
 from config.paths import RunPaths
 from config.plant_config import PlantConfig
+from matplotlib.animation import FuncAnimation
+from matplotlib.lines import Line2D
 from pydantic import BaseModel
 
 from complete_control.utils_common.draw_schema import draw_schema
@@ -200,7 +203,149 @@ def plot_errors_per_trial(
     plt.close()
 
 
-def plot_plant_outputs(run_paths: RunPaths):
+def plot_joint_space_animated(
+    config: PlantConfig,
+    time_vector_s: np.ndarray,
+    pos_j_rad_actual: np.ndarray,
+    desired_trj_joint_rad: np.ndarray,
+    animated: bool = True,
+    video_duration: float = None,
+    fps: float = 25,
+    save_fig: bool = True,
+) -> None:
+    """Plots joint space position (actual vs desired)."""
+    plt.rcParams.update({"font.size": 13})
+    pth_fig_receiver = config.run_paths.figures_receiver
+
+    x = time_vector_s
+    y1 = pos_j_rad_actual
+    y2 = desired_trj_joint_rad
+
+    MARKERSIZE = 0.8
+    COLOR_ACTUAL = "m"
+    COLOR_DESIRED = "c"
+    LABEL_ACTUAL = "Actual Joint Angle"
+    LABEL_DESIRED = "Desired Joint Angle"
+
+    fig, ax = plt.subplots()
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Joint Angle (rad)")
+    ax.set_title("Joint Space Position")
+    ax.set_xlim(x.min(), x.max())
+    ax.set_ylim(y1.min() - 0.1, 2.8)
+
+    legend_elements = [
+        Line2D(
+            [0],
+            [0],
+            marker="o",
+            color=COLOR_ACTUAL,
+            label=LABEL_ACTUAL,
+            markersize=4,
+            linestyle="None",
+        ),
+        Line2D(
+            [0],
+            [0],
+            marker="o",
+            color=COLOR_DESIRED,
+            label=LABEL_DESIRED,
+            markersize=4,
+            linestyle="None",
+        ),
+    ]
+    ax.legend(handles=legend_elements, loc="lower left")
+    fig.tight_layout()
+
+    (line1,) = ax.plot(
+        x if not animated else [],
+        y1 if not animated else [],
+        ".",
+        markersize=MARKERSIZE,
+        label=LABEL_ACTUAL,
+        color=COLOR_ACTUAL,
+    )
+    (line2,) = ax.plot(
+        x if not animated else [],
+        y2 if not animated else [],
+        ".",
+        markersize=MARKERSIZE,
+        label=LABEL_DESIRED,
+        color=COLOR_DESIRED,
+    )
+
+    if animated:
+        n_frames = video_duration * fps
+
+        def update(frame):
+            end = int(len(x) * frame / n_frames)
+            line1.set_data(x[:end], y1[:end])
+            line2.set_data(x[:end], y2[:end])
+            return (line1, line2)
+
+        ani = FuncAnimation(
+            fig, update, frames=n_frames, interval=1000 / fps, blit=True
+        )
+
+    if save_fig:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        if animated:
+            with tqdm.tqdm(total=n_frames, unit="step", desc="Rendering") as pbar:
+                filepath = pth_fig_receiver / f"anim_position_joint_{timestamp}.mp4"
+                log.debug(f"Saving animated joint space plot at {filepath}...")
+                ani.save(
+                    filepath,
+                    writer="ffmpeg",
+                    fps=fps,
+                    dpi=300,
+                    progress_callback=lambda i, n: pbar.update(1),
+                )
+                log.info(f"Saved animated joint space plot at {filepath}")
+        else:
+            filepath = pth_fig_receiver / f"position_joint_{timestamp}.png"
+            fig.savefig(filepath, dpi=900, transparent=False)
+            log.info(f"Saved joint space plot at {filepath}")
+    plt.close()
+
+
+def plot_desired(
+    config: PlantConfig,
+    time_vector_s: np.ndarray,
+    pos_j_rad_actual: np.ndarray,
+    desired_trj_joint_rad: np.ndarray,
+    save_fig: bool = True,
+) -> None:
+    """Plots joint space position (actual vs desired)."""
+    pth_fig_receiver = config.run_paths.figures_receiver
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    COLOR_DESIRED = "c"
+    plt.plot(
+        time_vector_s,
+        desired_trj_joint_rad,
+        linestyle=":",
+        linewidth=2,
+        color=COLOR_DESIRED,
+        label="Target Trajectory",
+    )
+
+    plt.xlabel("Time (s)")
+    plt.ylabel("Joint Angle (rad)")
+    plt.title("Joint Space Position")
+    plt.legend()
+    plt.ylim((0.0, 2.8))
+    plt.tight_layout()
+    if save_fig:
+        filepath = pth_fig_receiver / f"desired_{timestamp}.png"
+        plt.savefig(filepath, dpi=900)
+        log.info(f"Saved joint space plot at {filepath}")
+    plt.close()
+
+
+def plot_plant_outputs(
+    run_paths: RunPaths,
+    animated_task: bool = False,
+    animated_plots: bool = False,
+):
     """Loads all plant-related data and generates all plots."""
     log.info("Generating plant plots...")
 
@@ -218,18 +363,24 @@ def plot_plant_outputs(run_paths: RunPaths):
     with open(run_paths.trajectory, "r") as f:
         planner_data: PlannerData = PlannerData.model_validate_json(f.read())
 
-    # Generate plots
-    plot_joint_space(
+    generate_video_from_existing_result_single_trial(
+        config,
+        plant_data,
+    )
+    plot_joint_space_animated(
         config=config,
         time_vector_s=config.time_vector_total_s,
         pos_j_rad_actual=joint_data.pos_rad,
         desired_trj_joint_rad=planner_data.trajectory,
+        animated=animated_plots,
+        video_duration=video_duration,
+        fps=framerate,
     )
     plot_ee_space(
         config=config,
         desired_start_ee=np.array(plant_data.init_hand_pos_ee),
         desired_end_ee=np.array(plant_data.trgt_hand_pos_ee),
-        actual_traj_ee=joint_data.pos_ee_m,
+        actual_traj_ee=plant_data.ee_data.pos_ee,
     )
     plot_motor_commands(
         config=config,
@@ -239,6 +390,12 @@ def plot_plant_outputs(run_paths: RunPaths):
     if plant_data.errors_per_trial:
         plot_errors_per_trial(config=config, errors_list=plant_data.errors_per_trial)
 
+    plot_desired(
+        config=config,
+        time_vector_s=config.time_vector_total_s,
+        pos_j_rad_actual=joint_data.pos_rad,
+        desired_trj_joint_rad=planner_data.trajectory,
+    )
     draw_schema(run_paths, scale_factor=0.005)
 
     log.info("Plant plots generated.")
