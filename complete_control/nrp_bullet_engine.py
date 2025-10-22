@@ -92,6 +92,6 @@ class Script(GrpcEngineScript):
     def shutdown(self):
         self.log.info("Simulation loop finished.")
         self.simulator._finalize_and_process_data()
-        if self.config.master_config.PLOT_AFTER_SIMULATE:
+        if self.config.master_config.plotting.PLOT_AFTER_SIMULATE:
             plot_plant_outputs(self.run_paths)
         print("Simulation End !!!")

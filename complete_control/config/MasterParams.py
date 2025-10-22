@@ -11,6 +11,7 @@ from .core_models import (
     ExperimentParams,
     MetaInfo,
     MusicParams,
+    PlottingParams,
     SimulationParams,
 )
 from .module_params import ModuleContainerConfig
@@ -25,13 +26,13 @@ class MasterParams(BaseModel):
     }
     run_paths: RunPaths
 
-    PLOT_AFTER_SIMULATE: bool = False
     USE_CEREBELLUM: bool = False
     GUI_PYBULLET: bool = False
     USE_MUSIC: bool = False
     SAVE_WEIGHTS_CEREB: bool = False
 
     NJT: int = 1
+    plotting: PlottingParams = Field(default_factory=lambda: PlottingParams())
     simulation: SimulationParams = Field(default_factory=lambda: SimulationParams())
     experiment: ExperimentParams = Field(default_factory=lambda: ExperimentParams())
     brain: BrainParams = Field(default_factory=lambda: BrainParams())

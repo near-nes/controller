@@ -138,7 +138,7 @@ class Script(GrpcEngineScript):
         for controller in self.controllers:
             pop_views.extend(controller.get_all_recorded_views())
         collapse_files(self.run_paths.data_nest, pop_views)
-        if self.master_config.PLOT_AFTER_SIMULATE:
+        if self.master_config.plotting.PLOT_AFTER_SIMULATE:
             plot_controller_outputs(self.run_paths)
 
         # nest.Cleanup()

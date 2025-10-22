@@ -119,3 +119,9 @@ class MusicParams(BaseModel, frozen=True):
     # robotic side ports
     port_motcmd_in: str = "mot_cmd_in"
     port_fbk_out: str = "fbk_out"
+
+
+class PlottingParams(BaseModel, frozen=True):
+    PLOT_AFTER_SIMULATE: bool = True
+    CAPTURE_VIDEO: list[str] = []  # ["x", "y", "z"]
+    NUM_STEPS_CAPTURE_VIDEO: int = 100

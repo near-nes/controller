@@ -180,7 +180,7 @@ if __name__ == "__main__":
     run_simulation(master_config, run_paths.data_nest, controllers, comm)
 
     # Plotting (Rank 0 Only)
-    if rank == 0 and master_config.PLOT_AFTER_SIMULATE:
+    if rank == 0 and master_config.plotting.PLOT_AFTER_SIMULATE:
         main_log.info("--- Generating Plots (Standalone) ---")
         start_plot_time = timer()
         plot_controller_outputs(run_paths)

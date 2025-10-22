@@ -72,7 +72,7 @@ def main():
             log.info("Disconnecting PyBullet from receiver plant.")
             p.disconnect()
 
-    if config.master_config.PLOT_AFTER_SIMULATE:
+    if config.master_config.plotting.PLOT_AFTER_SIMULATE:
         plot_plant_outputs(config.run_paths)
 
     log.info("Receiver plant process finished.")

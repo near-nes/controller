@@ -277,8 +277,6 @@ def plot_controller_outputs(run_paths: RunPaths):
 
     path_fig.mkdir(parents=True, exist_ok=True)
 
-    # Get parameters from config
-    njt = master_config.NJT
     # pop_size = master_config.brain.population_size # No longer needed, obtained from PopulationSpikes
     res = master_config.simulation.resolution
     total_sim_duration = master_config.simulation.total_duration_all_trials_ms
