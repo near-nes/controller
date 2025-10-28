@@ -20,19 +20,19 @@ class ConnectionsParams(BaseModel):
 
     dcn_forw_prediction: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.0055,
+            weight=0.55,
             delay=min_delay,
         )
     )
     pred_state: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=1.0,
+            weight=1,
             receptor_type=1,
         )
     )
     fbk_smoothed_state: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=1.10,
+            weight=0.6317663917438847,
             receptor_type=2,
         )
     )
@@ -74,7 +74,7 @@ class ConnectionsParams(BaseModel):
     )
     error_io_f: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.04,
+            weight=0.016,
             delay=min_delay,
             receptor_type=1,
         )
@@ -159,9 +159,16 @@ class ConnectionsParams(BaseModel):
     )
     error_inv_io_i: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.9,
+            weight=0.8,
             delay=min_delay,
             receptor_type=1,
+        )
+    )
+
+    feedback_error: SingleSynapseParams = Field(
+        default_factory=lambda: SingleSynapseParams(
+            weight=0.1,
+            delay=0.1,
         )
     )
 
@@ -174,8 +181,4 @@ class ConnectionsParams(BaseModel):
     @property
     def dcn_f_error(self) -> SingleSynapseParams:
         return SingleSynapseParams(weight=0.1, delay=self.sensory_delay)
-
-    @computed_field
-    @property
-    def feedback_error(self) -> SingleSynapseParams:
-        return SingleSynapseParams(weight=0.1, delay=min_delay)
+s

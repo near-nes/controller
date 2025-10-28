@@ -61,7 +61,7 @@ class SpineModuleConfig(BaseModel):
 
 class StateModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
-    kp: float = 2.0
+    kp: float = 1.4
     base_rate: float = 0.0
     buffer_size: float = 60.0
 

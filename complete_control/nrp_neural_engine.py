@@ -43,9 +43,7 @@ class Script(GrpcEngineScript):
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger("nrp_neural")
         self.log.info(f"Engine Log Path: {self.run_paths.logs}")
 
-        self.master_config = MasterParams.from_runpaths(
-            self.run_paths, USE_MUSIC=False, PLOT_AFTER_SIMULATE=False
-        )
+        self.master_config = MasterParams.from_runpaths(self.run_paths, USE_MUSIC=False)
         with open(self.run_paths.params_json, "w") as f:
             f.write(self.master_config.model_dump_json(indent=2))
         self.log.info("MasterParams loaded and dumped successfully.")
@@ -138,8 +136,6 @@ class Script(GrpcEngineScript):
         for controller in self.controllers:
             pop_views.extend(controller.get_all_recorded_views())
         collapse_files(self.run_paths.data_nest, pop_views)
-        if self.master_config.PLOT_AFTER_SIMULATE:
-            plot_controller_outputs(self.run_paths)
 
         # nest.Cleanup()
 
