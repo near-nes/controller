@@ -7,9 +7,8 @@ import structlog
 from config.MasterParams import MasterParams
 from config.paths import COMPLETE_CONTROL, RunPaths
 from neural.nest_adapter import initialize_nest, nest
-from neural.plot_utils import plot_controller_outputs
 from neural_simulation_lib import (
-    create_controllers,
+    create_controller,
     setup_environment,
     setup_nest_kernel,
 )
@@ -27,7 +26,7 @@ class Script(GrpcEngineScript):
         initialize_nest("MUSIC")
         # initialize_nest("NRP")
         self.master_config = None
-        self.controllers = []
+        self.controller = None
         self.step = 0
         self.run_paths = None
 
@@ -55,8 +54,8 @@ class Script(GrpcEngineScript):
         )
         self.log.info("Environment and NEST kernel setup complete.")
 
-        self.controllers = create_controllers(self.master_config)
-        self.log.info(f"Created {len(self.controllers)} controllers.")
+        self.controller = create_controller(self.master_config)
+        self.log.info(f"Created controller.")
         self.sensory_profile = Profile()
         self.sim_profile = Profile()
         self.motor_profile = Profile()
@@ -86,7 +85,7 @@ class Script(GrpcEngineScript):
         sim_time_s = self._time_ns * NANO_SEC
 
         with self.sensory_profile.time():
-            self.controllers[0].update_sensory_info_from_NRP(
+            self.controller.update_sensory_info_from_NRP(
                 joint_pos_rad, sim_time_s * 1000
             )
 
@@ -100,7 +99,7 @@ class Script(GrpcEngineScript):
             self.log.debug("[neural] simulated")
 
         with self.motor_profile.time():
-            pos, neg = self.controllers[0].extract_motor_command_NRP()
+            pos, neg = self.controller.extract_motor_command_NRP()
 
         if self.step % 50 == 0:
             self.log.debug(
@@ -132,9 +131,7 @@ class Script(GrpcEngineScript):
         )
         from neural.data_handling import collapse_files
 
-        pop_views = []
-        for controller in self.controllers:
-            pop_views.extend(controller.get_all_recorded_views())
+        pop_views = self.controller.get_all_recorded_views()
         collapse_files(self.run_paths.data_nest, pop_views)
 
         # nest.Cleanup()

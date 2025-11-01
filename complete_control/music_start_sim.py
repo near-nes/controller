@@ -10,29 +10,24 @@ initialize_nest("MUSIC")
 
 
 import structlog
+from config.MasterParams import MasterParams
 from config.paths import RunPaths
 from mpi4py import MPI
-from mpi4py.MPI import Comm
 from neural.Controller import Controller
 from neural.data_handling import collapse_files, save_conn_weights
 from neural.plot_utils import plot_controller_outputs
-from utils_common.log import setup_logging
-
-from complete_control.config.core_models import SimulationParams
-from complete_control.config.MasterParams import MasterParams
-from complete_control.neural.Controller import Controller
-from complete_control.neural.data_handling import collapse_files
-from complete_control.neural_simulation_lib import (
-    create_controllers,
+from neural_simulation_lib import (
+    create_controller,
     setup_environment,
     setup_nest_kernel,
 )
+from utils_common.log import setup_logging
 
 
 def run_simulation(
     master_config: MasterParams,
     path_data: Path,
-    controllers: list[Controller],
+    controller: Controller,
     comm: MPI.Comm,
 ):
     """Runs the NEST simulation for the specified number of trials."""
@@ -40,12 +35,9 @@ def run_simulation(
     log: structlog.stdlib.BoundLogger = structlog.get_logger(
         "main.simulation_loop", log_all_ranks=True
     )
-    pop_views = []
-    for controller in controllers:
-        pop_views.extend(controller.get_all_recorded_views())
+    pop_views = controller.get_all_recorded_views()
 
     log.info("collected all popviews")
-    controller = controllers[0]
     log.info("Starting Simulation")
 
     nest.Prepare()
@@ -140,7 +132,6 @@ if __name__ == "__main__":
 
     start_script_time = timer()
 
-    # Load master config
     master_config = MasterParams.from_runpaths(run_paths=run_paths, USE_MUSIC=True)
     with open(run_paths.params_json, "w") as f:
         f.write(master_config.model_dump_json(indent=2))
@@ -153,11 +144,9 @@ if __name__ == "__main__":
         run_paths.data_nest,
     )
 
-    # Create controllers
-    controllers = create_controllers(master_config, comm=comm)
+    controller = create_controller(master_config, comm=comm)
 
-    # Run simulation
-    run_simulation(master_config, run_paths.data_nest, controllers, comm)
+    run_simulation(master_config, run_paths.data_nest, controller, comm)
 
     # Plotting (Rank 0 Only)
     if rank == 0 and master_config.plotting.PLOT_AFTER_SIMULATE:
@@ -168,7 +157,6 @@ if __name__ == "__main__":
         plot_wall_time = datetime.timedelta(seconds=end_plot_time - start_plot_time)
         main_log.info(f"Plotting Finished (Standalone)", wall_time=str(plot_wall_time))
 
-    # Final Timing
     end_script_time = timer()
     main_log.info(f"--- Script Finished (Standalone) ---")
     main_log.info(

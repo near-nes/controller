@@ -67,10 +67,10 @@ def setup_nest_kernel(
     np.random.seed(simulation_config.seed)
 
 
-def create_controllers(
+def create_controller(
     master_config: MasterParams,
     comm=None,  # if comm is None, Cerebellum will be loaded without MPI
-) -> list[Controller]:
+) -> Controller:
     log = structlog.get_logger("main.network_construction")
     module_params = master_config.modules
     pops_params = master_config.populations
@@ -107,29 +107,25 @@ def create_controllers(
         while not os.path.exists(master_config.run_paths.input_image):
             time.sleep(1)
 
-    controllers = []
     log.info(f"Constructing Network", dof=njt, N_neurons_pop=N)
-    for j in range(njt):
-        log.info(f"Creating controller", dof=j)
 
-        controller = Controller(
-            dof_id=j,
-            N=N,
-            total_time_vect=total_time_vect_concat,
-            mc_params=module_params.motor_cortex,
-            plan_params=module_params.planner,
-            spine_params=module_params.spine,
-            state_params=module_params.state,
-            pops_params=pops_params,
-            conn_params=conn_params,
-            sim_params=master_config.simulation,
-            master_params=master_config,
-            path_data=master_config.run_paths.data_nest,
-            label_prefix="",
-            comm=comm,
-            music_cfg=music_cfg,
-            use_cerebellum=master_config.USE_CEREBELLUM,
-            cerebellum_paths=master_config.bsb_config_paths,
-        )
-        controllers.append(controller)
-    return controllers
+    controller = Controller(
+        dof_id=0,
+        N=N,
+        total_time_vect=total_time_vect_concat,
+        mc_params=module_params.motor_cortex,
+        plan_params=module_params.planner,
+        spine_params=module_params.spine,
+        state_params=module_params.state,
+        pops_params=pops_params,
+        conn_params=conn_params,
+        sim_params=master_config.simulation,
+        master_params=master_config,
+        path_data=master_config.run_paths.data_nest,
+        label_prefix="",
+        comm=comm,
+        music_cfg=music_cfg,
+        use_cerebellum=master_config.USE_CEREBELLUM,
+        cerebellum_paths=master_config.bsb_config_paths,
+    )
+    return controller
