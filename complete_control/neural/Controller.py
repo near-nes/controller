@@ -15,6 +15,7 @@ from config.module_params import (
 )
 from config.population_params import PopulationsParams
 from neural.nest_adapter import nest
+from neural.neural_models import PopulationBlocks
 from plant.sensoryneuron import SensoryNeuron
 from utils_common.generate_signals import generate_traj
 
@@ -785,26 +786,20 @@ class Controller:
 
         return rate_pos, rate_neg
 
-    def get_all_recorded_views(self) -> list[PopView]:
+    def collect_populations(self) -> PopulationBlocks:
         """
         Collects all PopView instances that are configured for recording from
         the main controller populations and, if enabled, from the cerebellum populations.
         """
-        all_views = []
-        self.log.debug("Collecting views from ControllerPopulations")
-        all_views.extend(self.pops.get_all_views())
+        pops = PopulationBlocks()
+        self.log.debug("Collecting pops from ControllerPopulations")
+        pops.controller = self.pops
 
         if self.use_cerebellum:
-            self.log.debug("Collecting views from CerebellumHandler.interface_pops")
-            all_views.extend(self.cerebellum_handler.interface_pops.get_all_views())
-            all_views.extend(
-                self.cerebellum_handler.cerebellum.populations.get_all_views()
-            )
+            self.log.debug("Collecting pops from CerebellumHandler.interface_pops")
+            pops.cerebellum_handler = self.cerebellum_handler.interface_pops
+            pops.cerebellum = self.cerebellum_handler.cerebellum.populations
         else:
-            self.log.debug("Cerebellum not in use, skipping cerebellum views.")
+            self.log.debug("Cerebellum not in use, skipping cerebellum pops.")
 
-        recorded_views = [view for view in all_views if view and view.label]
-        self.log.info(
-            f"Collected {len(recorded_views)} views with labels for recording."
-        )
-        return recorded_views
+        return pops

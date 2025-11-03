@@ -35,7 +35,6 @@ def run_simulation(
     log: structlog.stdlib.BoundLogger = structlog.get_logger(
         "main.simulation_loop", log_all_ranks=True
     )
-    pop_views = controller.get_all_recorded_views()
 
     log.info("collected all popviews")
     log.info("Starting Simulation")
@@ -56,7 +55,7 @@ def run_simulation(
     start_collapse_time = timer()
     collapse_files(
         path_data,
-        pop_views,
+        controller.collect_populations(),
         comm,
     )
     if controller.use_cerebellum and master_config.SAVE_WEIGHTS_CEREB:

@@ -131,7 +131,7 @@ class Script(GrpcEngineScript):
         )
         from neural.data_handling import collapse_files
 
-        pop_views = self.controller.get_all_recorded_views()
+        pop_views = self.controller.collect_populations()
         collapse_files(self.run_paths.data_nest, pop_views)
 
         # nest.Cleanup()

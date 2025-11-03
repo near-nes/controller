@@ -71,6 +71,10 @@ class PopView:
         self.total_n_events = 0
         self.rates_history = []
 
+    def collect(self):
+        # TODO!
+        _log.debug(f"{self.label} collect called!")
+
     def _create_connect_spike_detector(self, pop, **kwargs):
         spike_detector = nest.Create("spike_recorder")
         nest.SetStatus(spike_detector, params=kwargs)
