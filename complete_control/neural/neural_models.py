@@ -1,8 +1,36 @@
+from dataclasses import dataclass
+from pathlib import Path
 from typing import List
 
+from neural.population_view import PopView
 from pydantic import BaseModel
+from utils_common.custom_types import NdArray
 
-from complete_control.utils_common.custom_types import NdArray
+
+class ConvertToRecording:
+    # Class variable that subclasses should override
+    RecordingClass = None
+
+    def convert_to_recording(self):
+        if self.RecordingClass is None:
+            raise NotImplementedError("RecordingClass must be set in subclass")
+
+        dest = self.RecordingClass()
+        for k, v in self.__dict__.items():
+            if isinstance(v, PopView):
+                setattr(dest, k, v.collect())
+        return dest
+
+
+@dataclass
+class PopulationBlocks:
+    controller: ConvertToRecording = None
+    cerebellum_handler: ConvertToRecording = None
+    cerebellum: ConvertToRecording = None
+
+
+class RecordingManifest(BaseModel):
+    population_spikes: Path
 
 
 class PopulationSpikes(BaseModel):

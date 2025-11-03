@@ -1,11 +1,14 @@
-from dataclasses import dataclass
-from typing import Any, List, Optional
+from typing import Any, ClassVar, Generic, List, Optional, Type, TypeVar
+
+from neural.neural_models import ConvertToRecording, RecordingManifest
+from pydantic import BaseModel
 
 from .population_view import PopView
 
+T = TypeVar("T")
 
-@dataclass
-class ControllerPopulations:
+
+class ControllerPopulationsGeneric(BaseModel, Generic[T]):
     """
     Holds the PopView instances for various populations in the controller.
     If CerebellumHandler is used, it will connect to the following populations from this dataclass:
@@ -18,45 +21,46 @@ class ControllerPopulations:
     """
 
     # Planner
-    planner_p: Optional[PopView] = None
-    planner_n: Optional[PopView] = None
+    planner_p: Optional[T] = None
+    planner_n: Optional[T] = None
     # Motor Cortex
-    mc_M1_p: Optional[PopView] = None
-    mc_M1_n: Optional[PopView] = None
-    mc_fbk_p: Optional[PopView] = None
-    mc_fbk_n: Optional[PopView] = None
-    mc_out_p: Optional[PopView] = None
-    mc_out_n: Optional[PopView] = None
+    mc_M1_p: Optional[T] = None
+    mc_M1_n: Optional[T] = None
+    mc_fbk_p: Optional[T] = None
+    mc_fbk_n: Optional[T] = None
+    mc_out_p: Optional[T] = None
+    mc_out_n: Optional[T] = None
     # State Estimator
-    state_p: Optional[PopView] = None
-    state_n: Optional[PopView] = None
+    state_p: Optional[T] = None
+    state_n: Optional[T] = None
     # Sensory Input (Parrots)
-    sn_p: Optional[PopView] = None
-    sn_n: Optional[PopView] = None
+    sn_p: Optional[T] = None
+    sn_n: Optional[T] = None
     # Prediction Scaling (Diff Neurons)
-    pred_p: Optional[PopView] = None
-    pred_n: Optional[PopView] = None
+    pred_p: Optional[T] = None
+    pred_n: Optional[T] = None
     # Feedback Smoothing (Basic Neurons)
-    fbk_smooth_p: Optional[PopView] = None
-    fbk_smooth_n: Optional[PopView] = None
+    fbk_smooth_p: Optional[T] = None
+    fbk_smooth_n: Optional[T] = None
     # Brainstem Output (Basic Neurons)
-    brainstem_p: Optional[PopView] = None
-    brainstem_n: Optional[PopView] = None
-    # Add any other populations if needed
+    brainstem_p: Optional[T] = None
+    brainstem_n: Optional[T] = None
 
-    # Helper to get all valid PopView objects (useful for iteration)
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class ControllerPopulationsRecordings(ControllerPopulationsGeneric[RecordingManifest]):
+    pass
+
+
+class ControllerPopulations(
+    ControllerPopulationsGeneric[PopView],
+    ConvertToRecording,
+):
+    RecordingClass: ClassVar[Type[ControllerPopulationsRecordings]] = (
+        ControllerPopulationsRecordings
+    )
+
     def get_all_views(self) -> List[PopView]:
-        views = []
-        for pop_field in self.__dataclass_fields__:
-            view = getattr(self, pop_field)
-            if isinstance(view, PopView):
-                views.append(view)
-        return views
-
-    # Helper to get underlying NEST nodes for all views
-    def get_all_nest_nodes(self) -> List[Any]:
-        nodes = []
-        for view in self.get_all_views():
-            if view.pop:  # Check if pop exists
-                nodes.extend(view.pop)  # Assumes view.pop is iterable (NodeCollection)
-        return nodes
+        return [v for v in self.__dict__.values() if isinstance(v, PopView)]
