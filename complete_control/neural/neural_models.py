@@ -6,20 +6,20 @@ from neural.population_view import PopView
 from pydantic import BaseModel
 from utils_common.custom_types import NdArray
 
+T = TypeVar("T")
 
-class ConvertToRecording:
-    # Class variable that subclasses should override
-    RecordingClass = None
 
-    def convert_to_recording(self):
-        if self.RecordingClass is None:
-            raise NotImplementedError("RecordingClass must be set in subclass")
+def convert_to_recording(
+    source: object, target_class: type[T], path: Path, comm=None
+) -> T:
+    from neural.population_view import PopView
 
-        dest = self.RecordingClass()
-        for k, v in self.__dict__.items():
-            if isinstance(v, PopView):
-                setattr(dest, k, v.collect())
-        return dest
+    """Convert a population object to its recording equivalent."""
+    dest = target_class()
+    for k, v in source.__dict__.items():
+        if isinstance(v, PopView):
+            setattr(dest, k, v.collect(path, comm))
+    return dest
 
 
 @dataclass

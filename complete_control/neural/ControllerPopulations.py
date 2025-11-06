@@ -1,6 +1,9 @@
-from typing import Any, ClassVar, Generic, List, Optional, Type, TypeVar
+from typing import Generic, Optional, TypeVar
 
-from neural.neural_models import ConvertToRecording, RecordingManifest
+from neural.neural_models import (
+    RecordingManifest,
+    convert_to_recording,
+)
 from pydantic import BaseModel
 
 from .population_view import PopView
@@ -54,13 +57,8 @@ class ControllerPopulationsRecordings(ControllerPopulationsGeneric[RecordingMani
     pass
 
 
-class ControllerPopulations(
-    ControllerPopulationsGeneric[PopView],
-    ConvertToRecording,
-):
-    RecordingClass: ClassVar[Type[ControllerPopulationsRecordings]] = (
-        ControllerPopulationsRecordings
-    )
-
-    def get_all_views(self) -> List[PopView]:
-        return [v for v in self.__dict__.values() if isinstance(v, PopView)]
+class ControllerPopulations(ControllerPopulationsGeneric[PopView]):
+    def to_recording(self, *args, **kwargs) -> ControllerPopulationsRecordings:
+        return convert_to_recording(
+            self, ControllerPopulationsRecordings, *args, **kwargs
+        )

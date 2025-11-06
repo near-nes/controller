@@ -1,6 +1,9 @@
-from typing import Any, ClassVar, Generic, List, Optional, Type, TypeVar
+from typing import Generic, Optional, TypeVar
 
-from neural.neural_models import ConvertToRecording, RecordingManifest
+from neural.neural_models import (
+    RecordingManifest,
+    convert_to_recording,
+)
 from pydantic import BaseModel
 
 from .population_view import PopView
@@ -55,13 +58,11 @@ class CerebellumHandlerPopulationsGeneric(BaseModel, Generic[T]):
 class CerebellumHandlerPopulationsRecordings(
     CerebellumHandlerPopulationsGeneric[RecordingManifest]
 ):
-
     pass
 
 
-class CerebellumHandlerPopulations(
-    CerebellumHandlerPopulationsGeneric[PopView], ConvertToRecording
-):
-    RecordingClass: ClassVar[Type[CerebellumHandlerPopulationsRecordings]] = (
-        CerebellumHandlerPopulationsRecordings
-    )
+class CerebellumHandlerPopulations(CerebellumHandlerPopulationsGeneric[PopView]):
+    def to_recording(self, *args, **kwargs) -> CerebellumHandlerPopulationsRecordings:
+        return convert_to_recording(
+            self, CerebellumHandlerPopulationsRecordings, *args, **kwargs
+        )
