@@ -25,6 +25,7 @@ class MasterParams(BaseModel):
         "arbitrary_types_allowed": True,
     }
     run_paths: RunPaths
+    run_id: str
 
     USE_CEREBELLUM: bool = False
     GUI_PYBULLET: bool = False
@@ -73,6 +74,4 @@ class MasterParams(BaseModel):
 
     @classmethod
     def from_runpaths(cls, run_paths: RunPaths, **kwargs):
-        return MasterParams(
-            run_paths=RunPaths.from_run_id(run_paths.run.name), **kwargs
-        )
+        return MasterParams(run_paths=run_paths, run_id=run_paths.run.name, **kwargs)

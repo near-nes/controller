@@ -41,7 +41,9 @@ class RunPaths:
     run: Path
     input_image: Path
     data_nest: Path
+    neural_result: Path
     robot_result: Path
+    meta_result: Path
     figures: Path
     figures_receiver: Path
     logs: Path
@@ -61,15 +63,18 @@ class RunPaths:
             RunPaths: A dataclass instance containing Path objects for
                                 'run', 'data', 'figures', 'logs'.
         """
+        id = run_timestamp.partition("-")[0]
         run_dir = RUNS_DIR / run_timestamp
         data_dir = run_dir / "data"
         data_nest_dir = data_dir / "neural"
         robot_result = data_dir / "robotic" / "plant_data.json"
+        neural_result = run_dir / "neural_data.json"
+        meta_result = run_dir / f"{id}.json"
         figures_dir = run_dir / FOLDER_NAME_NEURAL_FIGS
         figures_receiver_dir = run_dir / FOLDER_NAME_ROBOTIC_FIGS
         video_frames = run_dir / "video_frames"
         logs_dir = run_dir / "logs"
-        params_path = run_dir / f"params{run_timestamp}.json"
+        params_path = run_dir / f"params{id}.json"
         input_image = run_dir / "input_image.bmp"
         trajectory = run_dir / "traj.npy"
 
@@ -89,6 +94,8 @@ class RunPaths:
             run=run_dir,
             input_image=input_image,
             data_nest=data_nest_dir,
+            neural_result=neural_result,
+            meta_result=meta_result,
             robot_result=robot_result,
             figures=figures_dir,
             figures_receiver=figures_receiver_dir,

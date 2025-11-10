@@ -11,6 +11,7 @@ initialize_nest("MUSIC")
 
 import structlog
 from config.MasterParams import MasterParams
+from utils_common.results import make_trial_id
 from config.ResultMeta import ResultMeta
 from config.paths import RunPaths
 from mpi4py import MPI
@@ -90,45 +91,46 @@ def run_simulation(
     log.info("--- Simulation Finished ---")
 
 
-def coordinate_paths_with_receiver() -> tuple[str, RunPaths]:
+def coordinate_paths_with_receiver(label: str = "") -> tuple[str, RunPaths]:
     shared_data = {
-        "timestamp": None,
+        "run_id": None,
         "paths": None,
     }
-    run_timestamp_str = None
+    run_id = None
     if rank == 0:
-        shared_data["timestamp"] = run_timestamp_str = datetime.datetime.now().strftime(
-            "%Y%m%d_%H%M%S"
+        run_id = make_trial_id(
+            datetime.datetime.now().strftime("%Y%m%d_%H%M%S"), label=label
         )
-        shared_data["paths"] = RunPaths.from_run_id(run_timestamp_str)
+        shared_data["run_id"] = run_id
+        shared_data["paths"] = RunPaths.from_run_id(run_id)
         print("sending paths to all processes...")
 
     shared_data = MPI.COMM_WORLD.bcast(shared_data, root=0)
-    run_timestamp_str = shared_data["timestamp"]
+    run_id = shared_data["run_id"]
     run_paths: RunPaths = shared_data["paths"]
 
-    return run_timestamp_str, run_paths
+    return run_id, run_paths
 
 
 if __name__ == "__main__":
-
     comm = MPI.COMM_WORLD.Create_group(
         MPI.COMM_WORLD.group.Excl([MPI.COMM_WORLD.Get_size() - 1])
     )
     rank = comm.rank
-    run_timestamp_str, run_paths = coordinate_paths_with_receiver()
-    run_paths = RunPaths.from_run_id(run_timestamp_str)
+    label = "singletrial"
+    run_id, run_paths = coordinate_paths_with_receiver(label)
+    run_paths = RunPaths.from_run_id(run_id)
 
     setup_logging(
         MPI.COMM_WORLD,
         log_dir_path=run_paths.logs,
-        timestamp_str=run_timestamp_str,
+        timestamp_str=run_id,
         log_level=os.environ.get("LOG_LEVEL", "DEBUG"),
     )
 
     main_log: structlog.stdlib.BoundLogger = structlog.get_logger("main")
     main_log.info(
-        f"Starting Standalone Run: {run_timestamp_str}",
+        f"Starting Standalone Run: {run_id}",
         run_dir=str(run_paths.run),
         log_all_ranks=True,
     )

@@ -22,7 +22,7 @@ from complete_control.plant.plant_plotting import plot_plant_outputs
 
 def coordinate_with_simulation():
     shared_data = {
-        "timestamp": None,
+        "run_id": None,
         "paths": None,
     }
     print("attempting to receive data via broadcast")
@@ -31,13 +31,13 @@ def coordinate_with_simulation():
 
 def main():
     shared_data = coordinate_with_simulation()
-    run_timestamp_str: str = shared_data["timestamp"]
+    run_id: str = shared_data["run_id"]
     run_paths: project_paths.RunPaths = shared_data["paths"]
 
     setup_logging(
         comm=MPI.COMM_WORLD,
         log_dir_path=run_paths.logs,
-        timestamp_str=run_timestamp_str,
+        timestamp_str=run_id,
         log_level=os.environ.get("LOG_LEVEL", "DEBUG"),
         default_log_all_ranks=True,
     )
@@ -45,7 +45,7 @@ def main():
     log.info(
         "Receiver plant process started and configured.",
         world_rank=MPI.COMM_WORLD.Get_rank(),
-        run_timestamp=run_timestamp_str,
+        run_id=run_id,
         log_path=str(run_paths.logs),
     )
 
