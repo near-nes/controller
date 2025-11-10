@@ -374,7 +374,7 @@ class PlantSimulator:
 
         return joint_pos_rad, joint_vel_rad_s, ee_pos_m, ee_vel_m_list, curr_section
 
-    def run_simulation(self) -> None:
+    def run_simulation(self) -> PlantPlotData:
         """Runs the main simulation loop. **NJT==1**"""
         self.log.info(
             "Starting simulation loop...",
@@ -386,30 +386,27 @@ class PlantSimulator:
         current_sim_time_s = 0.0
         step = 0
 
-        with tqdm(total=self.num_total_steps, unit="step", desc="Simulating") as pbar:
-            while current_sim_time_s < self.config.TOTAL_SIM_DURATION_S - (
-                self.config.RESOLUTION_S / 2.0
-            ):
-                # Get commands from MUSIC
-                rate_pos, rate_neg = self.music_prepare_step(current_sim_time_s)
+        for s in tqdm(
+            range(self.num_total_steps),
+            unit="step",
+            desc="Simulating",
+        ):
+            # Get commands from MUSIC
+            rate_pos, rate_neg = self.music_prepare_step(current_sim_time_s)
 
-                # Run simulation step
-                joint_pos, joint_vel, ee_pos, ee_vel, curr_section = (
-                    self.run_simulation_step(
-                        rate_pos, rate_neg, current_sim_time_s, step
-                    )
-                )
-
-                # Send sensory feedback through MUSIC
+            # Run simulation step
+            joint_pos, joint_vel, ee_pos, ee_vel, curr_section = (
+                self.run_simulation_step(rate_pos, rate_neg, current_sim_time_s, step)
+            )
                 self.music_end_step(joint_pos, current_sim_time_s, music_runtime)
 
-                # Update progress
-                current_sim_time_s += self.config.RESOLUTION_S
-                step += 1
-                pbar.update(1)
+            # Update progress
+            current_sim_time_s += self.config.RESOLUTION_S
+            step += 1
+        self.log.info("Simulation loop finished. Finalizing..")
+        # music_runtime.finalize() # you're supposed to call this, but it locks up
 
-        music_runtime.finalize()
-        self.log.info("Simulation loop finished.")
+        return self.finalize_and_process_data(joint_pos)
 
     def finalize_and_process_data(self, reached_joint_rad) -> PlantPlotData:
         """Saves all data required for post-simulation analysis and plotting."""
