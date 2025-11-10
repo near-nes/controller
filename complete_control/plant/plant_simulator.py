@@ -411,10 +411,7 @@ class PlantSimulator:
         music_runtime.finalize()
         self.log.info("Simulation loop finished.")
 
-        # After loop, finalize and save/plot
-        self.finalize_and_process_data(joint_pos)
-
-    def finalize_and_process_data(self, reached_joint_rad) -> None:
+    def finalize_and_process_data(self, reached_joint_rad) -> PlantPlotData:
         """Saves all data required for post-simulation analysis and plotting."""
         self.log.info("Finalizing and saving simulation data...")
         error = reached_joint_rad - self.config.target_joint_pos_rad
@@ -426,5 +423,9 @@ class PlantSimulator:
             init_hand_pos_ee=list(self.plant.init_hand_pos_ee),
             trgt_hand_pos_ee=list(self.plant.trgt_hand_pos_ee),
         )
-        plot_data.save(self.config.run_paths.robot_result)
-        self.log.info(f"Saved plotting data to {self.config.run_paths.robot_result}")
+        tmp_filename = self.config.run_paths.robot_result.with_suffix(".tmp")
+        final_filename = self.config.run_paths.robot_result
+        plot_data.save(tmp_filename)
+        # save + rename to have atomic write
+        tmp_filename.rename(final_filename)
+        return plot_data

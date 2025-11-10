@@ -11,6 +11,7 @@ initialize_nest("MUSIC")
 
 import structlog
 from config.MasterParams import MasterParams
+from config.ResultMeta import ResultMeta
 from config.paths import RunPaths
 from mpi4py import MPI
 from neural.Controller import Controller
@@ -75,6 +76,17 @@ def run_simulation(
         wall_time=str(collapse_wall_time),
     )
 
+    result = ResultMeta.create(master_config)
+    result.save(master_config.run_paths)
+
+    if controller.use_cerebellum and master_config.SAVE_WEIGHTS_CEREB:
+        log.info("Saving recorded synapse weights started...")
+        save_conn_weights(
+            controller.weights_history,
+            path_data,
+            "weightrecord",
+        )
+
     log.info("--- Simulation Finished ---")
 
 
@@ -131,9 +143,8 @@ if __name__ == "__main__":
 
     start_script_time = timer()
 
-    master_config = MasterParams.from_runpaths(run_paths=run_paths, USE_MUSIC=True)
-    with open(run_paths.params_json, "w") as f:
-        f.write(master_config.model_dump_json(indent=2))
+    master_config = MasterParams.from_runpaths(run_paths, USE_MUSIC=True)
+    master_config.save_to_json(run_paths.params_json)
     main_log.info("MasterParams initialized in music_start_sim (MUSIC).")
 
     # Setup environment and NEST kernel
