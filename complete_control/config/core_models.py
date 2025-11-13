@@ -115,6 +115,6 @@ class MusicParams(BaseModel, frozen=True):
 
 
 class PlottingParams(BaseModel, frozen=True):
-    PLOT_AFTER_SIMULATE: bool = True
+    PLOT_AFTER_SIMULATE: bool = False
     CAPTURE_VIDEO: list[str] = []  # ["x", "y", "z"]
     NUM_STEPS_CAPTURE_VIDEO: int = 100

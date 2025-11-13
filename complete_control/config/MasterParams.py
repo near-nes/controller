@@ -31,7 +31,7 @@ class MasterParams(BaseModel):
     USE_CEREBELLUM: bool = True
     GUI_PYBULLET: bool = False
     USE_MUSIC: bool = False
-    SAVE_WEIGHTS_CEREB: bool = False
+    SAVE_WEIGHTS_CEREB: bool = True
 
     NJT: int = 1
     JOINTS_NO_CONTROL: int = 2
@@ -74,5 +74,10 @@ class MasterParams(BaseModel):
             f.write(self.model_dump_json(indent=indent))
 
     @classmethod
-    def from_runpaths(cls, run_paths: RunPaths, **kwargs):
-        return MasterParams(run_paths=run_paths, run_id=run_paths.run.name, **kwargs)
+    def from_runpaths(cls, run_paths: RunPaths, parent_id: str, **kwargs):
+        return MasterParams(
+            run_paths=run_paths,
+            run_id=run_paths.run.name,
+            parent_id=parent_id,
+            **kwargs
+        )

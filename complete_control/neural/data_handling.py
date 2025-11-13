@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 import structlog
 from mpi4py.MPI import Comm
@@ -52,36 +53,52 @@ def collapse_files(
         cerebellum_handler=cerebhandler_rec,
         cerebellum=cereb_rec,
         use_cerebellum=use_cerebellum,
+        weights=None,
     )
 
 
-def save_conn_weights(weights_history: dict, dir: Path, filename_prefix: str):
-    """
-    merge SynapseRecording objects with the same (source, target, type, trials_recorded),
-    concatenate their weight_history, and save as a JSON array.
-    """
-    for (source_pop, target_pop), inner in weights_history.items():
-        label = f"{source_pop.label}>{target_pop.label}"
-        recs = []
-        for (
-            (source_neur, target_neur, synapse_id, synapse_model),
-            weights,
-        ) in inner.items():
-            recs.append(
-                SynapseRecording(
-                    source=source_neur,
-                    target=target_neur,
-                    syn_id=synapse_id,
-                    syn_type=synapse_model,
-                    weight_history=weights,
-                )
+def merge_synapse_blocks(blocks: List[SynapseBlock]) -> SynapseBlock:
+    if not blocks:
+        raise ValueError("Cannot merge empty list of blocks")
+
+    reference_source = blocks[0].source_pop_label
+    reference_target = blocks[0].target_pop_label
+
+    for i, block in enumerate(blocks[1:], start=1):
+        if (
+            block.source_pop_label != reference_source
+            or block.target_pop_label != reference_target
+        ):
+            raise ValueError(
+                f"Inconsistent source_pop_label: block 0 has '{reference_source}>{reference_target}', "
+                f"but block {i} has '{block.source_pop_label}>{block.target_pop_label}'"
             )
-        s = SynapseBlock(
-            source_pop_label=source_pop.label,
-            target_pop_label=target_pop.label,
-            synapse_recordings=recs,
-        )
-        rec_path = dir / f"{filename_prefix}-{label}.json"
-        with open(rec_path, "w") as f:
-            json_array = s.model_dump_json(indent=2)
-            f.write(json_array)
+
+    return SynapseBlock(
+        source_pop_label=blocks[0].source_pop_label,
+        target_pop_label=blocks[0].target_pop_label,
+        synapse_recordings=[r for b in blocks for r in b.synapse_recordings],
+    )
+
+
+def save_conn_weights(
+    weights: list[SynapseBlock], dir: Path, filename_prefix: str, comm=None
+) -> list[Path]:
+
+    paths = []
+    for block in weights:
+        if comm is not None:
+            # gather all blocks and merge them in a single object
+            gathered: list[SynapseBlock] = comm.gather(block, root=0)
+            if comm.rank == 0:
+                block = merge_synapse_blocks(gathered)
+
+        if comm is None or comm.rank == 0:
+            label = f"{block.source_pop_label}>{block.target_pop_label}"
+            rec_path = dir / f"{filename_prefix}-{label}.json"
+            _log.debug(f"saving {label}, with {len(block.synapse_recordings)} synapses")
+            with open(rec_path, "w") as f:
+                json_array = block.model_dump_json(indent=2)
+                f.write(json_array)
+            paths.append(rec_path)
+    return paths

@@ -47,8 +47,10 @@ def run_simulation(
 
     nest.Run(master_config.simulation.duration_ms)
 
-    if controller.use_cerebellum:
-        controller.record_synaptic_weights()
+    rec_paths = None
+    if controller.use_cerebellum and master_config.SAVE_WEIGHTS_CEREB:
+        w = controller.record_synaptic_weights()
+        rec_paths = save_conn_weights(w, path_data, f"synrec", comm)
 
     nest.Cleanup()
 
@@ -59,6 +61,7 @@ def run_simulation(
         controller.collect_populations(),
         comm,
     )
+    res.weights = rec_paths  # TODO move this somewhere less ugly
 
     with open(master_config.run_paths.neural_result, "w") as f:
         f.write(res.model_dump_json())

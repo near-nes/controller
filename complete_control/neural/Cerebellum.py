@@ -1,7 +1,11 @@
+from pathlib import Path
 import numpy as np
 import structlog
 from bsb import SimulationData, config, from_storage, get_simulation_adapter, options
 from bsb_nest.adapter import NestAdapter, NestResult
+import tqdm
+from neural.nest_adapter import nest
+from neural.neural_models import SynapseBlock
 from config.bsb_models import BSBConfigPaths
 from mpi4py import MPI
 
@@ -18,6 +22,7 @@ class Cerebellum:
         paths: BSBConfigPaths,
         total_time_vect: np.ndarray,
         label_prefix: str,
+        weights: list[Path] | None,
     ):
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
         options.verbosity = (
@@ -328,6 +333,28 @@ class Cerebellum:
             _inv_N_PC_minus_gids,
         )
 
+        # TODO make into dataclass, then use it to assign default params when running without parent
+        self.plastic_pairs = [
+            (
+                self.populations.forw_grc_view,
+                self.populations.forw_pc_p_view,
+            ),
+            (
+                self.populations.forw_grc_view,
+                self.populations.forw_pc_n_view,
+            ),
+            (
+                self.populations.inv_grc_view,
+                self.populations.inv_pc_p_view,
+            ),
+            (
+                self.populations.inv_grc_view,
+                self.populations.inv_pc_n_view,
+            ),
+        ]
+        self.log.warning("loading weights!!")
+        self._connect_plastic_pops(self.plastic_pairs, weights)
+
     def _create_core_pop_views(
         self,
         _forw_N_Glom_gids,
@@ -501,3 +528,25 @@ class Cerebellum:
             to_file=True,
             label=f"{self.label_prefix}inv_pc_n",
         )
+
+    def _connect_plastic_pops(self, pairs, weights):
+        if weights is None:
+            return
+        for path in weights:
+            with open(path, "r") as f:
+                block = SynapseBlock.model_validate_json(f.read())
+            self.log.debug(
+                f"working on {block.source_pop_label}>{block.target_pop_label}"
+            )
+            for conn in tqdm.tqdm(block.synapse_recordings):
+                nest.Connect(
+                    [conn.syn.source],
+                    [conn.syn.target],
+                    "one_to_one",
+                    syn_spec={
+                        "synapse_model": conn.syn.syn_type,
+                        "weight": [conn.weight],
+                        "delay": [conn.syn.delay],
+                        "receptor_type": [conn.syn.receptor_type],
+                    },
+                )

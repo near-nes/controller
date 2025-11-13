@@ -40,12 +40,18 @@ class PopulationSpikes(BaseModel):
         arbitrary_types_allowed = True
 
 
-class SynapseRecording(BaseModel):
-    weight_history: List[float]
+class Synapse(BaseModel):
     source: int  # GID
     target: int  # GID
-    syn_type: str
     syn_id: int
+    syn_type: str
+    receptor_type: int
+    delay: float
+
+
+class SynapseRecording(BaseModel):
+    syn: Synapse
+    weight: float
 
     class Config:
         arbitrary_types_allowed = True

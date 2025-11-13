@@ -4,6 +4,12 @@ from typing import Optional
 
 import numpy as np
 import structlog
+from neural.neural_models import (
+    Synapse,
+    SynapseBlock,
+    SynapseRecording,
+)
+from utils_common.results import read_weights
 from neural.CerebellumHandlerPopulations import CerebellumHandlerPopulations
 from neural.CerebellumPopulations import CerebellumPopulations
 from config.bsb_models import BSBConfigPaths
@@ -167,28 +173,54 @@ class Controller:
 
         self.log.info("Controller initialization complete.")
 
-    def record_synaptic_weights(self):
-        PF_to_purkinje_conns = (
-            self.cerebellum_handler.get_synapse_connections_PF_to_PC()
-        )
+    def record_synaptic_weights(self) -> list[SynapseBlock]:
+        PF_to_purkinje_conns = self.cerebellum_handler.get_plastic_connections()
+        blocks = []
         for (pre_pop, post_pop), conns in PF_to_purkinje_conns.items():
+            recs = []
             for conn in conns:
-                source_neur, target_neur, synapse_id, delay, synapse_model, weight = (
-                    nest.GetStatus(
-                        conn,
-                        [
-                            "source",
-                            "target",
-                            "synapse_id",
-                            "delay",
-                            "synapse_model",
-                            "weight",
-                        ],
-                    )[0]
+                st = nest.GetStatus(
+                    conn,
+                    [
+                        "source",
+                        "target",
+                        "synapse_id",
+                        "delay",
+                        "synapse_model",
+                        "weight",
+                        "receptor",
+                    ],
+                )[0]
+                (
+                    source_neur,
+                    target_neur,
+                    synapse_id,
+                    delay,
+                    synapse_model,
+                    weight,
+                    receptor_type,
+                ) = st
+                recs.append(
+                    SynapseRecording(
+                        syn=Synapse(
+                            source=source_neur,
+                            target=target_neur,
+                            syn_id=synapse_id,
+                            syn_type=synapse_model,
+                            delay=delay,
+                            receptor_type=receptor_type,
+                        ),
+                        weight=weight,
+                    )
                 )
-                self.weights_history[(pre_pop, post_pop)][
-                    (source_neur, target_neur, synapse_id, synapse_model)
-                ].append(weight)
+            blocks.append(
+                SynapseBlock(
+                    source_pop_label=pre_pop,
+                    target_pop_label=post_pop,
+                    synapse_recordings=recs,
+                )
+            )
+        return blocks
 
     def _instantiate_cerebellum_handler(self, controller_pops: ControllerPopulations):
         from .CerebellumHandler import CerebellumHandler
@@ -200,60 +232,26 @@ class Controller:
                 "Cerebellum config must be provided when use_cerebellum is True"
             )
 
-        cereb_pop_keys = [
-            "prediction",
-            "feedback",
-            "motor_commands",
-            "error",
-            "plan_to_inv",
-            "state_to_inv",
-            "error_i",
-            "motor_pred",
-            "feedback_inv",
-        ]
-        cereb_conn_keys = [
-            "dcn_forw_prediction",
-            "error_io_f",
-            "dcn_f_error",  # Fwd connections
-            "feedback_error",  # Used by CerebellumHandler for fwd error calculation
-            "plan_to_inv_error_inv",
-            "state_error_inv",  # Inv error connections (state_error_inv might not exist, handled below)
-            "error_inv_io_i",
-            "dcn_i_motor_pred",  # Inv connections
-            # "sn_feedback_inv" is used by controller.py to connect TO cerebellum_controller, not internally by it.
-            # Connections *from* SDC *to* CerebController interfaces are handled in SDC._connect_blocks
-            # Connections *from* CerebController *to* SDC interfaces are handled in SDC._connect_blocks
-        ]
-
-        # cereb_pops_params = {k: self.pops_params[k] for k in cereb_pop_keys}
-        # cereb_conn_params = {k: self.conn_params[k] for k in cereb_conn_keys}
-        # TODO different parameter sets could be nice :)
         cereb_pops_params = self.pops_params
         cereb_conn_params = self.conn_params
+        weights = read_weights(self.master_params)
 
-        try:
-            cerebellum_controller = CerebellumHandler(
-                N=self.N,
-                total_time_vect=self.total_time_vect,
-                sim_params=self.sim_params,
-                pops_params=cereb_pops_params,
-                conn_params=cereb_conn_params,
-                cerebellum_paths=self.cerebellum_paths,
-                path_data=self.path_data,
-                label_prefix=f"{self.label}cereb_",
-                dof_id=self.dof_id,
-                comm=self.comm,
-                controller_pops=controller_pops,
-            )
-            self.log.info("Internal CerebellumHandler instantiated successfully.")
-            return cerebellum_controller
-        except Exception as e:
-            self.log.error(
-                "Failed to instantiate internal CerebellumHandler",
-                error=str(e),
-                exc_info=True,
-            )
-            raise
+        cerebellum_controller = CerebellumHandler(
+            N=self.N,
+            total_time_vect=self.total_time_vect,
+            sim_params=self.sim_params,
+            pops_params=cereb_pops_params,
+            conn_params=cereb_conn_params,
+            cerebellum_paths=self.cerebellum_paths,
+            path_data=self.path_data,
+            label_prefix=f"{self.label}cereb_",
+            dof_id=self.dof_id,
+            comm=self.comm,
+            controller_pops=controller_pops,
+            weights=weights,
+        )
+        self.log.info("Internal CerebellumHandler instantiated successfully.")
+        return cerebellum_controller
 
     # --- 1. Block Creation ---
     def _create_blocks(self):

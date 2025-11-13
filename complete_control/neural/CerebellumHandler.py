@@ -1,3 +1,5 @@
+from collections import defaultdict
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -62,6 +64,7 @@ class CerebellumHandler:
         path_data: str,
         comm,  # MPI.Comm
         controller_pops: Optional[ControllerPopulations],
+        weights: list[Path] | None,
         label_prefix: str = "cereb_",
         dof_id: int = 0,
     ):
@@ -105,6 +108,7 @@ class CerebellumHandler:
             paths=cerebellum_paths,
             total_time_vect=self.total_time_vect,
             label_prefix=f"{self.label_prefix}core_",
+            weights=weights,
         )
         self.log.info("Core Cerebellum object instantiated.")
         # Get N_mossy counts from the Cerebellum object
@@ -132,38 +136,29 @@ class CerebellumHandler:
         # Use path_data implicitly if to_file=True
         return PopView(nest_pop, self.total_time_vect, to_file=True, label=full_label)
 
-    def get_synapse_connections_PF_to_PC(self):
+    def get_plastic_connections(self):
         """
-        Returns a dict of NEST connection handles for all PF→Purkinje types.
+        Returns a dict of NEST connection handles for all PF→Purkinje non-static.
         """
-        conns = {}
-        pairs = [
-            (
-                self.cerebellum.populations.forw_grc_view,
-                self.cerebellum.populations.forw_pc_p_view,
-            ),
-            (
-                self.cerebellum.populations.forw_grc_view,
-                self.cerebellum.populations.forw_pc_n_view,
-            ),
-            (
-                self.cerebellum.populations.inv_grc_view,
-                self.cerebellum.populations.inv_pc_p_view,
-            ),
-            (
-                self.cerebellum.populations.inv_grc_view,
-                self.cerebellum.populations.inv_pc_n_view,
-            ),
-        ]
+        conns = defaultdict(list)
+        pairs = self.cerebellum.plastic_pairs
         tot_syn = 0
         for pre_pop, post_pop in pairs:
             c = nest.GetConnections(
                 source=pre_pop.pop,
                 target=post_pop.pop,
             )
-            conns[(pre_pop, post_pop)] = c
-            tot_syn += len(c)
-        self.log.warning(f"total number of synapses: {tot_syn}")
+            for ic in c:
+                if nest.GetStatus(c, "synapse_model") != "static_synapse":
+                    conns[(pre_pop.label, post_pop.label)].append(ic)
+                    tot_syn += 1
+
+            self.log.debug(
+                f"{pre_pop.label}>{post_pop.label} ({len(c)} synapses). done {tot_syn}",
+                log_all_ranks=True,
+            )
+
+        self.log.debug(f"total number of synapses: {tot_syn}", log_all_ranks=True)
         return conns
 
     def _create_interface_populations(self):
