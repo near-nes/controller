@@ -1,7 +1,8 @@
 # Applications
 [from]
-  binary=/sim/controller/complete_control/main_simulation.py
-  np=2
+  binary=/sim/controller/complete_control/music_start_sim.py
+  #binary=/sim/controller/complete_control/prove_neuroni_state.py
+  np=1
 
 [to]
   binary=/sim/controller/complete_control/receiver_plant.py

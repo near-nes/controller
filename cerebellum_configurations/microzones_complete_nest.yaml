@@ -8,7 +8,7 @@ storage:
 simulations:
   basal_activity:
     simulator: nest
-    resolution: 0.1
+    resolution: 1.0 # 0.1
     duration: 50
     modules: # - custom_stdp_module
     seed: 1234
@@ -530,101 +530,101 @@ simulations:
           cell_models:
           - mossy_fibers
         weight: 1
-        delay: 0.1
+        delay: 1.0 # 0.1
       mossy_fibers_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - mossy_fibers
       glomerulus_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - glomerulus
       granule_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - granule_cell
       golgi_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - golgi_cell
       basket_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - basket_cell
       stellate_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - stellate_cell
       purkinje_cell_plus_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - purkinje_cell_plus
       purkinje_cell_minus_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - purkinje_cell_minus
       dcn_p_plus_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - dcn_p_plus
       dcn_p_minus_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - dcn_p_minus
       dcn_i_plus_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - dcn_i_plus
       dcn_i_minus_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - dcn_i_minus
       io_plus_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
           - io_plus
       io_minus_record:
         device: spike_recorder
-        delay: 0.1
+        delay: 1.0 # 0.1
         targetting:
           strategy: cell_model
           cell_models:
@@ -641,7 +641,7 @@ simulations:
           cell_models:
           - mossy_fibers
         weight: 1
-        delay: 0.1
+        delay: 1.0 # 0.1
       mf_stimulus_2:
         device: poisson_generator
         rate: 40
@@ -652,7 +652,7 @@ simulations:
           cell_models:
           - mossy_fibers
         weight: 1
-        delay: 0.1
+        delay: 1.0 # 0.1
       cf_stimulus_plus:
         device: poisson_generator
         rate: 500
@@ -664,7 +664,7 @@ simulations:
           - io_plus
         receptor_type: 1
         weight: 55
-        delay: 0.1
+        delay: 1.0 # 0.1
       cf_stimulus_minus:
         device: poisson_generator
         rate: 500
@@ -676,7 +676,7 @@ simulations:
           - io_minus
         receptor_type: 1
         weight: 55
-        delay: 0.1
+        delay: 1.0 # 0.1
     $import:
       ref: "#/simulations/basal_activity"
       values:

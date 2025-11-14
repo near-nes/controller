@@ -1,4 +1,4 @@
-from neural.NestClient import NESTClient
+from complete_control.neural.NestClient import NESTClient
 
 _nest = None
 _initialized = False

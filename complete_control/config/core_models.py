@@ -64,7 +64,7 @@ class OracleData(BaseModel):
 
 class SimulationParams(BaseModel, frozen=True):
     resolution: float = 1.0  # ms
-    time_prep: float = 150.0  # ms
+    time_prep: float = 650.0  # ms
     time_move: float = 500.0  # ms
     time_post: float = 350.0  # ms
     n_trials: int = 2

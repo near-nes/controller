@@ -51,7 +51,10 @@ def run_simulation(
     log.info("collected all popviews")
     controller = controllers[0]
     log.info("Starting Simulation")
-
+    ###############################
+    log.info("Waiting for all MPI ranks to finish MUSIC port setup before Prepare")
+    MPI.COMM_WORLD.barrier()
+    ###############################
     nest.Prepare()
     for trial in range(n_trials):
         current_sim_start_time = nest.GetKernelStatus("biological_time")

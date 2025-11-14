@@ -8,7 +8,7 @@ class EngineConfig(BaseModel):
     ServerAddress: str
     PythonFileName: str
     ProtobufPackages: List[str] = ["Wrappers", "NrpGenericProto"]
-    EngineTimestep: float = 0.0001
+    EngineTimestep: float = 0.001  # change here according to res
 
 
 class DataPackProcessingFunction(BaseModel):

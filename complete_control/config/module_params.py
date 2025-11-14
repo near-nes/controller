@@ -21,7 +21,7 @@ class PlannerModuleConfig(BaseModel):
     gle_config: GLETrajGeneratorConfig = Field(
         default_factory=lambda: GLETrajGeneratorConfig()
     )
-    kp: float = 100.0  # 1255.0503631208485
+    kp: float = 100.0
     kpl: float = 0.32504265346581107
     base_rate: float = 5.0
 
@@ -63,7 +63,7 @@ class StateModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
     kp: float = 1.4
     base_rate: float = 0.0
-    buffer_size: float = 60.0
+    buffer_size: float = 125.0  # 60.0
 
 
 class StateSEModuleConfig(BaseModel):
