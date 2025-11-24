@@ -75,7 +75,8 @@ ENV VIRTUAL_ENV=/sim/venv
 RUN python -m venv --system-site-packages $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN pip install --upgrade pip setuptools wheel packaging
+COPY ./docker/constraints.txt /tmp/constraints.txt
+RUN pip install --upgrade pip setuptools wheel packaging -c /tmp/constraints.txt
 
 ENV INSTALL_DIR=/sim/install
 ENV DEPS_DIR=/sim/dependencies
@@ -93,7 +94,6 @@ ENV CEREBELLUM_PATH=/sim/cerebellum
 ENV LD_LIBRARY_PATH="${MUSIC_INSTALL_DIR}/lib"
 
 RUN mkdir -p $INSTALL_DIR $DEPS_DIR $NEST_INSTALL_DIR $MUSIC_INSTALL_DIR
-COPY ./docker/constraints.txt /tmp/constraints.txt
 
 # openmpi, music and nest
 FROM base AS builder
