@@ -47,6 +47,7 @@ class Synapse(BaseModel):
     synapse_model: str
     receptor_type: int
     delay: float
+    port: int
 
 
 class SynapseRecording(BaseModel):

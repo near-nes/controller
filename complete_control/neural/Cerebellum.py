@@ -1,5 +1,4 @@
 from collections import defaultdict
-from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -11,7 +10,8 @@ from config.bsb_models import BSBConfigPaths
 from config.connection_params import ConnectionsParams
 from mpi4py import MPI
 from neural.nest_adapter import nest
-from neural.neural_models import SynapseBlock
+from neural.neural_models import SynapseBlock, SynapseRecording
+from utils_common.profile import Profile
 
 from .CerebellumPopulations import CerebellumPopulations
 from .population_view import PopView
@@ -26,83 +26,6 @@ def create_key_plastic_connection(s: str, t: str):
 
 
 class Cerebellum:
-    def prepare_configurations(
-        self,
-        f: str,
-        i: str,
-        weights: list[Path] | None,
-    ):
-        forward: config.Configuration = config.parse_configuration_file(f)
-        inverse: config.Configuration = config.parse_configuration_file(i)
-        to_be_created_once_neurons_exist = []
-
-        if weights is None or len(weights) == 0:  # no parent, root execution
-            return forward, inverse, to_be_created_once_neurons_exist
-        # extract plastic layers
-        self.log.debug(f"received {len(weights)} weights!")
-
-        conn_to_connectionmodel = {
-            "cereb_core_forw_grc>cereb_core_forw_pc_n": (
-                "parallel_fiber_to_purkinje_minus",
-                forward,
-            ),
-            "cereb_core_forw_grc>cereb_core_forw_pc_p": (
-                "parallel_fiber_to_purkinje_plus",
-                forward,
-            ),
-            "cereb_core_inv_grc>cereb_core_inv_pc_n": (
-                "parallel_fiber_to_purkinje_minus",
-                inverse,
-            ),
-            "cereb_core_inv_grc>cereb_core_inv_pc_p": (
-                "parallel_fiber_to_purkinje_plus",
-                inverse,
-            ),
-        }
-        # iterate through all possible weights
-        for weight_label, (
-            yaml_label,
-            configuration,
-        ) in conn_to_connectionmodel.items():
-            self.log.debug(
-                f"looking for label {weight_label} in {[i.stem for i in weights]}"
-            )
-            path = next((i for i in weights if i.stem == weight_label), None)
-            # if the weights for this connection were not saved, do nothing
-            if path is None:
-                continue
-            # otherwise, stop conns from being created
-            current_model = (
-                configuration.simulations[SIMULATION_NAME_IN_YAML]
-                .connection_models[yaml_label]
-                .synapse.model
-            )
-            self.log.debug(
-                f"changing synapse model from {current_model} to {DUMMY_MODEL_NAME}"
-            )
-            configuration.simulations[SIMULATION_NAME_IN_YAML].connection_models[
-                yaml_label
-            ].synapse.model = DUMMY_MODEL_NAME
-            # and instead accumulate to create based on weights
-            to_be_created_once_neurons_exist.append(path)
-            weights.remove(path)
-        # if len(weights) + len(to_be_created_once_neurons_exist) > len(
-        #     conn_to_connectionmodel
-        # ):
-        #     self.log.error(
-        #         f"len(weights) + len(to_be_created_once_neurons_exist) > len(conn_to_connectionmodel): ({len(weights)}+{len(to_be_created_once_neurons_exist)}>{len(conn_to_connectionmodel)})"
-        #         "something has probably gone wrong"
-        #     )
-        #     raise ValueError("more weights than possible were expected.")
-
-        if len(weights) > 0:
-            self.log.error(
-                f"len(weights)>0 (={len(weights)}). something has probably gone wrong"
-            )
-            self.log.error(weights)
-            raise ValueError("some weight files were not consumed.")
-        return forward, inverse, to_be_created_once_neurons_exist
-
     def __init__(
         self,
         comm: MPI.Comm,
@@ -124,10 +47,11 @@ class Cerebellum:
 
         adapter: NestAdapter = get_simulation_adapter("nest", comm)
 
-        conf_forward, conf_inverse, weights_for_conn_to_create = (
-            self.prepare_configurations(
-                str(paths.forward_yaml), str(paths.inverse_yaml), weights
-            )
+        conf_forward: config.Configuration = config.parse_configuration_file(
+            str(paths.forward_yaml)
+        )
+        conf_inverse: config.Configuration = config.parse_configuration_file(
+            str(paths.inverse_yaml)
         )
 
         self.forward_model = from_storage(str(paths.cerebellum_hdf5), comm)
@@ -455,7 +379,7 @@ class Cerebellum:
                 ),
             ),
         ]
-        self._connect_plastic_pops(weights_for_conn_to_create)
+        self._update_weight_plastic_pops(weights)
 
     def _create_core_pop_views(
         self,
@@ -662,22 +586,84 @@ class Cerebellum:
         )
         return conns
 
-    def _connect_plastic_pops(self, weights: list[Path]):
-        for path in weights:
-            with open(path, "r") as f:
-                block = SynapseBlock.model_validate_json(f.read())
-            for conn in tqdm.tqdm(
-                block.synapse_recordings,
-                f"{block.source_pop_label}>{block.target_pop_label}",
-            ):
-                nest.Connect(
-                    [conn.syn.source],
-                    [conn.syn.target],
-                    "one_to_one",
-                    syn_spec={
-                        "synapse_model": conn.syn.synapse_model,
-                        "weight": [conn.weight],
-                        "delay": [conn.syn.delay],
-                        "receptor_type": conn.syn.receptor_type,
-                    },
+    def _pop_this_id_is_in(self, id):
+        return next(i.label for _, i in self.populations if id in i.pop)
+
+    def _update_weight_plastic_pops(self, weights: list[Path]):
+        if weights is None:
+            return
+        create_plastic = Profile()
+
+        num_conns_curr_proc = applied_weights = 0
+        with create_plastic.time():
+            loc_nodes = set(nest.GetNodes(local_only=True).get("global_id"))
+            curr_proc_recordings: defaultdict[str, list[SynapseRecording]] = (
+                defaultdict(list)
+            )
+            self.log.debug(f"loading all connections, split by synapse model...")
+            # load all connections, split by synapse model
+            for path in weights:
+                with open(path, "r") as f:
+                    block = SynapseBlock.model_validate_json(f.read())
+                for conn in block.synapse_recordings:
+                    if conn.syn.target in loc_nodes:
+                        curr_proc_recordings[conn.syn.synapse_model].append(conn)
+                        num_conns_curr_proc += 1
+            self.log.debug(f"{curr_proc_recordings.keys()}")
+
+            # iterate based on synapse model
+            for syn_model, connections in curr_proc_recordings.items():
+                rec_sources, rec_targets = (set(), set())
+                recordings: dict[tuple, SynapseRecording] = {}
+
+                # index connections based on key, save sources/targets
+                for conn in connections:
+                    rec_sources.add(conn.syn.source)
+                    rec_targets.add(conn.syn.target)
+                    recordings[
+                        (
+                            conn.syn.source,
+                            conn.syn.target,
+                            conn.syn.synapse_model,
+                            conn.syn.port,
+                        )
+                    ] = conn
+
+                # collect nest SynapseCollection of this synapse model
+                conn_nest = nest.GetConnections(
+                    # nest wants a sorted unique list
+                    source=nest.NodeCollection(sorted(rec_sources)),
+                    target=nest.NodeCollection(sorted(rec_targets)),
+                    synapse_model=syn_model,
                 )
+
+                if len(conn_nest) != len(recordings):
+                    raise ValueError(
+                        f"collected inconsistent connections: {len(conn_nest)} collected vs {len(recordings)} recordings"
+                    )
+
+                # sort weights according to collected nest connections
+                source = conn_nest.get("source")
+                target = conn_nest.get("target")
+                synapse_model = conn_nest.get("synapse_model")
+                port = conn_nest.get("port")
+                weights_sorted = []
+                for conn, source, target, model, port in zip(
+                    conn_nest,
+                    source,
+                    target,
+                    synapse_model,
+                    port,
+                ):
+                    weights_sorted.append(
+                        recordings.pop((source, target, model, port)).weight
+                    )
+
+                # apply sorted weights according to the existing SynapseCollection
+                nest.SetStatus(conn_nest, [{"weight": w} for w in weights_sorted])
+                applied_weights += len(weights_sorted)
+        self.log.warning(f"applying all weights took: {create_plastic.total_time}")
+        if applied_weights != num_conns_curr_proc:
+            raise ValueError(
+                f"applied_weights != num_conns_curr_proc ({applied_weights} != {num_conns_curr_proc})"
+            )

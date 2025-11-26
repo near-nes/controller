@@ -4,14 +4,6 @@ from typing import Optional
 
 import numpy as np
 import structlog
-from neural.neural_models import (
-    Synapse,
-    SynapseBlock,
-    SynapseRecording,
-)
-from utils_common.results import read_weights
-from neural.CerebellumHandlerPopulations import CerebellumHandlerPopulations
-from neural.CerebellumPopulations import CerebellumPopulations
 from config.bsb_models import BSBConfigPaths
 from config.connection_params import ConnectionsParams
 from config.core_models import MusicParams, SimulationParams
@@ -23,9 +15,13 @@ from config.module_params import (
     StateModuleConfig,
 )
 from config.population_params import PopulationsParams
+from neural.CerebellumHandlerPopulations import CerebellumHandlerPopulations
+from neural.CerebellumPopulations import CerebellumPopulations
 from neural.nest_adapter import nest
+from neural.neural_models import Synapse, SynapseBlock, SynapseRecording
 from plant.sensoryneuron import SensoryNeuron
 from utils_common.generate_signals import generate_traj
+from utils_common.results import read_weights
 
 from .ControllerPopulations import ControllerPopulations
 from .motorcortex import MotorCortex
@@ -189,9 +185,14 @@ class Controller:
                         "delay",
                         "synapse_model",
                         "weight",
+                        "port",
                         # "receptor", see https://github.com/near-nes/controller/issues/102#issuecomment-3558895210
                     ],
-                )[0]
+                )
+                if len(st) != 1:
+                    raise ValueError(
+                        f"Multiple ({len(st)}) statuses found for a single connection ({st})"
+                    )
                 (
                     source_neur,
                     target_neur,
@@ -199,8 +200,9 @@ class Controller:
                     delay,
                     synapse_model,
                     weight,
+                    port,
                     # receptor_type, see https://github.com/near-nes/controller/issues/102#issuecomment-3558895210
-                ) = st
+                ) = st[0]
                 recs.append(
                     SynapseRecording(
                         syn=Synapse(
@@ -210,6 +212,7 @@ class Controller:
                             synapse_model=synapse_model,
                             delay=delay,
                             receptor_type=receptor_type,
+                            port=port,
                         ),
                         weight=weight,
                     )
