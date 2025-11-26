@@ -45,7 +45,7 @@ class Synapse(BaseModel):
     target: int  # GID
     syn_id: int
     synapse_model: str
-    receptor_type: int
+    # receptor_type: int see https://github.com/near-nes/controller/issues/102#issuecomment-3558895210
     delay: float
     port: int
 

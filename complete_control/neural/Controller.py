@@ -172,7 +172,7 @@ class Controller:
     def record_synaptic_weights(self) -> list[SynapseBlock]:
         PF_to_purkinje_conns = self.cerebellum_handler.get_plastic_connections()
         blocks = []
-        for (pre_pop, post_pop), (conns, receptor_type) in PF_to_purkinje_conns.items():
+        for (pre_pop, post_pop), conns in PF_to_purkinje_conns.items():
             recs = []
             self.log.debug(f"saving {pre_pop}>{post_pop}...")
             for conn in conns:
@@ -211,7 +211,6 @@ class Controller:
                             syn_id=synapse_id,
                             synapse_model=synapse_model,
                             delay=delay,
-                            receptor_type=receptor_type,
                             port=port,
                         ),
                         weight=weight,

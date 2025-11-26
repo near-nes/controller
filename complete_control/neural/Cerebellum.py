@@ -349,36 +349,6 @@ class Cerebellum:
             _inv_N_PC_minus_gids,
         )
 
-        self.plastic_pairs = [
-            (
-                self.populations.forw_grc_view,
-                self.populations.forw_pc_p_view,
-                self._find_receptor_type(
-                    conf_forward, "parallel_fiber_to_purkinje_plus"
-                ),
-            ),
-            (
-                self.populations.forw_grc_view,
-                self.populations.forw_pc_n_view,
-                self._find_receptor_type(
-                    conf_forward, "parallel_fiber_to_purkinje_minus"
-                ),
-            ),
-            (
-                self.populations.inv_grc_view,
-                self.populations.inv_pc_p_view,
-                self._find_receptor_type(
-                    conf_inverse, "parallel_fiber_to_purkinje_plus"
-                ),
-            ),
-            (
-                self.populations.inv_grc_view,
-                self.populations.inv_pc_n_view,
-                self._find_receptor_type(
-                    conf_inverse, "parallel_fiber_to_purkinje_minus"
-                ),
-            ),
-        ]
         self._update_weight_plastic_pops(weights)
 
     def _create_core_pop_views(
@@ -555,18 +525,11 @@ class Cerebellum:
             label=f"{self.label_prefix}inv_pc_n",
         )
 
-    def _find_receptor_type(self, c: config.Configuration, connection_name: str):
-        return (
-            c.simulations[SIMULATION_NAME_IN_YAML]
-            .connection_models[connection_name]
-            .synapse.receptor_type
-        )
-
     def get_plastic_connections(self):
         conns = {}
-        pairs = self.plastic_pairs
+        pairs = self.populations.get_plastic_pairs()
         tot_syn = 0
-        for pre_pop, post_pop, receptor_type in pairs:
+        for pre_pop, post_pop in pairs:
             c = []
             for p in PLASTICITY_TYPES:
                 c.extend(
@@ -577,8 +540,7 @@ class Cerebellum:
                     )
                     or []
                 )
-            # receptor_type saved because https://github.com/near-nes/controller/issues/102#issuecomment-3558895210
-            conns[(pre_pop.label, post_pop.label)] = (c, receptor_type)
+            conns[(pre_pop.label, post_pop.label)] = c
             tot_syn += len(c)
 
         self.log.debug(

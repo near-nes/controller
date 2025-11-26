@@ -72,3 +72,11 @@ class CerebellumPopulations(CerebellumPopulationsGeneric[PopView]):
         return convert_to_recording(
             self, CerebellumPopulationsRecordings, *args, **kwargs
         )
+
+    def get_plastic_pairs(self) -> tuple[tuple[PopView, PopView]]:
+        return (
+            (self.forw_grc_view, self.forw_pc_p_view),
+            (self.forw_grc_view, self.forw_pc_n_view),
+            (self.inv_grc_view, self.inv_pc_p_view),
+            (self.inv_grc_view, self.inv_pc_n_view),
+        )
