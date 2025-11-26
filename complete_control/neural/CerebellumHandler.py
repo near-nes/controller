@@ -114,7 +114,7 @@ class CerebellumHandler:
         self.log.info("Core Cerebellum object instantiated.")
         # Get N_mossy counts from the Cerebellum object
         self.N_mossy_forw = len(self.cerebellum.populations.forw_mf_view.pop)
-        self.N_mossy_inv = len(self.cerebellum.populations.inv_mf_view.pop)
+        self.N_mossy_inv = len(self.cerebellum.populations.inv_mf.pop)
         self.log.info(
             "Mossy fiber counts", N_forw=self.N_mossy_forw, N_inv=self.N_mossy_inv
         )
@@ -294,7 +294,7 @@ class CerebellumHandler:
         self.log.debug("Connecting error -> fwd_io", conn_spec=conn_spec_error_io_f)
         nest.Connect(
             self.interface_pops.error_p.pop,
-            self.cerebellum.populations.forw_io_p_view.pop,
+            self.cerebellum.populations.forw_io_p.pop,
             "all_to_all",
             syn_spec=conn_spec_error_io_f.model_dump(exclude_none=True),
         )
@@ -304,7 +304,7 @@ class CerebellumHandler:
         )
         nest.Connect(
             self.interface_pops.error_n.pop,
-            self.cerebellum.populations.forw_io_n_view.pop,
+            self.cerebellum.populations.forw_io_n.pop,
             "all_to_all",
             syn_spec=conn_spec_error_io_f_neg.model_dump(exclude_none=True),
         )
@@ -314,7 +314,7 @@ class CerebellumHandler:
         self.log.debug("Connecting plan_to_inv -> inv_mf")
         nest.Connect(
             self.interface_pops.plan_to_inv.pop,
-            self.cerebellum.populations.inv_mf_view.pop,
+            self.cerebellum.populations.inv_mf.pop,
             "one_to_one",
             syn_spec=self.conn_params.plan_to_inv_mossy.model_dump(exclude_none=True),
         )
@@ -324,13 +324,13 @@ class CerebellumHandler:
         self.log.debug("Connecting error_inv -> inv_io (p)", conn_spec=conn_spec_p)
         nest.Connect(
             self.interface_pops.error_inv_p.pop,
-            self.cerebellum.populations.inv_io_p_view.pop,
+            self.cerebellum.populations.inv_io_p.pop,
             "all_to_all",
             syn_spec=conn_spec_p,
         )
         nest.Connect(
             self.interface_pops.error_inv_n.pop,
-            self.cerebellum.populations.inv_io_n_view.pop,
+            self.cerebellum.populations.inv_io_n.pop,
             "all_to_all",
             syn_spec=conn_spec_p,
         )
@@ -347,25 +347,25 @@ class CerebellumHandler:
             syn_spec_n=syn_spec_n,
         )
         nest.Connect(
-            self.cerebellum.populations.inv_dcnp_p_view.pop,
+            self.cerebellum.populations.inv_dcnp_p.pop,
             self.interface_pops.motor_prediction_p.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
-            self.cerebellum.populations.inv_dcnp_p_view.pop,
+            self.cerebellum.populations.inv_dcnp_p.pop,
             self.interface_pops.motor_prediction_n.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
-            self.cerebellum.populations.inv_dcnp_n_view.pop,
+            self.cerebellum.populations.inv_dcnp_n.pop,
             self.interface_pops.motor_prediction_p.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
         nest.Connect(
-            self.cerebellum.populations.inv_dcnp_n_view.pop,
+            self.cerebellum.populations.inv_dcnp_n.pop,
             self.interface_pops.motor_prediction_n.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
@@ -423,25 +423,25 @@ class CerebellumHandler:
         )
         # TODO this agrees with brain.py, but why these signs?
         nest.Connect(
-            self.cerebellum.populations.forw_dcnp_n_view.pop,
+            self.cerebellum.populations.forw_dcnp_n.pop,
             self.interface_pops.error_p.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
         nest.Connect(
-            self.cerebellum.populations.forw_dcnp_n_view.pop,
+            self.cerebellum.populations.forw_dcnp_n.pop,
             self.interface_pops.error_n.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
         nest.Connect(
-            self.cerebellum.populations.forw_dcnp_p_view.pop,
+            self.cerebellum.populations.forw_dcnp_p.pop,
             self.interface_pops.error_p.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
-            self.cerebellum.populations.forw_dcnp_p_view.pop,
+            self.cerebellum.populations.forw_dcnp_p.pop,
             self.interface_pops.error_n.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
@@ -546,7 +546,7 @@ class CerebellumHandler:
             syn_spec_n=syn_spec_n,
         )
         nest.Connect(
-            self.cerebellum.populations.forw_dcnp_p_view.pop,
+            self.cerebellum.populations.forw_dcnp_p.pop,
             self.controller_pops.pred_p.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
@@ -554,14 +554,14 @@ class CerebellumHandler:
 
         # DCN minus inhibits Positive Prediction
         nest.Connect(
-            self.cerebellum.populations.forw_dcnp_n_view.pop,
+            self.cerebellum.populations.forw_dcnp_n.pop,
             self.controller_pops.pred_p.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
         # DCN minus drives Negative Prediction
         nest.Connect(
-            self.cerebellum.populations.forw_dcnp_n_view.pop,
+            self.cerebellum.populations.forw_dcnp_n.pop,
             self.controller_pops.pred_n.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
@@ -569,7 +569,7 @@ class CerebellumHandler:
 
         # DCN plus inhibits Negative Prediction
         nest.Connect(
-            self.cerebellum.populations.forw_dcnp_p_view.pop,
+            self.cerebellum.populations.forw_dcnp_p.pop,
             self.controller_pops.pred_n.pop,
             "all_to_all",
             syn_spec_p,
