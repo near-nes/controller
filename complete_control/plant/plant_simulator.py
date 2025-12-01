@@ -258,7 +258,7 @@ class PlantSimulator:
 
         return rate_pos_hz, rate_neg_hz
 
-    def _grasp_if_target_close(self):
+    def _grasp_if_target_close(self) -> float:
         if not self.checked_proximity:
             self.log.debug(
                 "In TIME_GRASP. Verifying whether EE is in range for attachment..."
@@ -271,14 +271,18 @@ class PlantSimulator:
             else:
                 self.target_attached = False
                 self.log.debug("EE is not in range. not attaching.")
+        return 1 if self.target_attached else 0  # torque
 
-    def _move_shoulder(self, direction):
+    def _move_shoulder(self, direction) -> float:
         if self.target_attached and not self.shoulder_moving:
             self.log.debug("Moving shoulder...")
             self.plant.move_shoulder(direction)
             self.shoulder_moving = True
+            return 1
         if self.target_attached:
             self.plant.update_ball_position()
+            return 1
+        return 0
 
     def get_current_section(self, curr_time_s: float):
         if curr_time_s == 0:
@@ -330,6 +334,7 @@ class PlantSimulator:
 
         net_rate_hz = rate_pos_hz - rate_neg_hz
         elbow_torque = net_rate_hz / self.config.SCALE_TORQUE
+        hand_torque = shoulder_torque = 0
 
         if self.config.master_config.plotting.CAPTURE_VIDEO and not (
             step % self.config.master_config.plotting.NUM_STEPS_CAPTURE_VIDEO
@@ -355,15 +360,15 @@ class PlantSimulator:
             self.plant.lock_elbow_joint()
 
         if curr_section == TrialSection.TIME_GRASP:
-            self._grasp_if_target_close()
+            hand_torque = self._grasp_if_target_close()
 
         if curr_section == TrialSection.TIME_POST:
-            self._move_shoulder(self.direction)
+            shoulder_torque = self._move_shoulder(self.direction)
 
         # Step PyBullet simulation
         self.plant.simulate_step(self.config.RESOLUTION_S)
 
-        imposed_torques = [elbow_torque, None, None]
+        imposed_torques = [hand_torque, elbow_torque, shoulder_torque]
         for torque, (i, state) in zip(
             imposed_torques,
             enumerate(joint_states),
@@ -422,7 +427,7 @@ class PlantSimulator:
         plot_data = PlantPlotData(
             joint_data=self.joint_data,
             ee_data=self.ee_data,
-            error=error,
+            error=[error],
             init_hand_pos_ee=list(self.plant.init_hand_pos_ee),
             trgt_hand_pos_ee=list(self.plant.trgt_hand_pos_ee),
         )

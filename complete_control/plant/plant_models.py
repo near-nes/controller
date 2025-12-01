@@ -104,7 +104,7 @@ class PlantPlotData(BaseModel):
 
     joint_data: List[JointData]
     ee_data: EEData
-    error: float
+    error: List[float]  # elbow error end of trial
     init_hand_pos_ee: List[float]
     trgt_hand_pos_ee: List[float]
 

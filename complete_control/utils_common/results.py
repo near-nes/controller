@@ -71,7 +71,7 @@ def extract_and_merge_plant_results(results: list[ResultMeta]):
             pos_ee=np.concatenate([d.ee_data.pos_ee for d in data]),
             vel_ee=np.concatenate([d.ee_data.vel_ee for d in data]),
         ),
-        error=data[0].error,
+        error=[d.error[0] for d in data],
         init_hand_pos_ee=data[0].init_hand_pos_ee,
         trgt_hand_pos_ee=data[0].trgt_hand_pos_ee,
     )
