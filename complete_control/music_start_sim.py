@@ -51,6 +51,7 @@ def run_simulation(
     nest.Run(master_config.simulation.duration_ms)
 
     rec_paths = None
+    log.info(f"Simulation completed, saving weights...")
     if controller.use_cerebellum and master_config.SAVE_WEIGHTS_CEREB:
         w = controller.record_synaptic_weights()
         rec_paths = save_conn_weights(w, path_data, comm)

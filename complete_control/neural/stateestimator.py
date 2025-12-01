@@ -47,9 +47,7 @@ class StateEstimator_mass:
             tmp_pop_n = nest.Create("state_neuron", numNeurons)  # state_neuron_nestml
             nest.SetStatus(tmp_pop_n, self._param_neurons)
             nest.SetStatus(tmp_pop_n, {"pos": False})
-            self.pops_n.append(
-                PopView(tmp_pop_n, time_vect, to_file=True, label="state_n")
-            )
+            self.pops_n.append(PopView(tmp_pop_n, to_file=True, label="state_n"))
 
         """
         params = [
