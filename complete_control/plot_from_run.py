@@ -13,6 +13,7 @@ from complete_control.config.paths import RUNS_DIR, RunPaths
 from complete_control.config.ResultMeta import ResultMeta
 from complete_control.neural.plot_utils import plot_controller_outputs
 from complete_control.plant.plant_plotting import plot_plant_outputs
+from complete_control.utils_common.draw_schema import draw_schema
 from complete_control.utils_common.results import gather_metas
 
 log = structlog.get_logger()
@@ -69,7 +70,8 @@ def main():
 
     log.info("Generating plots...")
     # plot_controller_outputs(metas)
-    plot_plant_outputs(metas)
+    # plot_plant_outputs(metas)
+    draw_schema(metas, scale_factor=0.005)
 
     log.info(
         "Plotting complete.",

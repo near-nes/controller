@@ -1,17 +1,36 @@
 import contextlib
-from pathlib import Path
+import shutil
 
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
+import numpy as np
 import structlog
 from config.paths import RunPaths
 from config.plant_config import PlantConfig
+from config.ResultMeta import ResultMeta
 from matplotlib.patches import FancyArrow, Rectangle
+from neural.plot_utils import merge_and_plot
+from neural.population_utils import POPS
+from plant.plant_plotting import ELBOW, plot_joint_space_animated
+from utils_common.generate_signals import PlannerData
+from utils_common.results import extract_and_merge_plant_results
 
 log = structlog.get_logger(__name__)
 
 
-def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
+def prep_temp_dir(run_paths: RunPaths):
+    tmp_path = run_paths.figures / "figs_for_schema"
+    if tmp_path.exists():
+        shutil.rmtree(tmp_path)
+    tmp_path.mkdir()
+    return tmp_path
+
+
+def draw_schema(metas: list[ResultMeta], scale_factor: float = 0.005):
+    run_paths = metas[-1].load_params().run_paths
+    figs_path = prep_temp_dir(run_paths)
+
+    p = merge_and_plot(metas, path_fig=figs_path)
 
     fig, ax = plt.subplots(figsize=(40, 35))
     ax.set_facecolor("#fefbf3")
@@ -48,6 +67,68 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
     robotic_figs_path = run_paths.figures_receiver
     print(f"Neural figures path: {neural_figs_path}")
     log.info(f"Taking all images: {neural_figs_path.name} and {robotic_figs_path.name}")
+
+    # Generate Joint Space Plot
+    plant_data = extract_and_merge_plant_results(metas)
+    params = [i.load_params() for i in metas]
+    ref_mp = params[0]
+    time_vector_total_s = np.arange(
+        0,
+        sum(p.simulation.duration_s for p in params),
+        params[0].simulation.resolution / 1000,
+    )
+    ref_plant_config = PlantConfig(ref_mp)
+    joint_data = plant_data.joint_data[ELBOW]
+
+    run_paths_list = [RunPaths.from_run_id(m.id) for m in metas]
+    trjs = []
+    for rp in run_paths_list:
+        with open(rp.trajectory, "r") as f:
+            planner_data: PlannerData = PlannerData.model_validate_json(f.read())
+            trjs.append(planner_data.trajectory)
+    desired_trajectory = np.concatenate(trjs, axis=0)
+
+    _, _, joint_plot_path = plot_joint_space_animated(
+        pth_fig_receiver=figs_path,
+        time_vector_s=time_vector_total_s,
+        pos_j_rad_actual=joint_data.pos_rad,
+        desired_trj_joint_rad=desired_trajectory,
+        animated=False,
+        save_fig=True,
+    )
+
+    # Mapping from component name to p key
+    p_map = {
+        "Planner": ("planner_p", "planner_n"),
+        "plan to inv": "plan_to_inv",
+        "error inv": ("error_inv_p", "error_inv_n"),
+        "State": ("state_p", "state_n"),
+        "state to inv": ("state_to_inv_p", "state_to_inv_n"),
+        "prediction": ("pred_p", "pred_n"),
+        "motor prediction": ("motor_prediction_p", "motor_prediction_n"),
+        "motor commands": "motor_commands",
+        "error forw": ("error_p", "error_n"),
+        "Sensory feedback": ("sn_p", "sn_n"),
+        "feedback": ("feedback_p", "feedback_n"),
+        "Mf_inv": "inv_mf",
+        "PC_inv": ("inv_pc_p", "inv_pc_n"),
+        "DCN_inv": ("inv_dcnp_p", "inv_dcnp_n"),
+        "IO_inv": ("inv_io_p", "inv_io_n"),
+        "Ffwd": ("mc_M1_p", "mc_M1_n"),
+        "Out": ("mc_out_p", "mc_out_n"),
+        "Fbk": ("mc_fbk_p", "mc_fbk_n"),
+        "Smoothing": ("brainstem_p", "brainstem_n"),
+        "DCN_forw": ("forw_dcnp_p", "forw_dcnp_n"),
+        "PC_forw": ("forw_pc_p", "forw_pc_n"),
+        "Mf_forw": "forw_mf",
+        "IO_forw": ("forw_io_p", "forw_io_n"),
+    }
+
+    def get_p_path(name):
+        key = p_map.get(name)
+        if key and key in p:
+            return p[key][2]
+        return None
 
     components_raw = {
         "Inverse model_container": (
@@ -103,7 +184,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "planner_0.png",
+            get_p_path("Planner"),
         ),
         "plan to inv": (
             1.0,
@@ -114,7 +195,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_plan_to_inv_0.png",
+            get_p_path("plan to inv"),
         ),
         "error inv": (
             4.5,
@@ -125,7 +206,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_error_inv_0.png",
+            get_p_path("error inv"),
         ),
         "State": (
             1.0,
@@ -136,7 +217,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "state_0.png",
+            get_p_path("State"),
         ),
         "state to inv": (
             1.0,
@@ -147,7 +228,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_state_to_inv_0.png",
+            get_p_path("state to inv"),
         ),
         "prediction": (
             1.0,
@@ -158,7 +239,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "pred_0.png",
+            get_p_path("prediction"),
         ),
         "motor prediction": (
             29.0,
@@ -169,7 +250,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_motor_prediction_0.png",
+            get_p_path("motor prediction"),
         ),
         "motor commands": (
             29.5,
@@ -180,7 +261,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_motor_commands_0.png",
+            get_p_path("motor commands"),
         ),
         "error forw": (
             29.5,
@@ -191,7 +272,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_error_0.png",
+            get_p_path("error forw"),
         ),
         "Sensory feedback": (
             35.0,
@@ -202,7 +283,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "sensoryneur_0.png",
+            get_p_path("Sensory feedback"),
         ),
         "feedback": (
             35.0,
@@ -213,7 +294,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_feedback_0.png",
+            get_p_path("feedback"),
         ),
         "Human Figure Plot": (
             35.0,
@@ -224,7 +305,11 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            next(robotic_figs_path.glob(f"position_joint*.png"), None),
+            (
+                next(robotic_figs_path.glob(f"position_joint*.png"), None)
+                if joint_plot_path is None
+                else joint_plot_path
+            ),
         ),
         # Inverse Model
         "Mf_inv": (
@@ -236,7 +321,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_core_inv_mf_0.png",
+            get_p_path("Mf_inv"),
         ),
         "PC_inv": (
             16.5,
@@ -247,7 +332,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_core_inv_pc_0.png",
+            get_p_path("PC_inv"),
         ),
         "DCN_inv": (
             23.0,
@@ -258,7 +343,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_core_inv_dcnp_0.png",
+            get_p_path("DCN_inv"),
         ),
         "IO_inv": (
             11.0,
@@ -269,7 +354,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_core_inv_io_0.png",
+            get_p_path("IO_inv"),
         ),
         # --- Motor Cortex ---
         "Ffwd": (
@@ -281,7 +366,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "Ffwd",
             "black",
             12,
-            neural_figs_path / "mc_m1_0.png",
+            get_p_path("Ffwd"),
         ),
         "Out": (
             16.0,
@@ -292,7 +377,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "mc_out_0.png",
+            get_p_path("Out"),
         ),
         "Fbk": (
             11.0,
@@ -303,7 +388,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "mc_fbk_0.png",
+            get_p_path("Fbk"),
         ),
         # --- Brain Stem ---
         "Smoothing": (
@@ -315,7 +400,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "brainstem_0.png",
+            get_p_path("Smoothing"),
         ),
         # --- Forward Model ---
         "DCN_forw": (
@@ -327,7 +412,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_core_forw_dcnp_0.png",
+            get_p_path("DCN_forw"),
         ),
         "PC_forw": (
             16.5,
@@ -338,7 +423,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_core_forw_pc_0.png",
+            get_p_path("PC_forw"),
         ),
         "Mf_forw": (
             22.0,
@@ -349,7 +434,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_core_forw_mf_0.png",
+            get_p_path("Mf_forw"),
         ),
         "IO_forw": (
             22.0,
@@ -360,7 +445,7 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
             "",
             "",
             0,
-            neural_figs_path / "cereb_core_forw_io_0.png",
+            get_p_path("IO_forw"),
         ),
     }
     # Dynamically Calculate Component Sizes
@@ -727,4 +812,5 @@ def draw_schema(run_paths: RunPaths, scale_factor: float = 0.005):
     filepath = robotic_figs_path / f"whole_controller_schema.png"
 
     plt.savefig(filepath, bbox_inches="tight", dpi=300, facecolor=ax.get_facecolor())
+    log.info(f"saved complete schema at {filepath}")
     plt.close(fig)
