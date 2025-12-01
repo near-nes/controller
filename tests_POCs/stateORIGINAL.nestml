@@ -1,0 +1,155 @@
+model state_neuron:
+    parameters:
+        kp real = 1 # Gain
+        pos boolean = true # Sign sensitivity of the neuron
+        base_rate Hz = 0 Hz # Base firing rate
+        buffer_size ms = 150.0 ms # Size of the sliding window
+        simulation_steps integer = 1000 # Number of simulation steps (simulation_time/resolution())
+        N_fbk integer = 200 # Population size for sensory feedback
+        N_pred integer = 200 # Population size for sensory prediction
+        fbk_bf_size integer = 30000
+        pred_bf_size integer = 30000
+        time_wait ms = 150.0 ms
+        time_trial ms = 650.0 ms
+
+    state:
+        in_rate Hz = 0 Hz # Input firing rate: to be computed from spikes
+        out_rate Hz = 0 Hz # Output firing rate: defined accordingly to the input firing rate
+        spike_count_out integer = 0 # Outgoing spikes
+
+        current_fbk_input[N_fbk] real = 0
+        current_pred_input[N_pred] real = 0
+
+        fbk_buffer[fbk_bf_size] real = 0 # Buffer for sensory feedback spikes
+        pred_buffer[pred_bf_size] real = 0 # Buffer for sensory prediction spikes
+
+        fbk_counts[N_fbk] real = 0 # Counts of incoming feedback spikes
+        pred_counts[N_pred] real = 0 # Counts of incoming prediction spikes
+
+        tick integer = 0 # Tick 
+        position_count integer = 0 
+        mean_fbk real = 0.0 # Mean sensory feedback
+        mean_pred real = 0.0 # Mean sensory prediction
+
+        var_fbk real = 0.0 # Variance of sensory feedback
+        var_pred real = 0.0 # Variance of sensory prediction
+
+        CV_fbk real = 0.0 # Coefficient of variation of sensory feedback
+        CV_pred real = 0.0 # Coefficient of variation of sensory prediction
+
+        total_CV real = 0.0
+        
+        lambda_poisson real = 0 # Parameter of the Poisson distribution defining generator behavior
+    
+    internals:
+        res ms = resolution()
+        buffer_steps integer = steps(buffer_size)
+        trial_steps integer = steps(time_trial)
+        wait_steps integer = steps(time_wait)
+          
+    input: 
+        fbk_spikes[N_fbk] <- spike
+        pred_spikes[N_pred] <- spike
+    
+    output:
+        spike
+    
+    update:
+        tick = steps(t)
+
+        # Save incoming spikes in the two buffers
+        i integer = 0
+        
+        for i in 0 ... (N_fbk-1) step 1:
+            current_fbk_input[i] = fbk_spikes[i]
+
+        j integer = 0
+        
+        for j in 0 ... (N_pred-1) step 1:
+            current_pred_input[j] = pred_spikes[j]
+        
+        index integer = 0
+        for i in 0 ... (N_fbk-1) step 1:
+            index = position_count * N_fbk + i
+            fbk_buffer[index] = current_fbk_input[i]
+        
+        for j in 0 ... (N_pred-1) step 1:
+            index = position_count*N_pred + j
+            pred_buffer[index] = current_pred_input[j]
+        
+        # Update position count
+        position_count+=1
+        if position_count > buffer_steps-1:
+            position_count = 0
+        
+        # Populate count_spikes
+        k integer = 0 # Index for bfk_counts
+        jump integer = 0 
+        for k in 0 ... (N_fbk-1) step 1:
+            fbk_counts[k] = 0 # Clean previous value
+            for jump in 0 ... (buffer_steps-1) step 1:
+                index = N_fbk * jump + k
+                if fbk_buffer[index] != 0:
+                    fbk_counts[k] += 1
+            # apply anscombe transform
+            # fbk_counts[k] = 2.0*((fbk_counts[k] + (3.0/8.0))**(0.5))
+        
+        m integer = 0
+        for m in 0 ... (N_pred-1) step 1:
+            pred_counts[m] = 0
+            for jump in 0 ... (buffer_steps-1) step 1:
+                index = (N_pred * jump) + m
+                if pred_buffer[index] != 0:
+                    pred_counts[m] += 1
+            # apply anscombe transform
+            # pred_counts[m] = 2.0*((pred_counts[m] + (3.0/8.0))**(0.5))
+        
+        # Compute mean and variability of both buffers
+        mean_fbk = 0.0
+        if N_fbk == 0:
+            CV_fbk = 10**6
+        else:
+            for k in 0 ... (N_fbk-1) step 1:
+                mean_fbk += fbk_counts[k]
+            mean_fbk /= N_fbk
+            if mean_fbk > 10**(-3):
+                var_fbk = 0.0
+                for k in 0 ... (N_fbk-1) step 1:
+                    var_fbk += (fbk_counts[k] -mean_fbk)**2
+                var_fbk /= N_fbk
+                CV_fbk = (var_fbk/mean_fbk)
+            else:
+                CV_fbk = 3.0
+
+        mean_pred = 0.0
+        if N_pred == 0:
+            CV_pred = 10**6
+        else:
+            for m in 0 ... (N_pred-1) step 1:
+                mean_pred += pred_counts[m]
+            mean_pred /= N_pred
+
+            if mean_pred > 10**(-3):
+                var_pred = 0.0
+                for m in 0 ... (N_pred-1) step 1:
+                    var_pred += (pred_counts[m]- mean_pred)**2
+                var_pred /= N_pred
+                CV_pred = (var_pred/mean_pred)
+            else:
+                CV_pred = 3.0
+
+        total_CV = CV_fbk + CV_pred
+
+        in_rate = (mean_pred*CV_fbk/total_CV + mean_fbk*CV_pred/total_CV)/buffer_size
+
+        out_rate = base_rate + kp * in_rate
+
+        lambda_poisson = out_rate * resolution() * 0.001
+
+        #spike_count_out = random_poisson(lambda_poisson)
+
+        # Now draw randomly according to probability distribution        
+        spike_count_out = random_poisson(lambda_poisson)
+
+        if spike_count_out > 0 and (tick % trial_steps) > wait_steps:
+            emit_spike()

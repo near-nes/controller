@@ -1,0 +1,11 @@
+# .transfer_exclude
+runs/
+tests_POCs/
+__pycache__/
+venv/
+.git/
+sim_old.sif
+controllerDaniel_old/
+*.tar.gz
+
+

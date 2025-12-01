@@ -22,6 +22,9 @@ def setup_environment(master_config: MasterParams):
     )
 
     try:
+        # install custom State Neuron (increased receptor_types and weights method)
+        nest.Install("state_check_module")
+
         # Check if module is already installed to prevent errors on reset
         if "eglif_cond_alpha_multisyn" not in nest.Models(mtype="nodes"):
             nest.Install("custom_stdp_module")

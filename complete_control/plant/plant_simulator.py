@@ -5,6 +5,7 @@ from typing import Any, List, Tuple
 import numpy as np
 import structlog
 from config.plant_config import PlantConfig
+from mpi4py import MPI
 from utils_common.log import tqdm
 
 from complete_control.config.core_models import TargetColor
@@ -123,9 +124,20 @@ class PlantSimulator:
             "MUSIC input port configured",
             port_name=self.config.MUSIC_PORT_MOT_CMD_IN,
             channels=n_music_channels_in,
-            acc_latency=self.config.MUSIC_ACCEPTABLE_LATENCY_S,
+            # acc_latency=self.config.MUSIC_ACCEPTABLE_LATENCY_S,
         )
-
+        #################################
+        try:
+            self.log.info("Plant waiting at MUSIC mapping barrier (MPI.COMM_WORLD)")
+            MPI.COMM_WORLD.barrier()
+            self.log.info("Plant passed MUSIC mapping barrier")
+        except Exception:
+            # If MPI is not available for some reason, continue without blocking
+            self.log.warning(
+                "MPI barrier for MUSIC mapping failed or MPI not available; continuing without sync"
+            )
+            acc_latency = (self.config.MUSIC_ACCEPTABLE_LATENCY_S,)
+        #################################
         # Configure output port mapping
         # Sensory neurons will connect to this port. Mapping is global, base 0, size N*2*njt.
         n_music_channels_out = self.config.N_NEURONS * 2 * self.config.NJT

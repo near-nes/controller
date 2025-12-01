@@ -1,0 +1,10 @@
+/sim/controller/target/CMakeFiles/dist.dir
+/sim/controller/target/CMakeFiles/state_check_module_module.dir
+/sim/controller/target/CMakeFiles/package.dir
+/sim/controller/target/CMakeFiles/package_source.dir
+/sim/controller/target/CMakeFiles/edit_cache.dir
+/sim/controller/target/CMakeFiles/rebuild_cache.dir
+/sim/controller/target/CMakeFiles/list_install_components.dir
+/sim/controller/target/CMakeFiles/install.dir
+/sim/controller/target/CMakeFiles/install/local.dir
+/sim/controller/target/CMakeFiles/install/strip.dir

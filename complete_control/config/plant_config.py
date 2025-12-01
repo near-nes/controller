@@ -62,7 +62,7 @@ class PlantConfig:
         self.N_NEURONS: int = self.master_config.brain.population_size
 
         # Plant interaction parameters (remain as is for Stage 1)
-        self.SCALE_TORQUE: float = 500000.0
+        self.SCALE_TORQUE: float = 5000.0  # 500000.0
         self.BUFFER_SIZE_S: float = 1.0 / 100.0
 
         # MUSIC configuration from MasterConfig

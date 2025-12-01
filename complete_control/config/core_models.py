@@ -39,7 +39,7 @@ class ExperimentParams(BaseModel, frozen=True):
 
 class OracleData(BaseModel):
     init_joint_angle: float = 90
-    tgt_joint_angle: float = 20
+    tgt_joint_angle: float = 140
     target_visual_offset: float = 4.0
     target_tolerance_angle_deg: float = 10
     target_color: TargetColor = Field(default=TargetColor.BLUE_LEFT)
@@ -61,8 +61,8 @@ class OracleData(BaseModel):
 
 
 class SimulationParams(BaseModel, frozen=True):
-    resolution: float = 0.1  # ms
-    time_prep: float = 150.0  # ms
+    resolution: float = 1.0  # ms
+    time_prep: float = 650.0  # ms
     time_move: float = 500.0  # ms
     time_grasp: float = 100.0  # ms
     time_post: float = 250.0  # ms
@@ -104,7 +104,7 @@ class SimulationParams(BaseModel, frozen=True):
 
 
 class BrainParams(BaseModel, frozen=True):
-    population_size: int = 50
+    population_size: int = 200
     first_id_sens_neurons: int = 0  # not sure why we need this.
 
 

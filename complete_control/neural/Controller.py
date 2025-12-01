@@ -350,10 +350,13 @@ class Controller:
             {
                 "N_fbk": N,
                 "N_pred": N,
+                "buffer_size": buf_sz,
                 "fbk_bf_size": N * int(buf_sz / self.sim_params.resolution),
                 "pred_bf_size": N * int(buf_sz / self.sim_params.resolution),
                 # the nestml model has a hardcoded solution to stop any spikes in time_wait
                 "time_wait": 0,
+                # "p": self.state_params.p,
+                # "pred_offset": self.state_params.pred_offset,
             }
         )
 
@@ -547,16 +550,25 @@ class Controller:
             syn_spec_p=syn_spec_p,
             syn_spec_n=syn_spec_n,
         )
+        #############################
+        N_indegree_fbk = 3
+        conn_spec_fbk = {
+            "rule": "fixed_indegree",
+            "indegree": N_indegree_fbk,
+            "allow_multapses": False,
+        }
+        #############################
+
         nest.Connect(
             self.pops.sn_p.pop,
             self.pops.fbk_smooth_p.pop,
-            "all_to_all",
+            "all_to_all",  # conn_spec=conn_spec_fbk,  # "one_to_one",  # "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
             self.pops.sn_n.pop,
             self.pops.fbk_smooth_n.pop,
-            "all_to_all",
+            "all_to_all",  # conn_spec=conn_spec_fbk,  # "one_to_one",  # "all_to_all",
             syn_spec=syn_spec_n,
         )
 
@@ -584,7 +596,8 @@ class Controller:
             )
         # Prediction (self.pops.pred_p/n) -> State Estimator (Receptors N+1 to 2N)
         # These connections are always made, as pred_p/n always exist.
-        offset = self.N + 1  # Start receptor types after the first N for sensory
+        offset = 201
+        # self.N + 1 Start receptor types after the first N for sensory   #it doesn't have to be N but the number of FBK receptors of the state neuron
         pred_state_spec = self.conn_params.pred_state.model_dump(exclude_none=True)
         self.log.debug(
             "Connecting self.pops.pred_p/n to state estimator", spec=pred_state_spec

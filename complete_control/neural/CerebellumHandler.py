@@ -519,6 +519,45 @@ class CerebellumHandler:
             syn_spec=syn_spec_n,
         )
 
+        ######################## CONNECT CEREB_ERROR -> STATE ###############################
+        # connect to state
+        error_state_params = {
+            "buffer_size_error": 25,
+            "N_error": self.N,
+            "C_error": 5,
+            "error_bf_size": 25,
+        }
+        nest.SetStatus(self.controller_pops.state_p.pop, error_state_params)
+        nest.SetStatus(self.controller_pops.state_n.pop, error_state_params)
+        w_error = 1.0
+        syn_spec_p = {"weight": w_error, "delay": 1.0, "receptor_type": 401}
+        syn_spec_n = {"weight": -w_error, "delay": 1.0, "receptor_type": 401}
+        nest.Connect(
+            self.interface_pops.error_p.pop,
+            self.controller_pops.state_p.pop,
+            "all_to_all",
+            syn_spec=syn_spec_p,
+        )
+        nest.Connect(
+            self.interface_pops.error_n.pop,
+            self.controller_pops.state_p.pop,
+            "all_to_all",
+            syn_spec=syn_spec_n,
+        )
+        nest.Connect(
+            self.interface_pops.error_p.pop,
+            self.controller_pops.state_n.pop,
+            "all_to_all",
+            syn_spec=syn_spec_p,
+        )
+        nest.Connect(
+            self.interface_pops.error_n.pop,
+            self.controller_pops.state_n.pop,
+            "all_to_all",
+            syn_spec=syn_spec_n,
+        )
+        #################################################################à
+
     def connect_to_main_controller_populations(self):
         if not self.controller_pops:
             self.log.error(
@@ -545,10 +584,20 @@ class CerebellumHandler:
             syn_spec_p=syn_spec_p,
             syn_spec_n=syn_spec_n,
         )
+
+        ########################################
+        N_indegree_pred = 1
+        conn_spec = {
+            "rule": "fixed_indegree",
+            "indegree": N_indegree_pred,
+            "allow_multapses": False,
+        }
+        ##########################################
+
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_p.pop,
             self.controller_pops.pred_p.pop,
-            "all_to_all",
+            "all_to_all",  # conn_spec=conn_spec,  # "all_to_all",
             syn_spec=syn_spec_p,
         )
 
@@ -556,14 +605,14 @@ class CerebellumHandler:
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_n.pop,
             self.controller_pops.pred_p.pop,
-            "all_to_all",
+            "all_to_all",  # conn_spec=conn_spec,  # "all_to_all",
             syn_spec=syn_spec_n,
         )
         # DCN minus drives Negative Prediction
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_n.pop,
             self.controller_pops.pred_n.pop,
-            "all_to_all",
+            "all_to_all",  # conn_spec=conn_spec,  # "all_to_all",
             syn_spec=syn_spec_n,
         )
 
@@ -571,8 +620,8 @@ class CerebellumHandler:
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_p.pop,
             self.controller_pops.pred_n.pop,
-            "all_to_all",
-            syn_spec_p,
+            "all_to_all",  # conn_spec=conn_spec,  # "all_to_all",
+            syn_spec=syn_spec_p,
         )
 
         # --- Connections TO Cerebellum Controller Interfaces (FROM controller_pops) ---
@@ -625,7 +674,7 @@ class CerebellumHandler:
         )
 
         # Sensory -> Cereb Feedback Input
-        sn_fbk_sm_spec = self.conn_params.sn_fbk_smoothed
+        sn_fbk_sm_spec = self.conn_params.sn_feedback  # sn_fbk_smoothed
         syn_spec_p = sn_fbk_sm_spec.model_dump(exclude_none=True)
         syn_spec_n = sn_fbk_sm_spec.model_copy(
             update={"weight": -sn_fbk_sm_spec.weight}

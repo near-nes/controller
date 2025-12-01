@@ -16,8 +16,8 @@ simulations:
           Aminus: 0
       parallel_fiber_to_purkinje_minus:
         synapse:
-          Aplus: 0
-          Aminus: 0
+          Aplus: 9e-6
+          Aminus: -1e-3
 
 $import:
   ref: ./microzones_complete_nest.yaml#/

@@ -57,6 +57,7 @@ class Script(GrpcEngineScript):
             self.run_paths.data_nest,
         )
         self.log.info("Environment and NEST kernel setup complete.")
+        self.log.info(f"Neuron modelss: {nest.Models()}")
 
         self.controller = create_controller(self.master_config)
         self.log.info(f"Created controller.")
