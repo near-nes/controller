@@ -37,6 +37,9 @@ class Script(GrpcEngineScript):
         self.log.debug(nest.ResetKernel())
         self.step = 0
 
+        # Load custom NESTML modules
+        # nest.Install("state_check_module")
+
         run_timestamp_str = os.getenv("EXEC_TIMESTAMP")
 
         self.run_paths = RunPaths.from_run_id(run_timestamp_str)
