@@ -6,6 +6,7 @@ import config.paths as project_paths
 import pybullet as p
 import structlog
 from config.plant_config import PlantConfig
+from config.ResultMeta import extract_id
 from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 from plant.plant_simulator import PlantSimulator, TrialSection
@@ -13,7 +14,6 @@ from utils_common.profile import Profile
 
 
 class Script(GrpcEngineScript):
-
     def __init__(self):
         super().__init__()
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger(
@@ -23,9 +23,10 @@ class Script(GrpcEngineScript):
     def initialize(self):
         self.log.info("PyBullet Engine Server is initializing.")
         run_timestamp_str = os.getenv("EXEC_TIMESTAMP")
+        parent_id = extract_id(os.getenv("PARENT_ID") or "")
         self.log.warning(f"run_timestamp_str =<{run_timestamp_str}>")
         self.run_paths = project_paths.RunPaths.from_run_id(run_timestamp_str)
-        self.config = PlantConfig.from_runpaths(self.run_paths)
+        self.config = PlantConfig.from_runpaths(self.run_paths, parent_id=parent_id)
 
         self.simulator = PlantSimulator(
             config=self.config,

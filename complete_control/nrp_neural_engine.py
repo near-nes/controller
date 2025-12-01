@@ -6,6 +6,7 @@ import nest
 import structlog
 from config.MasterParams import MasterParams
 from config.paths import COMPLETE_CONTROL, RunPaths
+from config.ResultMeta import extract_id
 from neural.nest_adapter import initialize_nest, nest
 from neural_simulation_lib import (
     create_controller,
@@ -37,7 +38,7 @@ class Script(GrpcEngineScript):
         self.step = 0
 
         run_timestamp_str = os.getenv("EXEC_TIMESTAMP")
-        parent_id = os.getenv("PARENT_ID")
+        parent_id = extract_id(os.getenv("PARENT_ID") or "")
 
         self.run_paths = RunPaths.from_run_id(run_timestamp_str)
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger("nrp_neural")

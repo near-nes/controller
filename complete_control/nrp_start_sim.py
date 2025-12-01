@@ -12,11 +12,10 @@ from nrp_client import NrpCore
 from nrp_protobuf import wrappers_pb2
 from plant.plant_plotting import plot_plant_outputs
 from tqdm import tqdm
-
 from utils_common.results import make_trial_id
 
 
-def run_trial(parent_id: str | None = None) -> str:
+def run_trial(parent_id: str = "") -> str:
     client_log = structlog.get_logger("nrp_client")
 
     label = "singletrial"
@@ -49,6 +48,8 @@ def run_trial(parent_id: str | None = None) -> str:
         simconfig_path,
         log_output=run_paths.logs / "nrpcore_log.log",
     )
+
+    client_log.debug(f"Starting NRP, logs in {run_paths.logs / 'nrpcore_log.log'}")
 
     start_time = timer()
 
