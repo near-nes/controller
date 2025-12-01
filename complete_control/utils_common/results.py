@@ -2,12 +2,19 @@ import datetime
 import random
 import string
 from pathlib import Path
+from typing import Optional, Type, TypeVar
 
 import numpy as np
 from config import paths
 from config.MasterParams import MasterParams
 from config.ResultMeta import ResultMeta
+from neural.CerebellumHandlerPopulations import CerebellumHandlerPopulationsRecordings
+from neural.CerebellumPopulations import CerebellumPopulationsRecordings
+from neural.ControllerPopulations import ControllerPopulationsRecordings
+from neural.neural_models import PopulationSpikes
+from neural.result_models import NeuralResultManifest
 from plant.plant_models import EEData, JointData, PlantPlotData
+from pydantic import BaseModel
 
 
 def make_trial_id(
@@ -74,4 +81,143 @@ def extract_and_merge_plant_results(results: list[ResultMeta]):
         error=[d.error[0] for d in data],
         init_hand_pos_ee=data[0].init_hand_pos_ee,
         trgt_hand_pos_ee=data[0].trgt_hand_pos_ee,
+    )
+
+
+def concatenate_population_spikes(
+    pops: list[Optional[PopulationSpikes]],
+    trial_duration_ms: list[float],
+) -> Optional[PopulationSpikes]:
+    """
+    Concatenate multiple PopulationSpikes objects.
+
+    - Keeps gids, population_size, neuron_model, and label the same (from first non-None)
+    - Concatenates senders array, shifts times array by duration
+    - Returns None if all inputs are None
+    """
+    # Filter out None values
+    valid_pops = [p for p in pops if p is not None]
+
+    if not valid_pops:
+        return None
+
+    # Use first population as reference
+    ref = valid_pops[0]
+
+    # Validate that all populations have the same metadata
+    for pop in valid_pops[1:]:
+        if not (pop.gids == ref.gids).all():
+            raise ValueError(f"GIDs mismatch for population '{ref.label}'")
+        if pop.population_size != ref.population_size:
+            raise ValueError(f"Population size mismatch for '{ref.label}'")
+        if pop.neuron_model != ref.neuron_model:
+            raise ValueError(f"Neuron model mismatch for '{ref.label}'")
+        if pop.label != ref.label:
+            raise ValueError(f"Label mismatch: '{pop.label}' vs '{ref.label}'")
+
+    # Concatenate spike data
+    import numpy as np
+
+    all_senders = np.concatenate([p.senders for p in valid_pops])
+    all_times = np.concatenate(  # shift times according to trial duration
+        [p.times + i * d for p, (i, d) in zip(valid_pops, enumerate(trial_duration_ms))]
+    )
+
+    return PopulationSpikes(
+        label=ref.label,
+        gids=ref.gids,
+        senders=all_senders,
+        times=all_times,
+        population_size=ref.population_size,
+        neuron_model=ref.neuron_model,
+    )
+
+
+T = TypeVar("T", bound=BaseModel)
+
+
+def concatenate_population_recordings(
+    recordings: list[Optional[T]],
+    recording_type: Type[T],
+    trial_durations_ms: list[float],
+) -> Optional[T]:
+    """
+    Generic function to concatenate population recordings.
+
+    Works for ControllerPopulationsRecordings, CerebellumPopulationsRecordings,
+    and CerebellumHandlerPopulationsRecordings.
+
+    Args:
+        recordings: List of recording objects (can contain None values)
+        recording_type: The class type to instantiate (e.g., ControllerPopulationsRecordings)
+
+    Returns:
+        Concatenated recording object, or None if all inputs are None
+    """
+    valid_recordings = [r for r in recordings if r is not None]
+
+    if not valid_recordings:
+        return None
+
+    field_names = recording_type.model_fields.keys()
+    concatenated_data = {}
+    for field in field_names:
+        pops = [getattr(rec, field) for rec in valid_recordings]
+        concatenated_pop = concatenate_population_spikes(pops, trial_durations_ms)
+        concatenated_data[field] = (
+            concatenated_pop.model_dump() if concatenated_pop is not None else None
+        )
+
+    return recording_type(**concatenated_data)
+
+
+def concatenate_neural_results(
+    result_metas: list[ResultMeta],
+) -> NeuralResultManifest:
+    """
+    Concatenates NeuralResultManifest, shifting times by trial duration (different durations are ok).
+    Verifies consistent GIDs, label, neuron model, population size.
+    """
+    if not result_metas:
+        raise ValueError("Cannot concatenate empty list of ResultMeta")
+
+    neural_results = [meta.load_neural() for meta in result_metas]
+    trial_durations_ms = [
+        meta.load_params().simulation.duration_ms for meta in result_metas
+    ]
+
+    use_cerebellum_values = [nr.use_cerebellum for nr in neural_results]
+    if len(set(use_cerebellum_values)) > 1:
+        raise ValueError(
+            f"Inconsistent use_cerebellum values: {use_cerebellum_values}. "
+            "All results must have the same use_cerebellum setting."
+        )
+
+    controller = concatenate_population_recordings(
+        [nr.controller for nr in neural_results],
+        ControllerPopulationsRecordings,
+        trial_durations_ms,
+    )
+
+    cerebellum = concatenate_population_recordings(
+        [nr.cerebellum for nr in neural_results],
+        CerebellumPopulationsRecordings,
+        trial_durations_ms,
+    )
+
+    cerebellum_handler = concatenate_population_recordings(
+        [nr.cerebellum_handler for nr in neural_results],
+        CerebellumHandlerPopulationsRecordings,
+        trial_durations_ms,
+    )
+
+    weights = [nr.weights for nr in neural_results if nr.weights is not None]
+    weights_result = weights if weights else None
+
+    return NeuralResultManifest.model_construct(
+        controller=controller,
+        cerebellum=cerebellum,
+        cerebellum_handler=cerebellum_handler,
+        weights=weights_result,  # list[list[Path]] or None
+        use_cerebellum=neural_results[0].use_cerebellum,
     )
