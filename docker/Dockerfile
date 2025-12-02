@@ -161,10 +161,10 @@ RUN git clone https://github.com/INCF/MUSIC \
     && make -j$(nproc) \
     && make install
 
-####################### NEST 3.7 #######################
-ENV NEST_VERSION=3.7
+####################### NEST 3.9 #######################
+ENV NEST_VERSION=3.9
 
-# Install NEST 3.7
+# Install NEST 3.9
 WORKDIR $DEPS_DIR
 RUN git clone --depth 1 --branch v${NEST_VERSION} https://github.com/nest/nest-simulator/
 WORKDIR ${DEPS_DIR}/nest-simulator
@@ -184,10 +184,6 @@ RUN mkdir -p nest-build \
     $DEPS_DIR/nest-simulator \
     && make -j$(nproc) \
     && make install
-
-# patch nest-server
-RUN sed -i 's/jsonify(response)/jsonify(nest.serialize_data(response))/' "${NEST_PYTHON_MODULE_PATH}"/server/hl_api_server.py
-COPY ./docker/hl_api_types.py "${NEST_PYTHON_MODULE_PATH}"/lib/hl_api_types.py
 
 
 ####################### NRP #######################

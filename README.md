@@ -30,7 +30,7 @@ Then, you can either open a devcontainer using it or `docker compose run develop
 
 ## HPC
 Quick notes before a more complete documentation:
-- build the container using `/scripts/build_and_export.sh`, optionally specifying a remote to copy the built container to.
+- build the container using `scripts/utilities/build_and_export.sh`, optionally specifying a remote to copy the built container to (as `<username>@<host>`, SSH should be possible to this endpoint).
 - if you don't specify the remote, manually:
     - move the zipped image to HPC
     - decompress it
