@@ -4,20 +4,16 @@ from typing import Any, List, Tuple
 
 import numpy as np
 import structlog
+from config.core_models import TargetColor
 from config.plant_config import PlantConfig
 from mpi4py import MPI
 from utils_common.log import tqdm
-
-from complete_control.config.core_models import TargetColor
+from utils_common.utils import TrialSection, get_current_section
 
 from . import plant_utils
 from .plant_models import EEData, JointData, PlantPlotData
 from .robotic_plant import RoboticPlant
 from .sensoryneuron import SensoryNeuron
-
-
-class TrialSection(Enum):
-    TIME_START, TIME_PREP, TIME_MOVE, TIME_GRASP, TIME_POST, TIME_END_TRIAL = range(6)
 
 
 class PlantSimulator:
@@ -296,26 +292,6 @@ class PlantSimulator:
             return 1
         return 0
 
-    def get_current_section(self, curr_time_s: float):
-        if curr_time_s == 0:
-            return TrialSection.TIME_START
-        elif curr_time_s <= self.config.TIME_PREP_S:
-            return TrialSection.TIME_PREP
-        elif curr_time_s <= (self.config.TIME_MOVE_S + self.config.TIME_PREP_S):
-            return TrialSection.TIME_MOVE
-        elif curr_time_s <= (
-            self.config.TIME_MOVE_S + self.config.TIME_PREP_S + self.config.TIME_GRASP_S
-        ):
-            return TrialSection.TIME_GRASP
-        elif (
-            0
-            <= (curr_time_s - self.config.TOTAL_SIM_DURATION_S)
-            < self.config.RESOLUTION_S
-        ):
-            return TrialSection.TIME_END_TRIAL
-        else:
-            return TrialSection.TIME_POST
-
     def run_simulation_step(
         self,
         rate_pos_hz: float,
@@ -333,7 +309,9 @@ class PlantSimulator:
         joint_states = self.plant.get_joint_states()
         joint_pos_rad, joint_vel_rad_s = joint_states.elbow
         ee_pos_m, ee_vel_m_list = self.plant.get_ee_pose_and_velocity()
-        curr_section = self.get_current_section(current_sim_time_s)
+        curr_section = get_current_section(
+            current_sim_time_s * 1000, self.config.master_config
+        )
 
         if step >= self.num_total_steps:
             self.log.warning(

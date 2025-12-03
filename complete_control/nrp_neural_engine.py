@@ -16,6 +16,7 @@ from neural_simulation_lib import (
 from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 from utils_common.profile import Profile
+from utils_common.utils import TrialSection, get_current_section
 
 NANO_SEC = 1e-9
 
@@ -88,6 +89,7 @@ class Script(GrpcEngineScript):
         joint_pos_rad = self._getDataPack("joint_pos_rad").value
 
         sim_time_s = self._time_ns * NANO_SEC
+        curr_section = get_current_section(sim_time_s * 1000, self.master_config)
 
         with self.sensory_profile.time():
             self.controller.update_sensory_info_from_NRP(
@@ -98,10 +100,14 @@ class Script(GrpcEngineScript):
             self.log.debug("[neural] updated sensory info")
 
         with self.sim_profile.time():
-            nest.Run(timestep_ns * NANO_SEC * 1000)
+            if (
+                curr_section != TrialSection.TIME_GRASP
+                and curr_section != TrialSection.TIME_MOVE
+            ):
+                nest.Run(timestep_ns * NANO_SEC * 1000)
 
         if self.step % 50 == 0:
-            self.log.debug("[neural] simulated")
+            self.log.debug("[neural] simulated or skipped")
 
         with self.motor_profile.time():
             pos, neg = self.controller.extract_motor_command_NRP()
