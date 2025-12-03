@@ -17,7 +17,7 @@ from utils_common.results import make_trial_id
 def run_trial(parent_id: str = "") -> str:
     client_log = structlog.get_logger("nrp_client")
 
-    label = "singletrial"
+    label = ""
     run_id = make_trial_id(label=label)
 
     os.environ["EXEC_TIMESTAMP"] = run_id
@@ -56,20 +56,20 @@ def run_trial(parent_id: str = "") -> str:
     client_log.debug("Nrp server initialized successfully")
 
     loop_start_time = timer()
-    steps_trial = master_config.simulation.sim_steps
-    client_log.info(f"Start run loop. 1 trial ({steps_trial} total iterations)")
+    steps = master_config.simulation.sim_steps
+    client_log.info(f"Start run loop. 1 trial ({steps} total iterations)")
 
-    it_step = int(steps_trial / 100)
+    it_step = max(15, int(steps / 100))
     with tqdm(
-        total=steps_trial,
+        total=steps,
         desc=f"Simulation",
         unit="iter",
         leave=False,
     ) as pbar_trial:
 
-        for i in range(int(steps_trial / it_step)):
-            nrp.run_loop(it_step)
-            pbar_trial.update(it_step)
+        for i in [min(it_step, steps - i) for i in range(0, steps, it_step)]:
+            nrp.run_loop(i)
+            pbar_trial.update(i)
 
     loop_end_time = timer()
     total_loop_time = datetime.timedelta(seconds=loop_end_time - loop_start_time)
