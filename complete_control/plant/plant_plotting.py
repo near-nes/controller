@@ -12,7 +12,10 @@ from config.ResultMeta import ResultMeta
 from matplotlib.animation import FuncAnimation
 from matplotlib.lines import Line2D
 from utils_common.generate_signals import PlannerData
-from utils_common.results import extract_and_merge_plant_results
+from utils_common.results import (
+    extract_and_merge_plant_results,
+    extract_time_move_trajectories,
+)
 
 from .plant_models import JointState, JointStates, PlantPlotData
 
@@ -288,6 +291,33 @@ def plot_desired(
     plt.close()
 
 
+def plot_rmse(
+    metas: list[ResultMeta],
+    pth_fig_receiver: Path,
+    save_fig: bool = True,
+) -> None:
+    """Trials' RMSE plotting"""
+    pos_j_actual, des_rad = extract_time_move_trajectories(metas)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filepath = None
+
+    elbow_rmse = [
+        np.sqrt(np.mean(np.square(a - d))) for a, d in zip(pos_j_actual, des_rad)
+    ]
+
+    fig, ax = plt.subplots()
+    ax.plot(np.arange(1, len(metas) + 1), elbow_rmse, "-o")
+    ax.set_xlabel("Trial Number")
+    ax.set_ylabel("Elbow RMSE (rad)")
+    ax.set_title("Elbow RMSE Over Trials")
+    fig.tight_layout()
+    if save_fig:
+        filepath = pth_fig_receiver / f"elbow_rmse_{timestamp}.png"
+        fig.savefig(filepath)
+        log.info(f"Saved joint RMSE plot at {filepath}")
+    return fig, ax, filepath
+
+
 def plot_plant_outputs(
     metas: list[ResultMeta],
     animated_task: bool = False,
@@ -313,6 +343,8 @@ def plot_plant_outputs(
             planner_data: PlannerData = PlannerData.model_validate_json(f.read())
             trjs.append(planner_data.trajectory)
     desired_trajectory = np.concatenate(trjs, axis=0)
+
+    plot_rmse(metas, ref_plant_config.run_paths.figures_receiver)
 
     framerate = 25
     video_duration = 5
