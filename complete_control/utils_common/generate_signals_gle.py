@@ -14,7 +14,7 @@ def generate_trajectory_gle(
 ) -> np.ndarray:
 
     import torch
-    from pfc_planner.gle_planner import GLEPlanner
+    from pfc_planner.src.gle_conv_planner import GLEConvPlanner
     from torchvision import transforms
 
     torch.set_num_threads(int(os.getenv("OMP_NUM_THREADS")))
@@ -35,8 +35,11 @@ def generate_trajectory_gle(
     NUM_CHOICES = 2
 
     # --- Model Initialization ---
-    gle_planner_model = GLEPlanner(
-        tau=1.0, dt=0.01, num_choices=NUM_CHOICES, trajectory_length=TRAJECTORY_LEN
+    _log.debug(
+        f"Attempting to load GLEConvPlanner, expecting traj len to be {TRAJECTORY_LEN}"
+    )
+    gle_planner_model = GLEConvPlanner(
+        tau=1.0, dt=0.1, num_choices=NUM_CHOICES, trajectory_length=TRAJECTORY_LEN
     )
 
     try:
@@ -53,8 +56,6 @@ def generate_trajectory_gle(
         [
             transforms.Resize((100, 100)),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.Lambda(lambda x: x.view(-1)),
         ]
     )
 
