@@ -1,7 +1,7 @@
 import config.paths as paths
 import structlog
 from config.core_models import SimulationParams
-from config.module_params import M1MockConfig, MotorCortexModuleConfig
+from config.module_params import M1MockConfig, M1Type, MotorCortexModuleConfig
 from interfaces.m1_base import M1SubModule
 from neural.nest_adapter import nest
 
@@ -97,9 +97,8 @@ class MotorCortex:
         self.create_net(params, numNeurons)
 
     def create_net(self, params: MotorCortexModuleConfig, numNeurons):
-        if params.use_m1_eprop:
-            # TODO let's make this a bit less convoluted
-            from motor_cortex_eprop.eprop_motor_control.M1MotorCortexEprop import (
+        if params.m1_type == M1Type.EPROP:
+            from motor_cortex_eprop.motor_controller_model.M1MotorCortexEprop import (
                 M1MotorCortexEprop,
             )
 
