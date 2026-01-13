@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 from typing import ClassVar
 
 import config.paths as paths
@@ -12,7 +13,7 @@ class TrajGeneratorType(str, Enum):
 
 
 class GLETrajGeneratorConfig(BaseModel):
-    model_path: str = str(paths.PFC_PLANNER / "models" / "trained_gle_conv_planner.pth")
+    model_path: Path = paths.PFC_PLANNER / "models" / "trained_gle_planner.pth"
 
 
 class PlannerModuleConfig(BaseModel):
