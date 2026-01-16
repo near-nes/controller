@@ -39,8 +39,8 @@ class M1MockConfig(BaseModel):
 
 
 class M1EPropConfig(BaseModel):
-    config_path: str = ""
-    weights_path: str = ""
+    config_path: str = paths.M1_CONFIG
+    weights_path: str = paths.M1_WEIGHTS
 
 
 class MotorCortexModuleConfig(BaseModel):
