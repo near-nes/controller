@@ -1,4 +1,3 @@
-import config.paths as paths
 import structlog
 from config.core_models import SimulationParams
 from config.module_params import M1MockConfig, M1Type, MotorCortexModuleConfig
@@ -25,10 +24,18 @@ class M1Mock(M1SubModule):
     #           - │   │  │  neuron)│                    │
     #             │   │  └─────────┘                    │
     #                 └─────────────────────────────────┘
-    def __init__(self, numNeurons, motorCommands, params: M1MockConfig, sim_steps):
+    def __init__(
+        self,
+        numNeurons,
+        motorCommands,
+        params: M1MockConfig,
+        sim_steps,
+        delay_ms: float,
+    ):
         self.N = numNeurons
         self.params = params
         self.motorCommands = motorCommands
+        self.delay_ms = delay_ms
         self.sim_steps = sim_steps
         self.create_network()
 
@@ -88,12 +95,17 @@ class MotorCortex:
     """
 
     def __init__(
-        self, numNeurons, params: MotorCortexModuleConfig, sim: SimulationParams
+        self,
+        numNeurons,
+        params: MotorCortexModuleConfig,
+        sim: SimulationParams,
+        m1_delay: float,
     ):
         self._log = structlog.get_logger("motorcortex")
         self.sim = sim
         self.N = numNeurons
         self.params = params
+        self.m1_delay = m1_delay
         self.create_net(params, numNeurons)
 
     def create_net(self, params: MotorCortexModuleConfig, numNeurons):
@@ -103,7 +115,12 @@ class MotorCortex:
             )
 
             self.m1 = M1MotorCortexEprop(
-                paths.M1_CONFIG, paths.M1_WEIGHTS, self.sim.sim_steps, nest
+                params.m1_eprop_config.config_path,
+                params.m1_eprop_config.weights_path,
+                self.sim.sim_steps,
+                nest,
+                expected_delay=self.m1_delay,
+                resolution=self.sim.resolution,
             )
             m1_to_out = "all_to_all"
         else:
@@ -111,9 +128,13 @@ class MotorCortex:
                 generate_motor_commands_minjerk,
             )
 
-            motor_commands = generate_motor_commands_minjerk(self.sim)
+            motor_commands = generate_motor_commands_minjerk(self.sim, self.m1_delay)
             self.m1 = M1Mock(
-                numNeurons, motor_commands, params.m1_mock_config, self.sim.sim_steps
+                numNeurons,
+                motor_commands,
+                params.m1_mock_config,
+                self.sim.sim_steps,
+                delay_ms=self.m1_delay,
             )
             m1_to_out = "one_to_one"
 
