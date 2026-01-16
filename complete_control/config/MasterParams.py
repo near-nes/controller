@@ -28,7 +28,7 @@ class MasterParams(BaseModel):
     run_id: str
     parent_id: str
 
-    USE_CEREBELLUM: bool = True
+    USE_CEREBELLUM: bool = False
     GUI_PYBULLET: bool = False
     USE_MUSIC: bool = False
     SAVE_WEIGHTS_CEREB: bool = True
