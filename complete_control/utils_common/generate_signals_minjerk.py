@@ -52,7 +52,7 @@ def generate_trajectory_minjerk(sim: SimulationParams):
     return trj
 
 
-def generate_motor_commands_minjerk(sim: SimulationParams):
+def generate_motor_commands_minjerk(sim: SimulationParams, m1_delay: float):
     """Generate motor commands for the simulation.
 
     Returns:
@@ -133,8 +133,12 @@ def generate_motor_commands_minjerk(sim: SimulationParams):
     mc_prep = 0 * np.ones(int(time_zeroed_prep / res))
     mc_post = 0 * np.ones(int(time_zeroed_post / res))
     motorCommands = np.concatenate((mc_prep, motorCommands.flatten(), mc_post))
+    delay_steps = int(m1_delay / sim.resolution)
+    delayed_mc = np.concatenate([np.zeros(delay_steps), motorCommands])[
+        0 : sim.sim_steps
+    ]
 
-    return motorCommands
+    return delayed_mc
 
 
 def generate_signals(sim: SimulationParams):
