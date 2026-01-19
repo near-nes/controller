@@ -70,7 +70,7 @@ def main():
 
     log.info("Generating plots...")
     # plot_controller_outputs(metas)
-    # plot_plant_outputs(metas)
+    plot_plant_outputs(metas)
     draw_schema(metas, scale_factor=0.005)
 
     log.info(

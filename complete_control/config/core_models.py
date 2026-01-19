@@ -39,7 +39,7 @@ class ExperimentParams(BaseModel, frozen=True):
 
 class OracleData(BaseModel):
     init_joint_angle: float = 90
-    tgt_joint_angle: float = 140
+    tgt_joint_angle: float = 20
     target_visual_offset: float = 4.0
     target_tolerance_angle_deg: float = 10
     target_color: TargetColor = Field(default=TargetColor.RED_RIGHT)
@@ -64,8 +64,9 @@ class SimulationParams(BaseModel, frozen=True):
     resolution: float = 1.0  # ms
     time_prep: float = 650.0  # ms
     time_move: float = 500.0  # ms
+    time_locked_with_feedback: float = 150.0  # ms - MUST BE KEPT SAME AS SENSORY_DELAY
     time_grasp: float = 100.0  # ms
-    time_post: float = 250.0  # ms
+    time_post: float = 100.0  # ms
 
     oracle: OracleData = Field(default_factory=lambda: OracleData())
 
@@ -74,7 +75,13 @@ class SimulationParams(BaseModel, frozen=True):
     @computed_field
     @property
     def duration_ms(self) -> float:
-        return self.time_prep + self.time_move + self.time_grasp + self.time_post
+        return (
+            self.time_prep
+            + self.time_move
+            + self.time_locked_with_feedback
+            + self.time_grasp
+            + self.time_post
+        )
 
     @computed_field
     @property
@@ -100,7 +107,10 @@ class SimulationParams(BaseModel, frozen=True):
 
     @property
     def manual_control_steps(self) -> int:
-        return int((self.time_grasp + self.time_post) / self.resolution)
+        return int(
+            (self.time_locked_with_feedback + self.time_grasp + self.time_post)
+            / self.resolution
+        )
 
 
 class BrainParams(BaseModel, frozen=True):
