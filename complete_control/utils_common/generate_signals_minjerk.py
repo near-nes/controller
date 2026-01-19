@@ -28,12 +28,12 @@ def generate_trajectory_minjerk(sim: SimulationParams):
         np.ndarray: Trajectory array for the simulation
     """
     res = sim.resolution
-    time_sim = sim.time_move
+    time_move = sim.time_move
     time_prep = sim.time_prep
     time_post = sim.time_grasp + sim.time_post
 
     time_sim_vec = np.linspace(
-        0, time_sim, num=int(np.round(time_sim / res)), endpoint=True
+        0, time_move, num=int(np.round(time_move / res)), endpoint=True
     )
 
     # Joint space
@@ -43,8 +43,11 @@ def generate_trajectory_minjerk(sim: SimulationParams):
     trj, pol = minimumJerk(init_pos, tgt_pos, time_sim_vec)  # Joint space (angle)
 
     trj_prep = trj[0] * np.ones(int(time_prep / res))
+    trj_locked_with_feedback = trj[-1] * np.ones(
+        int(sim.time_locked_with_feedback / res)
+    )
     trj_post = 0 * np.ones(int(time_post / res))
-    trj = np.concatenate((trj_prep, trj.flatten(), trj_post))
+    trj = np.concatenate((trj_prep, trj.flatten(), trj_locked_with_feedback, trj_post))
 
     return trj
 
@@ -56,12 +59,12 @@ def generate_motor_commands_minjerk(sim: SimulationParams):
         np.ndarray: Motor commands array for the simulation
     """
     res = sim.resolution
-    time_sim = sim.time_move
-    time_prep = sim.time_prep
-    time_post = sim.time_grasp + sim.time_post
+    time_move = sim.time_move
+    time_zeroed_prep = sim.time_prep
+    time_zeroed_post = sim.time_locked_with_feedback + sim.time_grasp + sim.time_post
 
     time_sim_vec = np.linspace(
-        0, time_sim, num=int(np.round(time_sim / res)), endpoint=True
+        0, time_move, num=int(np.round(time_move / res)), endpoint=True
     )
 
     dynSys = Robot1J(robot=sim.oracle.robot_spec)
@@ -127,8 +130,8 @@ def generate_motor_commands_minjerk(sim: SimulationParams):
         return mcmd[0]
 
     motorCommands = generateMotorCommands(init_pos, tgt_pos, time_sim_vec / 1e3)
-    mc_prep = 0 * np.ones(int(time_prep / res))
-    mc_post = 0 * np.ones(int(time_post / res))
+    mc_prep = 0 * np.ones(int(time_zeroed_prep / res))
+    mc_post = 0 * np.ones(int(time_zeroed_post / res))
     motorCommands = np.concatenate((mc_prep, motorCommands.flatten(), mc_post))
 
     return motorCommands
