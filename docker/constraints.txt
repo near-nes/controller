@@ -24,6 +24,7 @@ jupyter==1.1.1
 bsb~=6.0.0
 bsb-nest~=6.0.0
 Pillow==11.3.0
+cairosvg~=2.8
 ffmpeg~=1.4
 ffmpeg-python~=0.2.0
 typing-extensions==4.15
