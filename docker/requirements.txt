@@ -10,6 +10,7 @@ pybullet
 structlog
 pydantic
 Pillow
+cairosvg
 jupyter
 ffmpeg
 ffmpeg-python

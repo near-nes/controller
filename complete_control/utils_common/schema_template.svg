@@ -1,0 +1,608 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="2060.6306"
+   height="1113.1232"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="schema_template.svg"
+   inkscape:version="1.4.3 (unknown)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview5"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showguides="false"
+     inkscape:zoom="0.45928269"
+     inkscape:cx="1233.4451"
+     inkscape:cy="311.35508"
+     inkscape:window-width="1504"
+     inkscape:window-height="933"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5" />
+  <rect
+     width="2060.6306"
+     height="1113.1232"
+     fill="#fefbf3"
+     id="rect1"
+     x="0"
+     y="0"
+     style="stroke-width:1.34923" />
+  <path
+     id="arrow_planner_to_fbk-9-6"
+     d="m 1374.0813,1027.3174 1.3582,67.7419 -988.41641,-8.0597 -121.334,-4.8614 -5.24485,-63.2165"
+     stroke="#696969"
+     stroke-width="2"
+     fill="none"
+     marker-end="url(#arrowhead-2-3)"
+     sodipodi:nodetypes="ccccc"
+     style="marker-end:url(#arrowhead-2-3)"
+     inkscape:label="arrow_smoothed_to_state" />
+  <rect
+     id="planner_p,planner_n"
+     x="62.33139"
+     y="397.69794"
+     width="240"
+     height="150"
+     fill="#ff9933"
+     stroke="#000000"
+     stroke-width="1.5" />
+  <rect
+     id="plan_to_inv"
+     x="252.29538"
+     y="102.57783"
+     width="197.15926"
+     height="123.22453"
+     fill="#ff9933"
+     stroke="#000000"
+     stroke-width="1.23225" />
+  <rect
+     id="error_inv_p,error_inv_n"
+     x="424.17505"
+     y="291.11053"
+     width="154.3185"
+     height="96.449066"
+     fill="#e066ff"
+     stroke="#000000"
+     stroke-width="0.964491" />
+  <rect
+     id="state_p,state_n"
+     x="65.458374"
+     y="833.18561"
+     width="255.30026"
+     height="159.56267"
+     fill="#99ccff"
+     stroke="#000000"
+     stroke-width="1.59563" />
+  <rect
+     id="state_to_inv_p,state_to_inv_n"
+     x="128.54288"
+     y="647.44635"
+     width="184.91904"
+     height="115.57439"
+     fill="#99ccff"
+     stroke="#000000"
+     stroke-width="1.15574" />
+  <rect
+     id="motor_prediction_p,motor_prediction_n"
+     x="1465.8212"
+     y="34.48679"
+     width="240"
+     height="150"
+     fill="#e066ff"
+     stroke="#000000"
+     stroke-width="1.5" />
+  <rect
+     id="motor_commands"
+     x="1220.6305"
+     y="583.81232"
+     width="240"
+     height="150"
+     fill="#99ff33"
+     stroke="#000000"
+     stroke-width="1.5" />
+  <rect
+     id="sn_p,sn_n"
+     x="1797.9366"
+     y="788.17493"
+     width="203.27936"
+     height="127.0496"
+     fill="#66cc33"
+     stroke="#000000"
+     stroke-width="1.2705" />
+  <rect
+     id="feedback_p,feedback_n"
+     x="1512.8191"
+     y="752.71112"
+     width="203.4157"
+     height="127.13481"
+     fill="#66cc33"
+     stroke="#000000"
+     stroke-width="1.27135" />
+  <rect
+     id="joint_space_plot"
+     x="1799.78"
+     y="396.55423"
+     width="240"
+     height="225"
+     fill="#ffffff"
+     stroke="#000000"
+     stroke-width="1.5" />
+  <g
+     id="g6"
+     transform="translate(186.29032,-4.6187683)">
+    <rect
+       id="inverse_container"
+       x="475.61307"
+       y="51.170265"
+       width="653.72986"
+       height="284.8002"
+       fill="#ffcc66"
+       stroke="#000000"
+       stroke-width="2" />
+    <text
+       x="745.51318"
+       y="46.070366"
+       font-size="14px"
+       text-anchor="middle"
+       font-weight="bold"
+       id="text1">Inverse model</text>
+    <g
+       id="mf_inv_plot_container"
+       transform="matrix(0.73862043,0,0,0.73862043,261.57243,-35.319725)">
+      <rect
+         id="inv_mf"
+         x="330"
+         y="150"
+         width="240"
+         height="150"
+         fill="#ffffff"
+         stroke="#000000"
+         stroke-width="1.5" />
+    </g>
+    <g
+       id="pc_inv_plot_container"
+       transform="matrix(0.82149688,0,0,0.82149688,288.3718,17.337111)">
+      <rect
+         id="inv_pc_p,inv_pc_n"
+         x="495"
+         y="210"
+         width="240"
+         height="150"
+         fill="#ffffff"
+         stroke="#000000"
+         stroke-width="1.5" />
+    </g>
+    <g
+       id="dcn_inv_plot_container"
+       transform="matrix(0.8475654,0,0,0.8475654,317.5289,-51.240904)">
+      <rect
+         id="inv_dcnp_p,inv_dcnp_n"
+         x="690"
+         y="210"
+         width="240"
+         height="150"
+         fill="#ffffff"
+         stroke="#000000"
+         stroke-width="1.5" />
+    </g>
+    <g
+       id="io_inv_plot_container"
+       transform="translate(175.5132,-113.92963)">
+      <rect
+         id="inv_io_p,inv_io_n"
+         x="329.80185"
+         y="309.83115"
+         width="176.5872"
+         height="110.367"
+         fill="#ffffff"
+         stroke="#000000"
+         stroke-width="1.5" />
+    </g>
+  </g>
+  <g
+     id="g7"
+     transform="translate(138.56305)">
+    <rect
+       id="motor_container"
+       x="517.28986"
+       y="394.38663"
+       width="525.86023"
+       height="284.58456"
+       fill="#99ff33"
+       stroke="#000000"
+       stroke-width="2.41544" />
+    <text
+       x="726.33429"
+       y="369.16422"
+       font-size="14px"
+       text-anchor="middle"
+       font-weight="bold"
+       id="text2">Motor Cortex</text>
+    <rect
+       id="mc_M1_p,mc_M1_n"
+       x="545.39771"
+       y="418.31558"
+       width="193.65988"
+       height="121.03742"
+       fill="#ffffff"
+       stroke="#000000"
+       stroke-width="1.21037" />
+    <rect
+       id="mc_out_p,mc_out_n"
+       x="809.34137"
+       y="470.63165"
+       width="198.14392"
+       height="123.83995"
+       fill="#ffffff"
+       stroke="#000000"
+       stroke-width="1.2384" />
+    <rect
+       id="mc_fbk_p,mc_fbk_n"
+       x="554.56665"
+       y="554.39069"
+       width="171.7093"
+       height="107.31831"
+       fill="#ffffff"
+       stroke="#000000"
+       stroke-width="1.07318" />
+  </g>
+  <defs
+     id="defs4">
+    <marker
+       id="arrowhead"
+       markerWidth="10"
+       markerHeight="10"
+       refX="9"
+       refY="3"
+       orient="auto">
+      <polygon
+         points="0,6 0,0 10,3 "
+         fill="#696969"
+         id="polygon4" />
+    </marker>
+    <marker
+       id="arrowhead-3"
+       markerWidth="10"
+       markerHeight="10"
+       refX="9"
+       refY="3"
+       orient="auto">
+      <polygon
+         points="0,0 10,3 0,6 "
+         fill="#696969"
+         id="polygon4-6" />
+    </marker>
+    <marker
+       id="arrowhead-35"
+       markerWidth="10"
+       markerHeight="10"
+       refX="9"
+       refY="3"
+       orient="auto">
+      <polygon
+         points="0,0 10,3 0,6 "
+         fill="#696969"
+         id="polygon4-62" />
+    </marker>
+    <marker
+       id="arrowhead-2"
+       markerWidth="10"
+       markerHeight="10"
+       refX="9"
+       refY="3"
+       orient="auto">
+      <polygon
+         points="0,0 10,3 0,6 "
+         fill="#696969"
+         id="polygon4-7" />
+    </marker>
+    <marker
+       id="arrowhead-2-3"
+       markerWidth="10"
+       markerHeight="10"
+       refX="9"
+       refY="3"
+       orient="auto">
+      <polygon
+         points="10,3 0,6 0,0 "
+         fill="#696969"
+         id="polygon4-7-6" />
+    </marker>
+    <marker
+       id="arrowhead-35-2"
+       markerWidth="10"
+       markerHeight="10"
+       refX="9"
+       refY="3"
+       orient="auto">
+      <polygon
+         points="10,3 0,6 0,0 "
+         fill="#696969"
+         id="polygon4-62-6" />
+    </marker>
+  </defs>
+  <path
+     id="arrow_planner_to_plan_inv"
+     d="M 267.20124,379.22286 V 248.1873"
+     stroke="#696969"
+     stroke-width="4.17988"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <path
+     id="arrow_planner_to_plan_inv-1"
+     d="m 251.04526,561.24977 -6.05911,84.14951"
+     stroke="#696969"
+     stroke-width="2.69122"
+     fill="none"
+     marker-end="url(#arrowhead-35)"
+     style="marker-end:url(#arrowhead-35)"
+     inkscape:label="arrow_plan_to_error_inv" />
+  <path
+     id="arrow_plan_inv_to_mf"
+     d="m 460.82157,170.91126 121.54791,2.17731 v -63.23592 h 43.1648"
+     stroke="#696969"
+     stroke-width="2.01092"
+     fill="none"
+     marker-end="url(#arrowhead)"
+     sodipodi:nodetypes="cccc" />
+  <path
+     id="arrow_plan_to_error_inv"
+     d="m 315.1552,422.71693 c 15.08122,-29.41919 48.035,-54.70934 88.5109,-53.56403"
+     stroke="#696969"
+     stroke-width="3.70221"
+     fill="none"
+     marker-end="url(#arrowhead)"
+     sodipodi:nodetypes="cc" />
+  <path
+     id="arrow_planner_to_fbk"
+     d="m 304.43182,468.84896 h 21.56525 v 97.26229 l 317.17731,47.90078"
+     stroke="#696969"
+     stroke-width="2"
+     fill="none"
+     marker-end="url(#arrowhead)"
+     sodipodi:nodetypes="cccc" />
+  <path
+     id="arrow_planner_to_fbk-9"
+     d="m 1510.0747,802.53928 h -32.5128 v -57.3266 L 629.54174,743.43047 334.85407,864.96463"
+     stroke="#696969"
+     stroke-width="2"
+     fill="none"
+     marker-end="url(#arrowhead-2)"
+     sodipodi:nodetypes="ccccc"
+     style="marker-end:url(#arrowhead-2)"
+     inkscape:label="arrow_smoothed_to_state" />
+  <path
+     id="arrow_state_to_state_inv"
+     d="m 158.81326,822.66944 60.97297,-38.8099"
+     stroke="#696969"
+     stroke-width="4.81844"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <path
+     id="arrow_state_to_fbk"
+     d="M 329.75095,849.62229 654.67184,663.81618"
+     stroke="#4169e1"
+     stroke-width="4.93489"
+     fill="none"
+     marker-end="url(#arrowhead)"
+     sodipodi:nodetypes="cc" />
+  <path
+     id="arrow_state_inv_to_error_inv"
+     d="M 325.51653,667.0159 490.55719,399.03958"
+     stroke="#4169e1"
+     stroke-width="2"
+     fill="none"
+     marker-end="url(#arrowhead)"
+     sodipodi:nodetypes="cc" />
+  <path
+     id="arrow_prediction_to_state"
+     d="M 424.82013,922.61429 325.32396,882.64656"
+     stroke="#ff0000"
+     stroke-width="3.34736"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <path
+     id="arrow_dcn_forw_to_prediction"
+     d="m 652.05591,909.67258 -54.05472,-1.75694"
+     stroke="#ff0000"
+     stroke-width="2"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <path
+     id="arrow_dcn_inv_to_motor_pred"
+     d="M 1332.1793,194.02472 1448.2896,128.2637"
+     stroke="#ffd700"
+     stroke-width="3.55839"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <path
+     id="arrow_motor_pred_to_smoothing"
+     d="m 1501.1696,196.42326 5.8073,231.88883"
+     stroke="#da70d6"
+     stroke-width="3.00401"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <path
+     id="arrow_out_to_smoothing"
+     d="m 1191.8186,526.2967 232.4879,-3.19444"
+     stroke="#20b2aa"
+     stroke-width="6.07986"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <path
+     id="arrow_out_to_motor_commands"
+     d="m 1198.8849,534.0162 v 0 l 99.9285,45.02324"
+     stroke="#20b2aa"
+     stroke-width="0.917574"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <path
+     id="arrow_motor_commands_to_mf_forw"
+     d="m 1314.6555,739.31324 -95.1314,65.06581"
+     stroke="#9acd32"
+     stroke-width="5.26003"
+     fill="none"
+     marker-end="url(#arrowhead)"
+     sodipodi:nodetypes="cc" />
+  <g
+     id="g8"
+     transform="translate(138.56305)">
+    <rect
+       id="forward_container"
+       x="518.6217"
+       y="765"
+       width="540"
+       height="285"
+       fill="#ff6666"
+       stroke="#000000"
+       stroke-width="2" />
+    <text
+       x="788.6217"
+       y="760"
+       font-size="14px"
+       text-anchor="middle"
+       font-weight="bold"
+       id="text3">Forward model</text>
+    <rect
+       id="pred_p,pred_n"
+       x="285.34714"
+       y="862.07733"
+       width="168.08875"
+       height="105.05547"
+       fill="#ff6666"
+       stroke="#000000"
+       stroke-width="1.05055" />
+    <rect
+       id="error_p,error_n"
+       x="1137.1437"
+       y="928.19934"
+       width="128.30804"
+       height="80.192528"
+       fill="#ff0066"
+       stroke="#000000"
+       stroke-width="0.801925" />
+    <rect
+       id="forw_dcnp_p,forw_dcnp_n"
+       x="541.04236"
+       y="852.03937"
+       width="151.25845"
+       height="94.53653"
+       fill="#ffffff"
+       stroke="#000000"
+       stroke-width="0.945365" />
+    <rect
+       id="forw_pc_p,forw_pc_n"
+       x="711.80957"
+       y="921.32568"
+       width="152.78847"
+       height="95.492798"
+       fill="#ffffff"
+       stroke="#000000"
+       stroke-width="0.954928" />
+    <rect
+       id="forw_mf"
+       x="878.30157"
+       y="784.34265"
+       width="137.56395"
+       height="85.97747"
+       fill="#ffffff"
+       stroke="#000000"
+       stroke-width="0.859775" />
+    <rect
+       id="forw_io_p,forw_io_n"
+       x="899.80743"
+       y="939.45807"
+       width="122.067"
+       height="76.291718"
+       fill="#ffffff"
+       stroke="#000000"
+       stroke-width="0.762917" />
+    <path
+       id="arrow_dcn_forw_to_error_forw"
+       d="m 507.44868,971.9648 h -30 v 105 h 720.00002 v -60"
+       stroke="#ff0000"
+       stroke-width="2"
+       fill="none"
+       marker-end="url(#arrowhead)" />
+    <path
+       id="arrow_error_forw_to_io_forw"
+       d="m 1131.0582,975.66448 -92.8239,-1.14306"
+       stroke="#ff1493"
+       stroke-width="3.09131"
+       fill="none"
+       marker-end="url(#arrowhead)" />
+  </g>
+  <path
+     id="arrow_feedback_to_error_forw"
+     d="m 1484.1905,881.23983 -60.267,74.7856"
+     stroke="#696969"
+     stroke-width="2"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <path
+     id="arrow_human_to_sensory"
+     d="m 1871.3692,650.60098 -4.2105,111.93755"
+     stroke="#000000"
+     stroke-width="1.72833"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <path
+     id="arrow_sensory_to_feedback"
+     d="m 1780.5047,855.51837 -60.1327,-3.25503"
+     stroke="#000000"
+     stroke-width="5.74362"
+     fill="none"
+     marker-end="url(#arrowhead)" />
+  <g
+     id="g9">
+    <text
+       x="1583.2258"
+       y="413.76831"
+       font-size="14px"
+       text-anchor="middle"
+       font-weight="bold"
+       id="text4">Brain Stem</text>
+    <path
+       id="arrow_smoothing_to_human"
+       d="m 1742.6476,497.55437 30.9176,0.62429"
+       stroke="#696969"
+       stroke-width="2.11774"
+       fill="none"
+       marker-end="url(#arrowhead)" />
+    <g
+       id="smoothing_plot_container"
+       transform="matrix(1.0422476,0,0,1.0422476,648.77372,-75.525291)"
+       style="fill:#b3b3b3">
+      <rect
+         id="brainstem_p,brainstem_n"
+         x="795"
+         y="495"
+         width="240"
+         height="150"
+         fill="#ffffff"
+         stroke="#000000"
+         stroke-width="1.5"
+         style="fill:#b3b3b3" />
+    </g>
+  </g>
+  <path
+     id="arrow_planner_to_plan_inv-1-8"
+     d="m 588.88586,308.97629 67.96937,-44.31167"
+     stroke="#696969"
+     stroke-width="2.69122"
+     fill="none"
+     marker-end="url(#arrowhead-35-2)"
+     style="marker-end:url(#arrowhead-35-2)"
+     inkscape:label="arrow_plan_to_error_inv"
+     sodipodi:nodetypes="cc" />
+</svg>
