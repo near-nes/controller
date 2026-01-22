@@ -26,10 +26,6 @@ class CerebellumHandlerPopulationsGeneric(BaseModel, Generic[T]):
     feedback_p: Optional[T] = None
     feedback_n: Optional[T] = None
 
-    # From Sensory Neurons (scaled by diff_neuron_nestml, for Inv Error Calculation input)
-    feedback_inv_p: Optional[T] = None
-    feedback_inv_n: Optional[T] = None
-
     # From State Estimator (scaled by basic_neuron_nestml, for Inv Error Calculation input)
     state_to_inv_p: Optional[T] = None
     state_to_inv_n: Optional[T] = None
