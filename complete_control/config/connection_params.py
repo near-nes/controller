@@ -22,20 +22,20 @@ class ConnectionsParams(BaseModel):
 
     dcn_forw_prediction: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.0154,  # 0.0154,  # 0.1,  # 0.55
+            weight=0.1,
             delay=min_delay,
         )
     )
     pred_state: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=1.0,
-            receptor_type=1,
+            weight=0.005,
+            delay=min_delay,
         )
     )
-    fbk_smoothed_state: SingleSynapseParams = Field(
+    sensory_delayed_state: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=1.0,  # 0.6317663917438847,
-            receptor_type=2,
+            weight=0.005,
+            delay=min_delay,
         )
     )
     sn_state: SingleSynapseParams = Field(
@@ -137,18 +137,6 @@ class ConnectionsParams(BaseModel):
             delay=min_delay,
         )
     )
-    sn_feedback_inv: SingleSynapseParams = Field(
-        default_factory=lambda: SingleSynapseParams(
-            weight=0.001,
-            delay=min_delay,
-        )
-    )
-    feedback_inv_error_inv: SingleSynapseParams = Field(
-        default_factory=lambda: SingleSynapseParams(
-            weight=1.0,
-            delay=min_delay,
-        )
-    )
     state_error_inv: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=0.5,
@@ -169,7 +157,7 @@ class ConnectionsParams(BaseModel):
         )
     )
 
-    feedback_error: SingleSynapseParams = Field(
+    sensory_delayed_error: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=0.005,
             delay=min_delay,
@@ -178,15 +166,10 @@ class ConnectionsParams(BaseModel):
 
     @computed_field
     @property
-    def sn_fbk_smoothed(self) -> SingleSynapseParams:
+    def sn_sensory_delayed(self) -> SingleSynapseParams:
         return SingleSynapseParams(weight=0.005, delay=self.sensory_delay)
 
     @computed_field
     @property
-    def dcn_f_error(self) -> SingleSynapseParams:
-        return SingleSynapseParams(weight=-0.0154, delay=self.sensory_delay)
-
-    @computed_field
-    @property
-    def sn_feedback(self) -> SingleSynapseParams:
-        return SingleSynapseParams(weight=0.005, delay=self.sensory_delay)
+    def state_error_fwd(self) -> SingleSynapseParams:
+        return SingleSynapseParams(weight=-0.005, delay=self.sensory_delay)

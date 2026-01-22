@@ -64,13 +64,11 @@ POPS_PAIRED = [
     (POPS.inv_dcnp_p, POPS.inv_dcnp_n),
     (POPS.inv_io_p, POPS.inv_io_n),
     (POPS.inv_pc_p, POPS.inv_pc_n),
-    (POPS.error_p, POPS.error_n),
+    (POPS.error_fwd_p, POPS.error_fwd_n),
     (POPS.error_inv_p, POPS.error_inv_n),
-    (POPS.feedback_p, POPS.feedback_n),
-    (POPS.feedback_inv_p, POPS.feedback_inv_n),
     (POPS.motor_prediction_p, POPS.motor_prediction_n),
     (POPS.state_to_inv_p, POPS.state_to_inv_n),
-    (POPS.fbk_smooth_p, POPS.fbk_smooth_n),
+    (POPS.sensory_delayed_p, POPS.sensory_delayed_n),
     (POPS.pred_p, POPS.pred_n),
 ]
 

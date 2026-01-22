@@ -8,6 +8,7 @@ Edit layout visually in Inkscape or other svg editor
 Plot mapping: SVG placeholder IDs must match plot dictionary keys from merge_and_plot():
 - Paired populations become comma-separated IDs: id="planner_p,planner_n" → ("planner_p", "planner_n")
 - Single populations become simple string keys: id="plan_to_inv" → "plan_to_inv"
+note: make sure to set ID, not label! open tab "Object Properties" in inkscape
 
 Images are embedded with aspect-ratio preservation. Placeholder fill color shows as colored border.
 Arrows are ignored, so include them as you want to see them.
