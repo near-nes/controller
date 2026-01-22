@@ -40,8 +40,8 @@ class ControllerPopulationsGeneric(BaseModel, Generic[T]):
     pred_p: Optional[T] = None
     pred_n: Optional[T] = None
     # Feedback Smoothing (Basic Neurons)
-    fbk_smooth_p: Optional[T] = None
-    fbk_smooth_n: Optional[T] = None
+    sensory_delayed_p: Optional[T] = None
+    sensory_delayed_n: Optional[T] = None
     # Brainstem Output (Basic Neurons)
     brainstem_p: Optional[T] = None
     brainstem_n: Optional[T] = None

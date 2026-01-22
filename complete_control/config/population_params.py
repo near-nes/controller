@@ -32,10 +32,7 @@ class PopulationsParams(BaseModel):
             kp=1.0, buffer_size=10.0, base_rate=0.0
         )  # kp=0.2
     )
-    feedback: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=10.0, base_rate=0.0)
-    )
-    fbk_smoothed: SinglePopParams = Field(
+    sensory_delayed: SinglePopParams = Field(
         default_factory=lambda: SinglePopParams(
             kp=1.0, buffer_size=100.0, base_rate=1.0
         )

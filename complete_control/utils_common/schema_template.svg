@@ -21,10 +21,10 @@
      inkscape:deskcolor="#d1d1d1"
      showguides="false"
      inkscape:zoom="0.45928269"
-     inkscape:cx="1233.4451"
-     inkscape:cy="311.35508"
-     inkscape:window-width="1504"
-     inkscape:window-height="933"
+     inkscape:cx="1232.3565"
+     inkscape:cy="832.82041"
+     inkscape:window-width="1920"
+     inkscape:window-height="1052"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -120,14 +120,15 @@
      stroke="#000000"
      stroke-width="1.2705" />
   <rect
-     id="feedback_p,feedback_n"
+     id="sensory_delayed_p_sensory_delayed_n"
      x="1512.8191"
      y="752.71112"
-     width="203.4157"
+     width="203.416"
      height="127.13481"
      fill="#66cc33"
      stroke="#000000"
-     stroke-width="1.27135" />
+     stroke-width="1.27135"
+     inkscape:label="sensory_delayed_p,sensory_delayed_n" />
   <rect
      id="joint_space_plot"
      x="1799.78"

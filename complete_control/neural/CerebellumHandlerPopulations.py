@@ -22,16 +22,11 @@ class CerebellumHandlerPopulationsGeneric(BaseModel, Generic[T]):
     # From Planner (scaled by basic_neuron_nestml, to Inv Mossy Fibers)
     plan_to_inv: Optional[T] = None
 
-    # From Sensory Neurons (scaled by basic_neuron_nestml, for Fwd Error Calculation input)
-    feedback_p: Optional[T] = None
-    feedback_n: Optional[T] = None
-
     # From State Estimator (scaled by basic_neuron_nestml, for Inv Error Calculation input)
     state_to_inv_p: Optional[T] = None
     state_to_inv_n: Optional[T] = None
 
     # === Error Calculation Populations (Input to Core Cerebellum IO) ===
-    # Forward Model Error (calculated from feedback_p/n and Fwd DCN output; connects to Fwd IO)
     error_p: Optional[T] = None
     error_n: Optional[T] = None
 

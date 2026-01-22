@@ -32,7 +32,7 @@ class ConnectionsParams(BaseModel):
             receptor_type=1,
         )
     )
-    fbk_smoothed_state: SingleSynapseParams = Field(
+    sensory_delayed_state: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=1.0,  # 0.6317663917438847,
             receptor_type=2,
@@ -157,7 +157,7 @@ class ConnectionsParams(BaseModel):
         )
     )
 
-    feedback_error: SingleSynapseParams = Field(
+    sensory_delayed_error: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=0.005,
             delay=min_delay,
@@ -166,15 +166,10 @@ class ConnectionsParams(BaseModel):
 
     @computed_field
     @property
-    def sn_fbk_smoothed(self) -> SingleSynapseParams:
+    def sn_sensory_delayed(self) -> SingleSynapseParams:
         return SingleSynapseParams(weight=0.005, delay=self.sensory_delay)
 
     @computed_field
     @property
     def dcn_f_error(self) -> SingleSynapseParams:
         return SingleSynapseParams(weight=-0.0154, delay=self.sensory_delay)
-
-    @computed_field
-    @property
-    def sn_feedback(self) -> SingleSynapseParams:
-        return SingleSynapseParams(weight=0.005, delay=self.sensory_delay)

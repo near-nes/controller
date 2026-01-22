@@ -47,7 +47,7 @@ from .stateestimator import StateEstimator_mass
 #                    │                                          │     system     │
 #                    │                                          └────────────────┘
 #            ┌──────────────┐   ┌───────────────┐                      │
-#            │    State     │   │  Fbk_smoothed │◀─────────────────────┘
+#            │    State     │   │sensory delayed│◀─────────────────────┘
 #            │  estimator   │◀──│ (basic neuron)│
 #            │(state neuron)│   └───────────────┘
 #            └──────────────┘
@@ -272,7 +272,7 @@ class Controller:
         )  # These are the scaling neurons for cerebellar fwd output or other prediction source
         self._build_prediction_neurons()
         self.log.debug("Building feedback smoothed neurons block")
-        self._build_fbk_smoothed_neurons()
+        self._build_sensory_delayed_neurons()
         self.log.debug("Building brainstem block")
         self._build_brainstem()
 
@@ -403,9 +403,9 @@ class Controller:
         nest.SetStatus(pop_n, {**pop_params, "pos": False})
         self.pops.pred_n = self._pop_view(pop_n)
 
-    def _build_fbk_smoothed_neurons(self):
+    def _build_sensory_delayed_neurons(self):
         """Neurons for smoothing feedback"""
-        params = self.pops_params.fbk_smoothed
+        params = self.pops_params.sensory_delayed
         pop_params = {
             "kp": params.kp,
             "buffer_size": params.buffer_size,
@@ -416,11 +416,11 @@ class Controller:
 
         pop_p = nest.Create("basic_neuron_nestml", self.N)
         nest.SetStatus(pop_p, {**pop_params, "pos": True})
-        self.pops.fbk_smooth_p = self._pop_view(pop_p)
+        self.pops.sensory_delayed_p = self._pop_view(pop_p)
 
         pop_n = nest.Create("basic_neuron_nestml", self.N)
         nest.SetStatus(pop_n, {**pop_params, "pos": False})
-        self.pops.fbk_smooth_n = self._pop_view(pop_n)
+        self.pops.sensory_delayed_n = self._pop_view(pop_n)
 
     def _build_brainstem(self):
         """Basic neurons for output stage"""
@@ -540,7 +540,7 @@ class Controller:
         )
 
         # Sensory Input -> Feedback Smoothed Neurons
-        sn_fbk_sm_spec = self.conn_params.sn_fbk_smoothed
+        sn_fbk_sm_spec = self.conn_params.sn_sensory_delayed
         syn_spec_p = sn_fbk_sm_spec.model_dump(exclude_none=True)
         syn_spec_n = sn_fbk_sm_spec.model_copy(
             update={"weight": -sn_fbk_sm_spec.weight}
@@ -561,13 +561,13 @@ class Controller:
 
         nest.Connect(
             self.pops.sn_p.pop,
-            self.pops.fbk_smooth_p.pop,
+            self.pops.sensory_delayed_p.pop,
             "all_to_all",  # conn_spec=conn_spec_fbk,  # "one_to_one",  # "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
             self.pops.sn_n.pop,
-            self.pops.fbk_smooth_n.pop,
+            self.pops.sensory_delayed_n.pop,
             "all_to_all",  # conn_spec=conn_spec_fbk,  # "one_to_one",  # "all_to_all",
             syn_spec=syn_spec_n,
         )
@@ -576,18 +576,18 @@ class Controller:
         st_p = self.pops.state_p.pop
         st_n = self.pops.state_n.pop
 
-        fbk_sm_state_spec = self.conn_params.fbk_smoothed_state.model_dump(
+        fbk_sm_state_spec = self.conn_params.sensory_delayed_state.model_dump(
             exclude_none=True
         )
         self.log.debug("Connecting smoothed sensory to state", spec=fbk_sm_state_spec)
-        for i, pre in enumerate(self.pops.fbk_smooth_p.pop):
+        for i, pre in enumerate(self.pops.sensory_delayed_p.pop):
             nest.Connect(
                 pre,
                 st_p,
                 "all_to_all",
                 syn_spec={**fbk_sm_state_spec, "receptor_type": i + 1},
             )
-        for i, pre in enumerate(self.pops.fbk_smooth_n.pop):
+        for i, pre in enumerate(self.pops.sensory_delayed_n.pop):
             nest.Connect(
                 pre,
                 st_n,

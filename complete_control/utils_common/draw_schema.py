@@ -110,7 +110,6 @@ def draw_schema(metas: list[ResultMeta], scale_factor: float = 0.005):
         "motor commands": "motor_commands",
         "error forw": ("error_p", "error_n"),
         "Sensory feedback": ("sn_p", "sn_n"),
-        "feedback": ("feedback_p", "feedback_n"),
         "Mf_inv": "inv_mf",
         "PC_inv": ("inv_pc_p", "inv_pc_n"),
         "DCN_inv": ("inv_dcnp_p", "inv_dcnp_n"),

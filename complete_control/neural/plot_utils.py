@@ -567,7 +567,6 @@ def plot_controller_outputs(metas: list[ResultMeta]):
 
     # populations_to_overlay = [
     #     POPS.planner_p,
-    #     POPS.feedback_p,
     #     POPS.pred_p,
     #     POPS.state_p,
     # ]
