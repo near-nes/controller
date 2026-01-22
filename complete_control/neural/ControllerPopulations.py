@@ -64,5 +64,6 @@ class ControllerPopulations(ControllerPopulationsGeneric[PopView]):
         # Auto-label PopView instances when assigned
         if isinstance(value, PopView) and name in ControllerPopulations.model_fields:
             if value.label is None:
-                value.label = name  # This will trigger detector initialization
+                # set value name as population label, trigger detector initialization
+                value.label = name
         super().__setattr__(name, value)
