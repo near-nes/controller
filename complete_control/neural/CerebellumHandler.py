@@ -340,7 +340,7 @@ class CerebellumHandler:
         """Connects populations involved in calculating error signals for IO."""
         self.log.debug("Connecting populations for error calculation")
 
-        # --- Forward Error Calculation (Error = Feedback - Fwd_DCN_Prediction) ---
+        # --- Forward Error Calculation (Error = sensory_delayed - state) ---
         # Connect Feedback -> Error
         fb_err_spec = self.conn_params.sensory_delayed_error
         syn_spec_p = fb_err_spec.model_dump(exclude_none=True)
@@ -375,41 +375,33 @@ class CerebellumHandler:
             syn_spec=syn_spec_n,
         )
 
-        # Connect Fwd DCN -> Error (Inhibitory)
-        dcn_f_err_spec = self.conn_params.dcn_f_error
-        syn_spec_p = dcn_f_err_spec.model_dump(exclude_none=True)
-        syn_spec_n = dcn_f_err_spec.model_copy(
-            update={"weight": -dcn_f_err_spec.weight}
+        syn_spec_p = self.conn_params.state_error_fwd.model_dump(exclude_none=True)
+        syn_spec_n = self.conn_params.state_error_fwd.model_copy(
+            update={"weight": -self.conn_params.state_error_fwd.weight}
         ).model_dump(exclude_none=True)
-        self.log.debug(
-            "Connecting fwd_dcn -> error (inhibitory)",
-            syn_spec_p=syn_spec_p,
-            syn_spec_n=syn_spec_n,
-        )
-        # TODO this agrees with brain.py, but why these signs?
         nest.Connect(
-            self.cerebellum.populations.forw_dcnp_n.pop,
-            self.interface_pops.error_fwd_p.pop,
-            "all_to_all",
-            syn_spec=syn_spec_n,
-        )
-        nest.Connect(
-            self.cerebellum.populations.forw_dcnp_n.pop,
-            self.interface_pops.error_fwd_n.pop,
-            "all_to_all",
-            syn_spec=syn_spec_n,
-        )
-        nest.Connect(
-            self.cerebellum.populations.forw_dcnp_p.pop,
+            self.controller_pops.state_p.pop,
             self.interface_pops.error_fwd_p.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
-            self.cerebellum.populations.forw_dcnp_p.pop,
+            self.controller_pops.state_p.pop,
             self.interface_pops.error_fwd_n.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
+        )
+        nest.Connect(
+            self.controller_pops.state_n.pop,
+            self.interface_pops.error_fwd_p.pop,
+            "all_to_all",
+            syn_spec=syn_spec_n,
+        )
+        nest.Connect(
+            self.controller_pops.state_n.pop,
+            self.interface_pops.error_fwd_n.pop,
+            "all_to_all",
+            syn_spec=syn_spec_n,
         )
 
         # --- Inverse Error Calculation (Error = Plan - StateEst?) ---
@@ -483,45 +475,6 @@ class CerebellumHandler:
             "all_to_all",
             syn_spec=syn_spec_n,
         )
-
-        ######################## CONNECT CEREB_ERROR -> STATE ###############################
-        # connect to state
-        error_state_params = {
-            "buffer_size_error": 25,
-            "N_error": self.N,
-            "C_error": 5,
-            "error_bf_size": 25,
-        }
-        nest.SetStatus(self.controller_pops.state_p.pop, error_state_params)
-        nest.SetStatus(self.controller_pops.state_n.pop, error_state_params)
-        w_error = 1.0
-        syn_spec_p = {"weight": w_error, "delay": 1.0, "receptor_type": 401}
-        syn_spec_n = {"weight": -w_error, "delay": 1.0, "receptor_type": 401}
-        nest.Connect(
-            self.interface_pops.error_fwd_p.pop,
-            self.controller_pops.state_p.pop,
-            "all_to_all",
-            syn_spec=syn_spec_p,
-        )
-        nest.Connect(
-            self.interface_pops.error_fwd_n.pop,
-            self.controller_pops.state_p.pop,
-            "all_to_all",
-            syn_spec=syn_spec_n,
-        )
-        nest.Connect(
-            self.interface_pops.error_fwd_p.pop,
-            self.controller_pops.state_n.pop,
-            "all_to_all",
-            syn_spec=syn_spec_p,
-        )
-        nest.Connect(
-            self.interface_pops.error_fwd_n.pop,
-            self.controller_pops.state_n.pop,
-            "all_to_all",
-            syn_spec=syn_spec_n,
-        )
-        #################################################################à
 
     def connect_to_main_controller_populations(self):
         if not self.controller_pops:

@@ -340,37 +340,24 @@ class Controller:
         self.pops.mc_out_n = self.mc.out_n
 
     def _build_state_estimator(self):
-        buf_sz = self.state_params.buffer_size
         N = self.N
 
-        # Parameters for StateEstimator_mass constructor
-        # It expects a dictionary, so we convert the Pydantic model
-        state_estimator_constructor_params = self.state_params.model_dump()
-        state_estimator_constructor_params.update(
-            {
-                "N_fbk": N,
-                "N_pred": N,
-                "buffer_size": buf_sz,
-                "fbk_bf_size": N * int(buf_sz / self.sim_params.resolution),
-                "pred_bf_size": N * int(buf_sz / self.sim_params.resolution),
-                # the nestml model has a hardcoded solution to stop any spikes in time_wait
-                "time_wait": 0,
-                # "p": self.state_params.p,
-                # "pred_offset": self.state_params.pred_offset,
-            }
-        )
+        params = self.pops_params.state
+        pop_params = {
+            "kp": params.kp,
+            "buffer_size": params.buffer_size,
+            "base_rate": params.base_rate,
+            "simulation_steps": self.sim_params.sim_steps,
+        }
+        self.log.debug("Creating state as basic adder", **pop_params)
 
-        self.log.debug(
-            "Initializing StateEstimator_mass",
-            N=N,
-            njt=NJT,
-            state_params=state_estimator_constructor_params,
-        )
-        self.stEst = StateEstimator_mass(
-            N, NJT, self.total_time_vect, **state_estimator_constructor_params
-        )
-        self.pops.state_p = self.stEst.pops_p[0]
-        self.pops.state_n = self.stEst.pops_n[0]
+        pop_p = nest.Create("basic_neuron_nestml", self.N)
+        nest.SetStatus(pop_p, {**pop_params, "pos": True})
+        self.pops.state_p = self._pop_view(pop_p)
+
+        pop_n = nest.Create("basic_neuron_nestml", self.N)
+        nest.SetStatus(pop_n, {**pop_params, "pos": False})
+        self.pops.state_n = self._pop_view(pop_n)
 
     def _build_sensory_neurons(self):
         """Parrot neurons for sensory feedback input"""
@@ -572,50 +559,66 @@ class Controller:
             syn_spec=syn_spec_n,
         )
 
-        # Connections INTO State Estimator (Using receptor types)
-        st_p = self.pops.state_p.pop
-        st_n = self.pops.state_n.pop
+        # Connections INTO State Estimator
+        conn_spec = self.conn_params.sensory_delayed_state
+        syn_spec_p = conn_spec.model_dump(exclude_none=True)
+        syn_spec_n = conn_spec.model_copy(
+            update={"weight": -conn_spec.weight}
+        ).model_dump(exclude_none=True)
+        nest.Connect(
+            self.pops.sensory_delayed_p.pop,
+            self.pops.state_p.pop,
+            "all_to_all",
+            syn_spec=syn_spec_p,
+        )
+        nest.Connect(
+            self.pops.sensory_delayed_p.pop,
+            self.pops.state_n.pop,
+            "all_to_all",
+            syn_spec=syn_spec_p,
+        )
+        nest.Connect(
+            self.pops.sensory_delayed_n.pop,
+            self.pops.state_n.pop,
+            "all_to_all",
+            syn_spec=syn_spec_n,
+        )
+        nest.Connect(
+            self.pops.sensory_delayed_n.pop,
+            self.pops.state_n.pop,
+            "all_to_all",
+            syn_spec=syn_spec_n,
+        )
 
-        fbk_sm_state_spec = self.conn_params.sensory_delayed_state.model_dump(
-            exclude_none=True
+        conn_spec = self.conn_params.pred_state
+        syn_spec_p = conn_spec.model_dump(exclude_none=True)
+        syn_spec_n = conn_spec.model_copy(
+            update={"weight": -conn_spec.weight}
+        ).model_dump(exclude_none=True)
+        nest.Connect(
+            self.pops.pred_p.pop,
+            self.pops.state_p.pop,
+            "all_to_all",
+            syn_spec=syn_spec_p,
         )
-        self.log.debug("Connecting smoothed sensory to state", spec=fbk_sm_state_spec)
-        for i, pre in enumerate(self.pops.sensory_delayed_p.pop):
-            nest.Connect(
-                pre,
-                st_p,
-                "all_to_all",
-                syn_spec={**fbk_sm_state_spec, "receptor_type": i + 1},
-            )
-        for i, pre in enumerate(self.pops.sensory_delayed_n.pop):
-            nest.Connect(
-                pre,
-                st_n,
-                "all_to_all",
-                syn_spec={**fbk_sm_state_spec, "receptor_type": i + 1},
-            )
-        # Prediction (self.pops.pred_p/n) -> State Estimator (Receptors N+1 to 2N)
-        # These connections are always made, as pred_p/n always exist.
-        offset = 201
-        # self.N + 1 Start receptor types after the first N for sensory   #it doesn't have to be N but the number of FBK receptors of the state neuron
-        pred_state_spec = self.conn_params.pred_state.model_dump(exclude_none=True)
-        self.log.debug(
-            "Connecting self.pops.pred_p/n to state estimator", spec=pred_state_spec
+        nest.Connect(
+            self.pops.pred_p.pop,
+            self.pops.state_n.pop,
+            "all_to_all",
+            syn_spec=syn_spec_p,
         )
-        for i, pre in enumerate(self.pops.pred_p.pop):
-            nest.Connect(
-                pre,
-                st_p,
-                "all_to_all",
-                syn_spec={**pred_state_spec, "receptor_type": i + offset},
-            )
-        for i, pre in enumerate(self.pops.pred_n.pop):
-            nest.Connect(
-                pre,
-                st_n,
-                "all_to_all",
-                syn_spec={**pred_state_spec, "receptor_type": i + offset},
-            )
+        nest.Connect(
+            self.pops.pred_n.pop,
+            self.pops.state_n.pop,
+            "all_to_all",
+            syn_spec=syn_spec_n,
+        )
+        nest.Connect(
+            self.pops.pred_n.pop,
+            self.pops.state_n.pop,
+            "all_to_all",
+            syn_spec=syn_spec_n,
+        )
         # Note: The MC Output -> Brainstem connection happens in both cases and is handled above
 
     # --- MUSIC Setup ---

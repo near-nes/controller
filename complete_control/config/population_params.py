@@ -37,6 +37,11 @@ class PopulationsParams(BaseModel):
             kp=1.0, buffer_size=100.0, base_rate=1.0
         )
     )
+    state: SinglePopParams = Field(
+        default_factory=lambda: SinglePopParams(
+            kp=1.0, buffer_size=150.0, base_rate=0.0
+        )
+    )
     error: SinglePopParams = Field(
         default_factory=lambda: SinglePopParams(
             kp=1.0, buffer_size=30.0, base_rate=-1.0  # 20.0
