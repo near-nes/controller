@@ -138,10 +138,7 @@ class CerebellumHandler:
 
     def _create_interface_populations(self):
         """Creates the intermediate populations connecting to the cerebellum."""
-        # --- Populations based on brain.py logic ---
-
         # Feedback Scaling (Input to Fwd Error Calc)
-        # prediction_p and prediction_n are now created in Controller
         params = self.pops_params.feedback
         pop_params = {
             "kp": params.kp,
@@ -149,9 +146,7 @@ class CerebellumHandler:
             "base_rate": params.base_rate,
             "simulation_steps": len(self.total_time_vect),
         }
-        feedback_p = nest.Create(
-            "basic_neuron_nestml", self.N
-        )  # Using basic_neuron like brain.py
+        feedback_p = nest.Create("basic_neuron_nestml", self.N)
         nest.SetStatus(feedback_p, {**pop_params, "pos": True})
         self.interface_pops.feedback_p = self._pop_view(feedback_p)
         feedback_n = nest.Create("basic_neuron_nestml", self.N)
@@ -253,21 +248,6 @@ class CerebellumHandler:
         motor_prediction_n = nest.Create("diff_neuron_nestml", self.N)
         nest.SetStatus(motor_prediction_n, {**pop_params, "pos": False})
         self.interface_pops.motor_prediction_n = self._pop_view(motor_prediction_n)
-
-        # Feedback Inverse Scaling (Input to Inv Error Calc?) - Check necessity
-        params = self.pops_params.feedback_inv
-        pop_params = {
-            "kp": params.kp,
-            "buffer_size": params.buffer_size,
-            "base_rate": params.base_rate,
-            "simulation_steps": len(self.total_time_vect),
-        }
-        feedback_inv_p = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(feedback_inv_p, {**pop_params, "pos": True})
-        self.interface_pops.feedback_inv_p = self._pop_view(feedback_inv_p)
-        feedback_inv_n = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(feedback_inv_n, {**pop_params, "pos": False})
-        self.interface_pops.feedback_inv_n = self._pop_view(feedback_inv_n)
 
     def _pop_view(self, nest_pop) -> PopView:
         """Always creates with no label and to_file True to trigger auto naming"""
@@ -693,30 +673,6 @@ class CerebellumHandler:
         nest.Connect(
             self.controller_pops.sn_n.pop,
             self.interface_pops.feedback_n.pop,
-            "all_to_all",
-            syn_spec=syn_spec_n,
-        )
-
-        # Sensory -> Cereb Feedback Inv Input
-        sn_fbk_inv_spec = self.conn_params.sn_feedback_inv
-        syn_spec_p = sn_fbk_inv_spec.model_dump(exclude_none=True)
-        syn_spec_n = sn_fbk_inv_spec.model_copy(
-            update={"weight": -sn_fbk_inv_spec.weight}
-        ).model_dump(exclude_none=True)
-        self.log.debug(
-            "Connecting Controller Sensory -> Cereb FeedbackInv",
-            syn_spec_p=syn_spec_p,
-            syn_spec_n=syn_spec_n,
-        )
-        nest.Connect(
-            self.controller_pops.sn_p.pop,
-            self.interface_pops.feedback_inv_p.pop,
-            "all_to_all",
-            syn_spec=syn_spec_p,
-        )
-        nest.Connect(
-            self.controller_pops.sn_n.pop,
-            self.interface_pops.feedback_inv_n.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
