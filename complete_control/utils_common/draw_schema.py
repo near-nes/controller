@@ -108,7 +108,7 @@ def draw_schema(metas: list[ResultMeta], scale_factor: float = 0.005):
         "prediction": ("pred_p", "pred_n"),
         "motor prediction": ("motor_prediction_p", "motor_prediction_n"),
         "motor commands": "motor_commands",
-        "error forw": ("error_p", "error_n"),
+        "error forw": ("error_fwd_p", "error_fwd_n"),
         "Sensory feedback": ("sn_p", "sn_n"),
         "Mf_inv": "inv_mf",
         "PC_inv": ("inv_pc_p", "inv_pc_n"),

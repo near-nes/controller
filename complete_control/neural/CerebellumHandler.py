@@ -164,12 +164,12 @@ class CerebellumHandler:
             "base_rate": params.base_rate,
             "simulation_steps": len(self.total_time_vect),
         }
-        error_p = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(error_p, {**pop_params, "pos": True})
-        self.interface_pops.error_p = self._pop_view(error_p)
-        error_n = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(error_n, {**pop_params, "pos": False})
-        self.interface_pops.error_n = self._pop_view(error_n)
+        error_fwd_p = nest.Create("diff_neuron_nestml", self.N)
+        nest.SetStatus(error_fwd_p, {**pop_params, "pos": True})
+        self.interface_pops.error_fwd_p = self._pop_view(error_fwd_p)
+        error_fwd_n = nest.Create("diff_neuron_nestml", self.N)
+        nest.SetStatus(error_fwd_n, {**pop_params, "pos": False})
+        self.interface_pops.error_fwd_n = self._pop_view(error_fwd_n)
 
         # Planner Relay (Input to Inv MFs) - Size N_mossy_inv
         params = self.pops_params.plan_to_inv
@@ -258,7 +258,7 @@ class CerebellumHandler:
         conn_spec_error_io_f = self.conn_params.error_io_f
         self.log.debug("Connecting error -> fwd_io", conn_spec=conn_spec_error_io_f)
         nest.Connect(
-            self.interface_pops.error_p.pop,
+            self.interface_pops.error_fwd_p.pop,
             self.cerebellum.populations.forw_io_p.pop,
             "all_to_all",
             syn_spec=conn_spec_error_io_f.model_dump(exclude_none=True),
@@ -268,7 +268,7 @@ class CerebellumHandler:
             update={"weight": -conn_spec_error_io_f.weight}
         )
         nest.Connect(
-            self.interface_pops.error_n.pop,
+            self.interface_pops.error_fwd_n.pop,
             self.cerebellum.populations.forw_io_n.pop,
             "all_to_all",
             syn_spec=conn_spec_error_io_f_neg.model_dump(exclude_none=True),
@@ -352,25 +352,25 @@ class CerebellumHandler:
         )
         nest.Connect(
             self.controller_pops.sensory_delayed_p.pop,
-            self.interface_pops.error_p.pop,
+            self.interface_pops.error_fwd_p.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
             self.controller_pops.sensory_delayed_p.pop,
-            self.interface_pops.error_n.pop,
+            self.interface_pops.error_fwd_n.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
             self.controller_pops.sensory_delayed_n.pop,
-            self.interface_pops.error_p.pop,
+            self.interface_pops.error_fwd_p.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
         nest.Connect(
             self.controller_pops.sensory_delayed_n.pop,
-            self.interface_pops.error_n.pop,
+            self.interface_pops.error_fwd_n.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
@@ -389,25 +389,25 @@ class CerebellumHandler:
         # TODO this agrees with brain.py, but why these signs?
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_n.pop,
-            self.interface_pops.error_p.pop,
+            self.interface_pops.error_fwd_p.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_n.pop,
-            self.interface_pops.error_n.pop,
+            self.interface_pops.error_fwd_n.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_p.pop,
-            self.interface_pops.error_p.pop,
+            self.interface_pops.error_fwd_p.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
             self.cerebellum.populations.forw_dcnp_p.pop,
-            self.interface_pops.error_n.pop,
+            self.interface_pops.error_fwd_n.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
@@ -498,25 +498,25 @@ class CerebellumHandler:
         syn_spec_p = {"weight": w_error, "delay": 1.0, "receptor_type": 401}
         syn_spec_n = {"weight": -w_error, "delay": 1.0, "receptor_type": 401}
         nest.Connect(
-            self.interface_pops.error_p.pop,
+            self.interface_pops.error_fwd_p.pop,
             self.controller_pops.state_p.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
-            self.interface_pops.error_n.pop,
+            self.interface_pops.error_fwd_n.pop,
             self.controller_pops.state_p.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
         nest.Connect(
-            self.interface_pops.error_p.pop,
+            self.interface_pops.error_fwd_p.pop,
             self.controller_pops.state_n.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
-            self.interface_pops.error_n.pop,
+            self.interface_pops.error_fwd_n.pop,
             self.controller_pops.state_n.pop,
             "all_to_all",
             syn_spec=syn_spec_n,

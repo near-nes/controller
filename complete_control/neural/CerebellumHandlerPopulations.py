@@ -27,8 +27,8 @@ class CerebellumHandlerPopulationsGeneric(BaseModel, Generic[T]):
     state_to_inv_n: Optional[T] = None
 
     # === Error Calculation Populations (Input to Core Cerebellum IO) ===
-    error_p: Optional[T] = None
-    error_n: Optional[T] = None
+    error_fwd_p: Optional[T] = None
+    error_fwd_n: Optional[T] = None
 
     # Inverse Model Error (calculated from plan_to_inv_p/n and state_to_inv_p/n; connects to Inv IO)
     error_inv_p: Optional[T] = None

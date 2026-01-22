@@ -64,7 +64,7 @@ POPS_PAIRED = [
     (POPS.inv_dcnp_p, POPS.inv_dcnp_n),
     (POPS.inv_io_p, POPS.inv_io_n),
     (POPS.inv_pc_p, POPS.inv_pc_n),
-    (POPS.error_p, POPS.error_n),
+    (POPS.error_fwd_p, POPS.error_fwd_n),
     (POPS.error_inv_p, POPS.error_inv_n),
     (POPS.motor_prediction_p, POPS.motor_prediction_n),
     (POPS.state_to_inv_p, POPS.state_to_inv_n),
