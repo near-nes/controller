@@ -6,8 +6,8 @@ Template file: schema_template.svg (in this directory)
 Edit layout visually in Inkscape or other svg editor
 
 Plot mapping: SVG placeholder IDs must match plot dictionary keys from merge_and_plot():
-- Comma-separated IDs become tuple keys: id="planner_p,planner_n" → ("planner_p", "planner_n")
-- Simple IDs become string keys: id="plan_to_inv" → "plan_to_inv"
+- Paired populations become comma-separated IDs: id="planner_p,planner_n" → ("planner_p", "planner_n")
+- Single populations become simple string keys: id="plan_to_inv" → "plan_to_inv"
 
 Images are embedded with aspect-ratio preservation. Placeholder fill color shows as colored border.
 Arrows are ignored, so include them as you want to see them.
@@ -170,7 +170,6 @@ def create_schema_from_template(
             log.warning(f"Plot not found for '{placeholder_id}': {plot_path}")
 
     tree.write(output_path, encoding="utf-8", xml_declaration=True)
-    log.info(f"Saved schema to {output_path}")
 
 
 def generate_joint_space_plot(metas: list[ResultMeta], figs_path: Path) -> Path:

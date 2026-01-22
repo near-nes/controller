@@ -14,6 +14,7 @@ from complete_control.config.ResultMeta import ResultMeta
 from complete_control.neural.plot_utils import plot_controller_outputs
 from complete_control.plant.plant_plotting import plot_plant_outputs
 from complete_control.utils_common.draw_schema import draw_schema
+from complete_control.utils_common.draw_schema_svg import draw_schema as draw_schema_svg
 from complete_control.utils_common.results import gather_metas
 
 log = structlog.get_logger()
@@ -35,9 +36,9 @@ def parse_slice_notation(slice_str: str) -> slice:
 
 def parse_selection(selection_str: str, total_length: int) -> list[int]:
     indices = []
-    for part in selection_str.split(','):
+    for part in selection_str.split(","):
         part = part.strip()
-        if ':' in part:
+        if ":" in part:
             slice_obj = parse_slice_notation(part)
             indices.extend(range(total_length)[slice_obj])
         else:
@@ -81,6 +82,13 @@ def main():
         type=str,
         default=None,
         help="Trial selection with indices and/or slices (e.g., '-5:' for last 5, '0,5,10' for specific trials, '1:5,10:20:2' for mixed)",
+    )
+    parser.add_argument(
+        "--schema-method",
+        type=str,
+        choices=["matplotlib", "svg"],
+        default="svg",
+        help="Schema generation method: 'matplotlib' (old hardcoded) or 'svg' (new template-based)",
     )
     args = parser.parse_args()
 

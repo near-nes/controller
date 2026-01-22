@@ -73,7 +73,8 @@ class CerebellumPopulations(CerebellumPopulationsGeneric[PopView]):
         # Auto-label PopView instances when assigned
         if isinstance(value, PopView) and name in CerebellumPopulations.model_fields:
             if value.label is None:
-                value.label = name  # This will trigger detector initialization
+                # set value name as population label, trigger detector initialization
+                value.label = name
         super().__setattr__(name, value)
 
     def get_plastic_pairs(self) -> tuple[tuple[PopView, PopView]]:
