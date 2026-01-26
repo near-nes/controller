@@ -2,7 +2,6 @@ from enum import Enum
 from pathlib import Path
 from typing import ClassVar
 
-import config.paths as paths
 from pydantic import BaseModel, Field
 
 
@@ -13,7 +12,7 @@ class TrajGeneratorType(str, Enum):
 
 
 class GLETrajGeneratorConfig(BaseModel):
-    model_path: Path = paths.PFC_PLANNER / "models" / "trained_gle_planner.pth"
+    model_dir: Path | None = None  # None = use submodule default
 
 
 class PlannerModuleConfig(BaseModel):
