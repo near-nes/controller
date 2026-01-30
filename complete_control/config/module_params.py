@@ -48,7 +48,7 @@ class MotorCortexModuleConfig(BaseModel):
     out_base_rate: float = 0.0
     out_kp: float = 1.25
     wgt_ffwd_out: float = 1.0
-    wgt_fbk_out: float = 0.0  # 0.1  # 2.0 0.25
+    wgt_fbk_out: float = 0.1  # 2.0 0.25
     buf_sz: float = 50.0
 
 

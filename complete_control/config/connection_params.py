@@ -79,7 +79,7 @@ class ConnectionsParams(BaseModel):
     """
     error_io_f: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.5,
+            weight=0.7,
             delay=min_delay,
             receptor_type=1,
         )
@@ -128,7 +128,7 @@ class ConnectionsParams(BaseModel):
     )
     motor_pre_brain_stem: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.0,  # 0.005,
+            weight=0.005,
             delay=min_delay,
         )
     )
