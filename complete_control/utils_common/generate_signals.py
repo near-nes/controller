@@ -42,7 +42,7 @@ def generate_traj(
         )
 
         traj, idx_choice = generate_trajectory_gle(
-            input_image_path, params.gle_config.model_path, sim
+            input_image_path, sim, params.gle_config
         )
         choice = TargetColor.BLUE_LEFT if idx_choice == 0 else TargetColor.RED_RIGHT
     else:

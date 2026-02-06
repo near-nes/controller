@@ -12,11 +12,12 @@ FOLDER_NAME_ROBOTIC_FIGS = "figs_robotic"
 REFERENCE_DATA_DIR = COMPLETE_CONTROL / "reference_data"
 
 CONFIG = COMPLETE_CONTROL / "config"
+ARTIFACTS = ROOT / "artifacts"
 
 TRAJECTORY = CONFIG / "trajectory.txt"
 MOTOR_COMMANDS = CONFIG / "motor_commands.txt"
 NESTML_BUILD_DIR = ROOT / "nestml" / "target"
-CEREBELLUM = ROOT / "cerebellum"
+CEREBELLUM = ROOT.parent / "cerebellum"
 CEREBELLUM_CONFIGS = ROOT / "cerebellum_configurations"
 FORWARD = CEREBELLUM_CONFIGS / "forward.yaml"
 INVERSE = CEREBELLUM_CONFIGS / "inverse.yaml"
@@ -32,6 +33,7 @@ M1_WEIGHTS = (
 )
 
 PFC_PLANNER = SUBMODULES / "pfc_planner"
+ARTIFACTS_PLANNER = ARTIFACTS / "pfc_planner"
 
 
 @dataclass(frozen=True)

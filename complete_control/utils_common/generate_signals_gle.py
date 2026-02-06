@@ -4,81 +4,41 @@ from pathlib import Path
 import numpy as np
 import structlog
 from config.core_models import SimulationParams
-from PIL import Image
+from config.module_params import GLETrajGeneratorConfig, TrajGeneratorType
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger("traj.generate_gle")
 
 
 def generate_trajectory_gle(
-    image_path: Path, model_path: Path, sim: SimulationParams
-) -> np.ndarray:
-
+    image_path: Path,
+    sim: SimulationParams,
+    gle_params: GLETrajGeneratorConfig,
+) -> tuple[np.ndarray, int]:
     import torch
-    from pfc_planner.gle_planner import GLEPlanner
-    from torchvision import transforms
+    from pfc_planner.src.config import PlannerParams
+    from pfc_planner.src.factory import get_planner
 
     torch.set_num_threads(int(os.getenv("OMP_NUM_THREADS")))
+    torch.manual_seed(sim.seed)
     # otherwise torch messes with OMP_NUM_THREADS;
     # then nest does `assert env(OMP_NUM_THREADS) == kernel.virtual_threads` and fails
 
-    """
-    Generates a trajectory using the pre-trained GLEPlanner model.
-
-    Args:
-        image_path (str): Path to the input image for the planner.
-        model_path (str): Path to the trained .pth model file.
-
-    Returns:
-        np.ndarray: The predicted trajectory as a NumPy array.
-    """
-    TRAJECTORY_LEN = sim.neural_control_steps
-    NUM_CHOICES = 2
-
-    # --- Model Initialization ---
-    gle_planner_model = GLEPlanner(
-        tau=1.0, dt=0.01, num_choices=NUM_CHOICES, trajectory_length=TRAJECTORY_LEN
+    params = PlannerParams(
+        model_type=TrajGeneratorType.GLE.value,
+        resolution=sim.resolution,
+        time_prep=sim.time_prep,
+        time_move=sim.time_move,
+        time_locked_with_feedback=sim.time_locked_with_feedback,
+        time_grasp=sim.time_grasp,
+        time_post=sim.time_post,
     )
 
-    try:
-        gle_planner_model.load_state_dict(torch.load(model_path))
-    except RuntimeError as e:
-        _log.error(
-            f"Model was trained using diffferent sizes from provided one ({TRAJECTORY_LEN})"
-        )
-        raise e
-    gle_planner_model.eval()
+    _log.debug(f"Getting GLE planner, expecting traj len {params.trajectory_length}")
 
-    # --- Prepare Input Data ---
-    image_transform = transforms.Compose(
-        [
-            transforms.Resize((100, 100)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.Lambda(lambda x: x.view(-1)),
-        ]
-    )
+    planner = get_planner(params, model_dir=gle_params.model_dir)
 
-    _log.info(f"loading image from {image_path}")
-    input_image = Image.open(image_path).convert("RGB")
-    input_tensor = image_transform(input_image)
-    input_batch = input_tensor.unsqueeze(0)
+    _log.info(f"Loading image from {image_path}")
+    predicted_trajectory, predicted_choice = planner.image_to_trajectory(image_path)
+    predicted_choice_idx = 0 if predicted_choice == "left" else 1
 
-    # --- Get Model Prediction ---
-    with torch.no_grad():
-        # The forward pass runs the dynamics. Looping as in the evaluation script.
-        for _ in range(20):
-            model_output = gle_planner_model(input_batch)
-
-    # --- Process the Output ---
-    predicted_trajectory_tensor, pred_choice_logits = (
-        model_output[:, :TRAJECTORY_LEN],
-        model_output[:, TRAJECTORY_LEN:],
-    )
-    predicted_trajectory = predicted_trajectory_tensor.squeeze(0).cpu().numpy()
-    _, predicted_choice_idx = torch.max(pred_choice_logits, 1)
-
-    predicted_trajectory_padded = np.concatenate(
-        [predicted_trajectory, np.zeros(sim.manual_control_steps)]
-    )
-
-    return predicted_trajectory_padded, predicted_choice_idx
+    return predicted_trajectory, predicted_choice_idx

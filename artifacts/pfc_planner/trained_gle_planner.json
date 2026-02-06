@@ -1,0 +1,22 @@
+{
+    "model_type": "gle",
+    "num_choices": 2,
+    "image_size": [
+        100,
+        100
+    ],
+    "gle_tau": 1.0,
+    "gle_beta": 1.0,
+    "initial_elbow_angle_deg": 90.0,
+    "time_prep": 650.0,
+    "time_move": 500.0,
+    "time_locked_with_feedback": 150.0,
+    "time_grasp": 100.0,
+    "time_post": 100.0,
+    "resolution": 1.0,
+    "learning_rate": 0.01,
+    "num_epochs": 500,
+    "gle_update_steps": 10,
+    "git_commit": "2e623e6",
+    "trajectory_length": 1500
+}

@@ -1,8 +1,10 @@
 from enum import Enum
+from pathlib import Path
 from typing import ClassVar
 
-import config.paths as paths
 from pydantic import BaseModel, Field
+
+from .paths import ARTIFACTS_PLANNER
 
 
 class TrajGeneratorType(str, Enum):
@@ -12,12 +14,12 @@ class TrajGeneratorType(str, Enum):
 
 
 class GLETrajGeneratorConfig(BaseModel):
-    model_path: str = str(paths.PFC_PLANNER / "models" / "trained_gle_planner.pth")
+    model_dir: Path = ARTIFACTS_PLANNER
 
 
 class PlannerModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
-    trajgen_type: TrajGeneratorType = Field(default=TrajGeneratorType.MOCKED)
+    trajgen_type: TrajGeneratorType = Field(default=TrajGeneratorType.GLE)
     gle_config: GLETrajGeneratorConfig = Field(
         default_factory=lambda: GLETrajGeneratorConfig()
     )

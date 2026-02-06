@@ -16,10 +16,7 @@ import structlog
 # Ensure we can import from the current directory
 sys.path.append(str(Path(__file__).parent.resolve()))
 
-try:
-    from nrp_start_sim import run_trial as run_trial_nrp_func
-except ImportError:
-    run_trial_nrp_func = None
+from nrp_start_sim import run_trial as run_trial_nrp_func
 
 log = structlog.get_logger()
 

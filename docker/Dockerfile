@@ -238,6 +238,8 @@ RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
     && cmake . \
     && make \
     && make install
+# allow all users to run git commands here
+RUN git config --global --add safe.directory $CEREBELLUM_PATH 
 
 # parallelize slow pip installs    
 FROM base AS core_reqs
