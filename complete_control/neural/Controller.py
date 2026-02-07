@@ -22,7 +22,7 @@ from neural.neural_models import Synapse, SynapseBlock, SynapseRecording
 from plant.sensoryneuron import SensoryNeuron
 from utils_common.generate_signals import generate_traj
 from utils_common.results import read_weights
-from utils_common.utils import TrialSection
+from utils_common.utils import TrialSection, get_current_section
 
 from .ControllerPopulations import ControllerPopulations
 from .motorcortex import MotorCortex
@@ -825,7 +825,8 @@ class Controller:
 
         return pops
 
-    def run_simulation_step(self, curr_section, timestep):
+    def run_simulation_step(self, timestep, sim_time_s):
+        curr_section = get_current_section(sim_time_s * 1000, self.master_params)
         if self.master_params.USE_CEREBELLUM:
             self.cerebellum_handler.apply_blocking_window(curr_section)
 
