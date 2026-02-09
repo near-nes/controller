@@ -170,5 +170,10 @@ class ConnectionsParams(BaseModel):
 
     @computed_field
     @property
+    def sn_sensory_delayed(self) -> SingleSynapseParams:
+        return SingleSynapseParams(weight=0.005, delay=self.sensory_delay)
+
+    @computed_field
+    @property
     def state_error_fwd(self) -> SingleSynapseParams:
         return SingleSynapseParams(weight=-0.005, delay=self.sensory_delay)
