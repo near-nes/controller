@@ -4,7 +4,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel, Field
 
-from .paths import ARTIFACTS_PLANNER
+from . import paths as p
 
 
 class TrajGeneratorType(str, Enum):
@@ -19,12 +19,12 @@ class M1Type(str, Enum):
 
 
 class GLETrajGeneratorConfig(BaseModel):
-    model_dir: Path = ARTIFACTS_PLANNER
+    model_dir: Path = p.ARTIFACTS_PLANNER
 
 
 class PlannerModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
-    trajgen_type: TrajGeneratorType = Field(default=TrajGeneratorType.GLE)
+    trajgen_type: TrajGeneratorType = Field(default=TrajGeneratorType.MOCKED)
     gle_config: GLETrajGeneratorConfig = Field(
         default_factory=lambda: GLETrajGeneratorConfig()
     )
@@ -39,8 +39,8 @@ class M1MockConfig(BaseModel):
 
 
 class M1EPropConfig(BaseModel):
-    config_path: str = paths.M1_CONFIG
-    weights_path: str = paths.M1_WEIGHTS
+    config_path: str = p.M1_CONFIG
+    weights_path: str = p.M1_WEIGHTS
 
 
 class MotorCortexModuleConfig(BaseModel):
