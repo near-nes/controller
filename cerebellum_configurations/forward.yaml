@@ -2,7 +2,6 @@ name: No plasticity (forward)
 simulations:
   basal_activity:
     connection_models:
-    connection_models:
       parallel_fiber_to_purkinje_plus:
         synapse:
           Aplus: 9e-6
@@ -21,7 +20,7 @@ simulations:
           Aminus: -5e-4
 
 $import:
-  ref: ./microzones_complete_nest.yaml#/
+  ref: /sim/cerebellum/circuit.yaml#/
   values:
   - packages
   - storage

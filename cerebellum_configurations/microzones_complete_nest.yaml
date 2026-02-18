@@ -689,7 +689,7 @@ simulations:
       - connection_models
       - devices
 $import:
-  ref: /sim/cerebellum/configurations/mouse/dcn-io/microzones_complete.yaml#/
+  ref: /sim/cerebellum/circuit.yaml#/
   values:
   - packages
   - storage

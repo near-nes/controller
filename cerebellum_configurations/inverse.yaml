@@ -20,7 +20,7 @@ simulations:
           Aminus: -1e-3
 
 $import:
-  ref: ./microzones_complete_nest.yaml#/
+  ref: /sim/cerebellum/circuit.yaml#/
   values:
   - packages
   - storage
