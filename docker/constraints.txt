@@ -21,8 +21,8 @@ pybullet~=3.2.7
 structlog~=25.3.0
 pydantic~=2.11
 jupyter==1.1.1
-bsb~=6.0.0
-bsb-nest~=6.0.0
+bsb~=7.0
+bsb-nest~=7.0
 Pillow==11.3.0
 cairosvg~=2.8
 ffmpeg~=1.4

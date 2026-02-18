@@ -233,7 +233,7 @@ RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-b
 ####################### CEREBELLUM+MODELS #######################
 RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
-    && git checkout bbe4ccf49a1b01974434c77404f00688f6beb1fc\
+    && git checkout b265a04b117c05f623b180bbfb6278a9f2efe7cd \
     && cd custom_stdp \
     && cmake . \
     && make \
