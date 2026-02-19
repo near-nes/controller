@@ -17,9 +17,7 @@ from neural.nest_adapter import nest
 def setup_environment(master_config: MasterParams):
     log = structlog.get_logger("main.env_setup")
     """Sets up environment variables if needed (e.g., for NESTML)."""
-    os.environ["OMP_NUM_THREADS"] = str(
-        1 if master_config.USE_MUSIC else str(master_config.total_num_virtual_procs)
-    )
+    os.environ["OMP_NUM_THREADS"] = str(master_config.total_num_virtual_procs)
 
     try:
         # Check if module is already installed to prevent errors on reset
@@ -55,8 +53,7 @@ def setup_nest_kernel(
         "data_path": str(path_data),
         "rng_seed": simulation_config.seed,
     }
-    if not master_params.USE_MUSIC:
-        kernel_params["total_num_virtual_procs"] = master_params.total_num_virtual_procs
+    kernel_params["total_num_virtual_procs"] = master_params.total_num_virtual_procs
 
     nest.SetKernelStatus(kernel_params)
     nest.set_verbosity("M_ERROR")
@@ -99,9 +96,6 @@ def create_controller(
         single_trial_duration=time_span_per_trial,
         num_steps_total=len(total_time_vect_concat),
     )
-    music_cfg = (
-        master_config.music if master_config.USE_MUSIC else None
-    )  # TODO what is this man find a better solution
     if master_config.modules.planner.trajgen_type != TrajGeneratorType.MOCKED:
         log.debug("Reached initialization. Waiting for input image to be created...")
         while not os.path.exists(master_config.run_paths.input_image):
@@ -124,7 +118,6 @@ def create_controller(
         path_data=master_config.run_paths.data_nest,
         label_prefix="",
         comm=comm,
-        music_cfg=music_cfg,
         use_cerebellum=master_config.USE_CEREBELLUM,
         cerebellum_paths=master_config.bsb_config_paths,
     )

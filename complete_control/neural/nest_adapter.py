@@ -4,17 +4,12 @@ _nest = None
 _initialized = False
 
 
-def initialize_nest(coordinator_type):
+def initialize_nest(coordinator_type=None):
     global _nest, _initialized
     if _initialized:
         return  # Already initialized
 
-    if coordinator_type == "MUSIC":
-        import nest
-
-        _nest = nest
-    else:
-        _nest = NESTClient()
+    _nest = NESTClient()
 
     _initialized = True
 

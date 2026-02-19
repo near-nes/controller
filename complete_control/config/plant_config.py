@@ -65,18 +65,6 @@ class PlantConfig:
         self.SCALE_TORQUE: float = 5000.0  # 500000.0
         self.BUFFER_SIZE_S: float = 1.0 / 100.0
 
-        # MUSIC configuration from MasterConfig
-        self.MUSIC_CONST_S: float = (
-            self.master_config.music.const / 1000.0
-        )  # Assuming const in MusicConfigModel is in ms
-        self.MUSIC_ACCEPTABLE_LATENCY_S: float = 2 * self.RESOLUTION_S - (
-            self.RESOLUTION_S - self.MUSIC_CONST_S
-        )
-        if self.MUSIC_ACCEPTABLE_LATENCY_S < 0:
-            self.MUSIC_ACCEPTABLE_LATENCY_S = 0.0
-        self.MUSIC_PORT_MOT_CMD_IN: str = self.master_config.music.port_motcmd_in
-        self.MUSIC_PORT_FBK_OUT: str = self.master_config.music.port_fbk_out
-
         # Sensory Neuron parameters from MasterConfig
         self.SENS_NEURON_BASE_RATE: float = (
             self.master_config.modules.spine.sensNeur_base_rate
