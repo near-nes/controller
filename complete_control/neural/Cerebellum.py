@@ -3,7 +3,6 @@ from pathlib import Path
 
 import numpy as np
 import structlog
-import tqdm
 from bsb import SimulationData, config, from_storage, get_simulation_adapter, options
 from bsb_nest.adapter import NestAdapter, NestResult
 from config.bsb_models import BSBConfigPaths
@@ -56,6 +55,7 @@ class Cerebellum:
         )
 
         self.forward_model = from_storage(str(paths.cerebellum_hdf5), self.comm)
+        # self.forward_model._storage.store_active_config(conf_forward) -> equivalent to manually substituting simulation
         self.forward_model.simulations[SIMULATION_NAME_IN_YAML] = (
             conf_forward.simulations[SIMULATION_NAME_IN_YAML]
         )
@@ -63,6 +63,7 @@ class Cerebellum:
 
         self.inverse_model = from_storage(str(paths.cerebellum_hdf5), self.comm)
         self.inverse_model.simulations[SIMULATION_NAME_IN_YAML] = (
+            # cannot be a subset of microzones_complete_nest, must be the entire simulation spec
             conf_inverse.simulations[SIMULATION_NAME_IN_YAML]
         )
         self.log.debug("loaded inverse model and its configuration")

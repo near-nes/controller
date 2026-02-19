@@ -1,6 +1,9 @@
 name: No plasticity (forward)
+storage:
+  root: /sim/controller/fake_storage.hdf5
 simulations:
   basal_activity:
+    connection_models:
     connection_models:
       parallel_fiber_to_purkinje_plus:
         synapse:
@@ -20,17 +23,18 @@ simulations:
           Aminus: -5e-4
 
 $import:
-  ref: /sim/cerebellum/circuit.yaml#/
+  ref: ./microzones_complete_nest.yaml#/
   values:
-  - packages
-  - storage
+  - simulations
   - network
-  - regions
   - partitions
-  - morphologies
   - cell_types
   - placement
   - connectivity
+  - storage
+  # - morphologies
+  # - packages
+  # - storage
+  # - regions
   # - after_connectivity
-  - simulations
   # - components

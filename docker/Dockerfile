@@ -173,7 +173,7 @@ RUN mkdir -p nest-build \
     && cd nest-build \
     && cmake -DCMAKE_INSTALL_PREFIX:PATH=$NEST_INSTALL_DIR \
     -Dwith-mpi=ON \
-    -Dwith-music=$MUSIC_INSTALL_DIR \
+    # -Dwith-music=$MUSIC_INSTALL_DIR \
     -Dwith-python=ON \
     # just to make extra extra sure
     -DPYTHON_EXECUTABLE=$VIRTUAL_ENV/bin/python \
@@ -233,7 +233,8 @@ RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-b
 ####################### CEREBELLUM+MODELS #######################
 RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
-    && git checkout b265a04b117c05f623b180bbfb6278a9f2efe7cd \
+    && pip install --no-deps . \
+    && git checkout 491b1cf1260f4131810e85e489159b2ad30ca5fa \
     && cd custom_stdp \
     && cmake . \
     && make \
@@ -277,8 +278,8 @@ ENV OMPI_MCA_plm=^rsh
 ENV PYNEST_QUIET=1
 
 # cerebellum
-ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5.gz
-ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5
+ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/mouse_abstract_only.hdf5.gz
+ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/mouse_abstract_only.hdf5
 
 ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 
