@@ -76,12 +76,12 @@ simulations:
           E_rev3: 0
           I_e: 700
           V_m: -59
-          V_min: -350
+          Vmin: -350
           V_reset: -69
           V_th: -43
-          k_1: 0.195
-          k_2: 0.041
-          k_adap: 1.491
+          k1: 0.195
+          k2: 0.041
+          kadap: 1.491
           lambda_0: 4.0
           t_ref: 0.5
           tau_V: 3.5
@@ -103,9 +103,9 @@ simulations:
           V_m: -60
           V_reset: -78
           V_th: -53
-          k_1: 1.887
-          k_2: 1.096
-          k_adap: 2.025
+          k1: 1.887
+          k2: 1.096
+          kadap: 2.025
           lambda_0: 1.8
           t_ref: 1.59
           tau_V: 1.0
@@ -127,9 +127,9 @@ simulations:
           V_m: -60
           V_reset: -78
           V_th: -53
-          k_1: 1.887
-          k_2: 1.096
-          k_adap: 2.025
+          k1: 1.887
+          k2: 1.096
+          kadap: 2.025
           lambda_0: 1.8
           t_ref: 1.59
           tau_V: 1
@@ -194,9 +194,9 @@ simulations:
           V_m: -45
           V_reset: -45
           V_th: -35
-          k_1: 0.191
-          k_2: 0.091
-          k_adap: 1.928
+          k1: 0.191
+          k2: 0.091
+          kadap: 1.928
           lambda_0: 1.2
           t_ref: 1
           tau_V: 0.8
@@ -370,30 +370,30 @@ simulations:
           model: static_synapse
           receptor_type: 5
           weight: 800
-      # io_to_mli_plus_io_to_basket_cell:
-      #   synapses:
-      #   - delay: 40.0
-      #     model: static_synapse
-      #     receptor_type: 3
-      #     weight: 5.0
-      # io_to_mli_minus_io_to_basket_cell:
-      #   synapses:
-      #   - delay: 40.0
-      #     model: static_synapse
-      #     receptor_type: 3
-      #     weight: 5.0
-      # io_to_mli_plus_io_to_stellate_cell:
-      #   synapses:
-      #   - delay: 40.0
-      #     model: static_synapse
-      #     receptor_type: 3
-      #     weight: 5.0
-      # io_to_mli_minus_io_to_stellate_cell:
-      #   synapses:
-      #   - delay: 40.0
-      #     model: static_synapse
-      #     receptor_type: 3
-      #     weight: 5.0
+      io_to_mli_plus_io_to_basket_cell:
+        synapses:
+        - delay: 40.0
+          model: static_synapse
+          receptor_type: 3
+          weight: 5.0
+      io_to_mli_minus_io_to_basket_cell:
+        synapses:
+        - delay: 40.0
+          model: static_synapse
+          receptor_type: 3
+          weight: 5.0
+      io_to_mli_plus_io_to_stellate_cell:
+        synapses:
+        - delay: 40.0
+          model: static_synapse
+          receptor_type: 3
+          weight: 5.0
+      io_to_mli_minus_io_to_stellate_cell:
+        synapses:
+        - delay: 40.0
+          model: static_synapse
+          receptor_type: 3
+          weight: 5.0
       io_to_dcn_p_plus:
         synapses:
         - delay: 4.0
