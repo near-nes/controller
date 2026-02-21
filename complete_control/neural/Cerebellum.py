@@ -100,8 +100,8 @@ class Cerebellum:
         adapter.connect_neurons(simulation_inv)
         self.log.debug("connected cerebellum neurons")
 
-        adapter.create_devices(simulation_forw)
-        adapter.create_devices(simulation_inv)
+        adapter.implement_components(simulation_forw)
+        adapter.implement_components(simulation_inv)
         self.log.debug("created cerebellum devices")
 
         # Forward Model
@@ -138,14 +138,18 @@ class Cerebellum:
         self._update_weight_plastic_pops(weights)
 
     def _find_popview(self, simdata, model_name):
-        return PopView(
-            next(
-                gids
-                for neuron_model, gids in simdata.populations.items()
-                if neuron_model.name == model_name
-            ),
-            to_file=True,
-        )
+        try:
+            return PopView(
+                next(
+                    gids
+                    for neuron_model, gids in simdata.populations.items()
+                    if neuron_model.name == model_name
+                ),
+                to_file=True,
+            )
+        except Exception:
+            self.log.error(f"Could not retrieve {model_name}. Terminating...")
+            raise
 
     def get_plastic_connections(self):
         conns = {}
