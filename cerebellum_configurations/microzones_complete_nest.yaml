@@ -432,7 +432,7 @@ simulations:
           weight: 0.45
     devices:
       background_noise:
-        delay: 0.1
+        delay: 1
         device: poisson_generator
         rate: 4.0
         targetting:
@@ -441,35 +441,35 @@ simulations:
           strategy: cell_model
         weight: 1.0
       mossy_fibers_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
           - mossy_fibers
           strategy: cell_model
       glomerulus_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
           - glomerulus
           strategy: cell_model
       granule_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
           - granule_cell
           strategy: cell_model
       golgi_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
           - golgi_cell
           strategy: cell_model
       purkinje_plus_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
@@ -478,7 +478,7 @@ simulations:
           - plus
           strategy: by_label
       purkinje_minus_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
@@ -487,21 +487,21 @@ simulations:
           - minus
           strategy: by_label
       basket_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
           - basket_cell
           strategy: cell_model
       stellate_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
           - stellate_cell
           strategy: cell_model
       dcn_p_plus_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
@@ -510,7 +510,7 @@ simulations:
           - plus
           strategy: by_label
       dcn_p_minus_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
@@ -519,7 +519,7 @@ simulations:
           - minus
           strategy: by_label
       dcn_i_plus_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
@@ -528,7 +528,7 @@ simulations:
           - plus
           strategy: by_label
       dcn_i_minus_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
@@ -537,7 +537,7 @@ simulations:
           - minus
           strategy: by_label
       io_plus_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
@@ -546,7 +546,7 @@ simulations:
           - plus
           strategy: by_label
       io_minus_record:
-        delay: 0.1
+        delay: 1
         device: spike_recorder
         targetting:
           cell_models:
