@@ -107,18 +107,19 @@ class Cerebellum:
         # Forward Model
         fwd = adapter.simdata[simulation_forw]
         inv = adapter.simdata[simulation_inv]
+
         self.populations.forw_mf = self._find_popview(fwd, "mossy_fibers")
         self.populations.forw_glom = self._find_popview(fwd, "glomerulus")
         self.populations.forw_grc = self._find_popview(fwd, "granule_cell")
         self.populations.forw_goc = self._find_popview(fwd, "golgi_cell")
         self.populations.forw_bc = self._find_popview(fwd, "basket_cell")
         self.populations.forw_sc = self._find_popview(fwd, "stellate_cell")
-        self.populations.forw_io_p = self._find_popview(fwd, "io_plus")
-        self.populations.forw_io_n = self._find_popview(fwd, "io_minus")
-        self.populations.forw_dcnp_p = self._find_popview(fwd, "dcn_p_plus")
-        self.populations.forw_dcnp_n = self._find_popview(fwd, "dcn_p_minus")
-        self.populations.forw_pc_p = self._find_popview(fwd, "purkinje_cell_plus")
-        self.populations.forw_pc_n = self._find_popview(fwd, "purkinje_cell_minus")
+        self.populations.forw_io_p = self._find_popview(fwd, "io", "plus")
+        self.populations.forw_io_n = self._find_popview(fwd, "io", "minus")
+        self.populations.forw_dcnp_p = self._find_popview(fwd, "dcn_p", "plus")
+        self.populations.forw_dcnp_n = self._find_popview(fwd, "dcn_p", "minus")
+        self.populations.forw_pc_p = self._find_popview(fwd, "purkinje_cell", "plus")
+        self.populations.forw_pc_n = self._find_popview(fwd, "purkinje_cell", "minus")
 
         # Inverse Model
         self.populations.inv_mf = self._find_popview(inv, "mossy_fibers")
@@ -127,28 +128,34 @@ class Cerebellum:
         self.populations.inv_goc = self._find_popview(inv, "golgi_cell")
         self.populations.inv_bc = self._find_popview(inv, "basket_cell")
         self.populations.inv_sc = self._find_popview(inv, "stellate_cell")
-        self.populations.inv_io_p = self._find_popview(inv, "io_plus")
-        self.populations.inv_io_n = self._find_popview(inv, "io_minus")
-        self.populations.inv_dcnp_p = self._find_popview(inv, "dcn_p_plus")
-        self.populations.inv_dcnp_n = self._find_popview(inv, "dcn_p_minus")
-        self.populations.inv_pc_p = self._find_popview(inv, "purkinje_cell_plus")
-        self.populations.inv_pc_n = self._find_popview(inv, "purkinje_cell_minus")
+        self.populations.inv_io_p = self._find_popview(inv, "io", "plus")
+        self.populations.inv_io_n = self._find_popview(inv, "io", "minus")
+        self.populations.inv_dcnp_p = self._find_popview(inv, "dcn_p", "plus")
+        self.populations.inv_dcnp_n = self._find_popview(inv, "dcn_p", "minus")
+        self.populations.inv_pc_p = self._find_popview(inv, "purkinje_cell", "plus")
+        self.populations.inv_pc_n = self._find_popview(inv, "purkinje_cell", "minus")
         self.log.debug(f"all populations correctly retrieved")
 
         self._update_weight_plastic_pops(weights)
 
-    def _find_popview(self, simdata, model_name):
+    def _find_popview(self, simdata, model_name, label=None):
         try:
-            return PopView(
-                next(
-                    gids
-                    for neuron_model, gids in simdata.populations.items()
-                    if neuron_model.name == model_name
-                ),
-                to_file=True,
+            gids = next(
+                gids
+                for neuron_model, gids in simdata.populations.items()
+                if neuron_model.name == model_name
             )
+            if label is not None:
+                ps = next(
+                    ps
+                    for neuron_model, ps in simdata.placement.items()
+                    if neuron_model.name == model_name
+                )
+                indices = ps.get_labelled([label])
+                gids = gids[indices]
+            return PopView(gids, to_file=True)
         except Exception:
-            self.log.error(f"Could not retrieve {model_name}. Terminating...")
+            self.log.error(f"Could not retrieve {model_name}[{label}]. Terminating...")
             raise
 
     def get_plastic_connections(self):
