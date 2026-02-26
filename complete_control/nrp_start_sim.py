@@ -15,6 +15,16 @@ from utils_common.draw_schema import draw_schema
 from utils_common.results import make_trial_id
 
 
+def _dump_logs(run_paths: RunPaths):
+    """Print all log files from the run directory to stderr for debugging."""
+    log = structlog.get_logger("nrp_client")
+    for logfile in sorted(run_paths.logs.glob("*.log")):
+        try:
+            log.error(f"--- {logfile.name} ---\n{logfile.read_text()}")
+        except Exception:
+            pass
+
+
 def run_trial(parent_id: str = "", label: str = "") -> str:
     client_log = structlog.get_logger("nrp_client")
 
@@ -53,24 +63,32 @@ def run_trial(parent_id: str = "", label: str = "") -> str:
 
     start_time = timer()
 
-    nrp.initialize()
+    try:
+        nrp.initialize()
+    except Exception:
+        _dump_logs(run_paths)
+        raise
     client_log.debug("Nrp server initialized successfully")
 
     loop_start_time = timer()
     steps = master_config.simulation.sim_steps
     client_log.info(f"Start run loop. 1 trial ({steps} total iterations)")
 
-    it_step = max(15, int(steps / 100))
-    with tqdm(
-        total=steps,
-        desc=f"Simulation",
-        unit="iter",
-        leave=False,
-    ) as pbar_trial:
+    try:
+        it_step = max(15, int(steps / 100))
+        with tqdm(
+            total=steps,
+            desc=f"Simulation",
+            unit="iter",
+            leave=False,
+        ) as pbar_trial:
 
-        for i in [min(it_step, steps - i) for i in range(0, steps, it_step)]:
-            nrp.run_loop(i)
-            pbar_trial.update(i)
+            for i in [min(it_step, steps - i) for i in range(0, steps, it_step)]:
+                nrp.run_loop(i)
+                pbar_trial.update(i)
+    except Exception:
+        _dump_logs(run_paths)
+        raise
 
     loop_end_time = timer()
     total_loop_time = datetime.timedelta(seconds=loop_end_time - loop_start_time)

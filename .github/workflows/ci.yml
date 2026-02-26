@@ -35,9 +35,9 @@ jobs:
           context: .
           file: docker/Dockerfile
           target: dev
-          push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          build-args: |
+            UID=1001
+            GID=1001
 
   trial:
     name: 1-Trial Run
@@ -55,6 +55,9 @@ jobs:
           context: .
           file: docker/Dockerfile
           target: dev
+          build-args: |
+            UID=1001
+            GID=1001
           load: true
           tags: ${{ env.IMAGE_TAG }}
           cache-from: type=gha
