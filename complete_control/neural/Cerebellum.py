@@ -3,7 +3,6 @@ from pathlib import Path
 
 import numpy as np
 import structlog
-import tqdm
 from bsb import SimulationData, config, from_storage, get_simulation_adapter, options
 from bsb_nest.adapter import NestAdapter, NestResult
 from config.bsb_models import BSBConfigPaths
@@ -56,6 +55,7 @@ class Cerebellum:
         )
 
         self.forward_model = from_storage(str(paths.cerebellum_hdf5), self.comm)
+        # self.forward_model._storage.store_active_config(conf_forward) -> equivalent to manually substituting simulation
         self.forward_model.simulations[SIMULATION_NAME_IN_YAML] = (
             conf_forward.simulations[SIMULATION_NAME_IN_YAML]
         )
@@ -63,6 +63,7 @@ class Cerebellum:
 
         self.inverse_model = from_storage(str(paths.cerebellum_hdf5), self.comm)
         self.inverse_model.simulations[SIMULATION_NAME_IN_YAML] = (
+            # cannot be a subset of microzones_complete_nest, must be the entire simulation spec
             conf_inverse.simulations[SIMULATION_NAME_IN_YAML]
         )
         self.log.debug("loaded inverse model and its configuration")
@@ -99,25 +100,26 @@ class Cerebellum:
         adapter.connect_neurons(simulation_inv)
         self.log.debug("connected cerebellum neurons")
 
-        adapter.create_devices(simulation_forw)
-        adapter.create_devices(simulation_inv)
+        adapter.implement_components(simulation_forw)
+        adapter.implement_components(simulation_inv)
         self.log.debug("created cerebellum devices")
 
         # Forward Model
         fwd = adapter.simdata[simulation_forw]
         inv = adapter.simdata[simulation_inv]
+
         self.populations.forw_mf = self._find_popview(fwd, "mossy_fibers")
         self.populations.forw_glom = self._find_popview(fwd, "glomerulus")
         self.populations.forw_grc = self._find_popview(fwd, "granule_cell")
         self.populations.forw_goc = self._find_popview(fwd, "golgi_cell")
         self.populations.forw_bc = self._find_popview(fwd, "basket_cell")
         self.populations.forw_sc = self._find_popview(fwd, "stellate_cell")
-        self.populations.forw_io_p = self._find_popview(fwd, "io_plus")
-        self.populations.forw_io_n = self._find_popview(fwd, "io_minus")
-        self.populations.forw_dcnp_p = self._find_popview(fwd, "dcn_p_plus")
-        self.populations.forw_dcnp_n = self._find_popview(fwd, "dcn_p_minus")
-        self.populations.forw_pc_p = self._find_popview(fwd, "purkinje_cell_plus")
-        self.populations.forw_pc_n = self._find_popview(fwd, "purkinje_cell_minus")
+        self.populations.forw_io_p = self._find_popview(fwd, "io", "plus")
+        self.populations.forw_io_n = self._find_popview(fwd, "io", "minus")
+        self.populations.forw_dcnp_p = self._find_popview(fwd, "dcn_p", "plus")
+        self.populations.forw_dcnp_n = self._find_popview(fwd, "dcn_p", "minus")
+        self.populations.forw_pc_p = self._find_popview(fwd, "purkinje_cell", "plus")
+        self.populations.forw_pc_n = self._find_popview(fwd, "purkinje_cell", "minus")
 
         # Inverse Model
         self.populations.inv_mf = self._find_popview(inv, "mossy_fibers")
@@ -126,25 +128,35 @@ class Cerebellum:
         self.populations.inv_goc = self._find_popview(inv, "golgi_cell")
         self.populations.inv_bc = self._find_popview(inv, "basket_cell")
         self.populations.inv_sc = self._find_popview(inv, "stellate_cell")
-        self.populations.inv_io_p = self._find_popview(inv, "io_plus")
-        self.populations.inv_io_n = self._find_popview(inv, "io_minus")
-        self.populations.inv_dcnp_p = self._find_popview(inv, "dcn_p_plus")
-        self.populations.inv_dcnp_n = self._find_popview(inv, "dcn_p_minus")
-        self.populations.inv_pc_p = self._find_popview(inv, "purkinje_cell_plus")
-        self.populations.inv_pc_n = self._find_popview(inv, "purkinje_cell_minus")
+        self.populations.inv_io_p = self._find_popview(inv, "io", "plus")
+        self.populations.inv_io_n = self._find_popview(inv, "io", "minus")
+        self.populations.inv_dcnp_p = self._find_popview(inv, "dcn_p", "plus")
+        self.populations.inv_dcnp_n = self._find_popview(inv, "dcn_p", "minus")
+        self.populations.inv_pc_p = self._find_popview(inv, "purkinje_cell", "plus")
+        self.populations.inv_pc_n = self._find_popview(inv, "purkinje_cell", "minus")
         self.log.debug(f"all populations correctly retrieved")
 
         self._update_weight_plastic_pops(weights)
 
-    def _find_popview(self, simdata, model_name):
-        return PopView(
-            next(
+    def _find_popview(self, simdata, model_name, label=None):
+        try:
+            gids = next(
                 gids
                 for neuron_model, gids in simdata.populations.items()
                 if neuron_model.name == model_name
-            ),
-            to_file=True,
-        )
+            )
+            if label is not None:
+                ps = next(
+                    ps
+                    for neuron_model, ps in simdata.placement.items()
+                    if neuron_model.name == model_name
+                )
+                indices = ps.get_labelled([label])
+                gids = gids[indices]
+            return PopView(gids, to_file=True)
+        except Exception:
+            self.log.error(f"Could not retrieve {model_name}[{label}]. Terminating...")
+            raise
 
     def get_plastic_connections(self):
         conns = {}
