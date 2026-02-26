@@ -58,4 +58,20 @@ jobs:
           load: true
           tags: ${{ env.IMAGE_TAG }}
           cache-from: type=gha
-      - run: docker run --rm ${{ env.IMAGE_TAG }} python /sim/controller/complete_control/run_trials.py 1
+      - run: |
+          mkdir -p results
+          docker run --rm -v ${{ github.workspace }}/results:/sim/controller/runs ${{ env.IMAGE_TAG }} python /sim/controller/complete_control/run_trials.py 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trial-results
+          path: results/
+          retention-days: 21
+      - name: Add plots to job summary
+        if: always()
+        run: |
+          echo "## Trial Results" >> $GITHUB_STEP_SUMMARY
+          for img in $(find results -name '*.png' | sort); do
+            echo "### $(basename $img .png)" >> $GITHUB_STEP_SUMMARY
+            echo "![$(basename $img)](data:image/png;base64,$(base64 -w 0 $img))" >> $GITHUB_STEP_SUMMARY
+          done
