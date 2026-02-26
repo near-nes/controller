@@ -44,8 +44,8 @@ def run_trial(parent_id: str = "", label: str = "") -> str:
     nrp = NrpCore(
         "0.0.0.0:5679",
         "/sim/controller/",
-        simconfig_path,
-        log_output=run_paths.logs / "nrpcore_log.log",
+        log_output="nrpcore_log.log",
+        args=f"--logdir {run_paths.logs}",
     )
 
     client_log.debug(f"Starting NRP, logs in {run_paths.logs / 'nrpcore_log.log'}")
