@@ -70,7 +70,7 @@ if [ "$SIMULATION_MODE" = "dev" ]; then
 
         # Adjust ownership of internal directories
         echo "Adjusting ownership of internal directories..."
-        chown -R "$DIR_UID:$DIR_GID" "$VENV_PATH" "/home/$USERNAME" "$SHARED_DATA_DIR" "$NEST_MODULE_PATH"
+        chown -R "$DIR_UID:$DIR_GID" "$VENV_PATH" "/home/$USERNAME" "$SHARED_DATA_DIR" "$NEST_MODULE_PATH" "$INSTALL_DIR"
 
         echo "$USERNAME user adjusted to UID: $DIR_UID, GID: $DIR_GID"
     else
