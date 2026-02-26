@@ -72,11 +72,4 @@ jobs:
             results/
             !results/**/data/
           retention-days: 21
-      - name: Add plots to job summary
-        if: always()
-        run: |
-          echo "## Trial Results" >> $GITHUB_STEP_SUMMARY
-          for img in $(find results -name '*.png' | sort); do
-            echo "### $(basename $img .png)" >> $GITHUB_STEP_SUMMARY
-            echo "![$(basename $img)](data:image/png;base64,$(base64 -w 0 $img))" >> $GITHUB_STEP_SUMMARY
-          done
+
