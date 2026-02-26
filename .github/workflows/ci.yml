@@ -7,8 +7,55 @@ on:
   push:
     branches: [main]
 
+env:
+  IMAGE_TAG: simulation:hpc
+
 jobs:
-  placeholder:
+  lint:
+    name: Black Formatter
     runs-on: ubuntu-latest
     steps:
-      - run: echo "CI workflow placeholder"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install black
+      - run: black --check --exclude '/(submodules|nrp-core)/' .
+
+  build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: hpc
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  trial:
+    name: 1-Trial Run
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: docker/setup-buildx-action@v3
+      # Rebuild from GHA cache and load into local docker daemon
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: hpc
+          load: true
+          tags: ${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+      - run: docker run --rm ${{ env.IMAGE_TAG }} python /sim/controller/complete_control/run_trials.py 1
