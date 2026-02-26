@@ -44,6 +44,7 @@ def run_trial(parent_id: str = "", label: str = "") -> str:
     nrp = NrpCore(
         "0.0.0.0:5679",
         "/sim/controller/",
+        simconfig_path,
         log_output="nrpcore_log.log",
         args=f"--logdir {run_paths.logs}",
     )
