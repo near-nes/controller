@@ -90,7 +90,7 @@ class RunPaths:
                 video_frames,
                 logs_dir,
             ]:
-                dir_path.mkdir(parents=True, exist_ok=True, mode=0o770)
+                dir_path.mkdir(parents=True, exist_ok=True, mode=0o775)
 
         return cls(
             run=run_dir,
