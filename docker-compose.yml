@@ -9,6 +9,9 @@ x-simulation-base: &simulation-base
   stdin_open: true
   tty: true
   environment:
+    UID: ${UID}
+    GID: ${GID}
+    ENABLE_VNC: ${ENABLE_VNC:-false}
     TZ: ${TZ:-Europe/Rome}
     PYNEST_QUIET: 0
   ports:
