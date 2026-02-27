@@ -355,3 +355,4 @@ ENV SIMULATION_MODE=hpc
 ENV BSB_NETWORK_FILE=/tmp/cerebellum_plastic_base.hdf5
 COPY . /sim/controller
 RUN chown -R $USERNAME /sim/controller
+# RUN chmod -R a+rwX /sim
