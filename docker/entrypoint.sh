@@ -86,10 +86,7 @@ else
     echo "Uncompressed network file ${BSB_NETWORK_FILE} already exists. Skipping decompression."
 fi
 
-# --- Set Environment Variables for Final Command ---
-# Ensure these are set *before* gosu executes the final command
-# so they are inherited by the user's environment.
-
+# --- Environment Summary ---
 echo "Final LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 echo "Final PATH: $PATH"
 echo "Final PYTHONPATH: $PYTHONPATH"
@@ -99,20 +96,16 @@ if [ "$SIMULATION_MODE" = "hpc" ]; then
     exec "$@"
 fi
 
-
-# --- Prerequisite Scripts ---
-# Start VNC in the background AS THE USER first using the dedicated script.
-echo "Entrypoint: Launching VNC background process via gosu..."
-# Export variables needed by the background script
-export VNC_DISPLAY VNC_PASSWORD HOME=/home/$USERNAME
-gosu "$USERNAME" /usr/local/bin/start-vnc.sh
-
-echo "Entrypoint: Executing custom command as user '$USERNAME': $@"
+# --- VNC (optional) ---
+if [ "${ENABLE_VNC:-false}" = "true" ]; then
+    echo "Entrypoint: Launching VNC background process via gosu..."
+    export VNC_DISPLAY VNC_PASSWORD HOME=/home/$USERNAME
+    gosu "$USERNAME" /usr/local/bin/start-vnc.sh
+fi
 
 echo "----------------------------------------"
 echo "Switching to user $USERNAME (UID: $USER_ID_TO_USE, GID: $GROUP_ID_TO_USE) and executing command: $@"
 echo "----------------------------------------"
-
 
 if [ "$NEST_MODE" = "nest-server" ]; then
     export NEST_SERVER_HOST="${NEST_SERVER_HOST:-0.0.0.0}"
@@ -148,7 +141,3 @@ else
     echo "Running passed command: $@"
     exec gosu "$USERNAME" "$@"
 fi
-exec gosu "$USERNAME" "$@"
-# exec gosu "$USERNAME" bash -c 'run_as_user "$@"' bash "$@"
-# python controller/complete_control/brain.py
-# bash --rcfile <(python controller/complete_control/brain.py)
