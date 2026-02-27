@@ -1,12 +1,19 @@
 import nest
 import numpy as np
 import json
-from validation_synapse_sinexp import plot_synaptic_weight, reformat_weights, plot_synaptic_matrix, correct_spike_times, plot_complex_spike
+from validation_synapse_sinexp import (
+    plot_synaptic_weight,
+    reformat_weights,
+    plot_synaptic_matrix,
+    correct_spike_times,
+    plot_complex_spike,
+)
 import sys
+
 
 def test_complex_Gr_spike_sinexp():
     TEST_NUMBER = 4
-    f = open('tests_plasticity/eglif_params.json')
+    f = open("tests_plasticity/eglif_params.json")
     params = json.load(f)
     f.close()
 
@@ -20,16 +27,20 @@ def test_complex_Gr_spike_sinexp():
 
     N = 3
     M = 5
-    IO = nest.Create("eglif_io_nestml", N) # IO
-    #nest.SetStatus(IO, IO_params)
-    PC = nest.Create("eglif_pc_nestml", N) # PC
+    IO = nest.Create("eglif_io_nestml", N)  # IO
+    # nest.SetStatus(IO, IO_params)
+    PC = nest.Create("eglif_pc_nestml", N)  # PC
     nest.SetStatus(PC, PC_params)
-    Gr = nest.Create("eglif_cond_alpha_multisyn", M) # Gr
-    #nest.SetStatus(Gr, GR_params) # If used, Gr does not spike
+    Gr = nest.Create("eglif_cond_alpha_multisyn", M)  # Gr
+    # nest.SetStatus(Gr, GR_params) # If used, Gr does not spike
 
-    complex_spike_time= [997]
-    complex_spike_gen = nest.Create("spike_generator", {"spike_times": complex_spike_time})
-    nest.Connect(complex_spike_gen, IO, "all_to_all", {"weight": 1000, "receptor_type": 1})
+    complex_spike_time = [997]
+    complex_spike_gen = nest.Create(
+        "spike_generator", {"spike_times": complex_spike_time}
+    )
+    nest.Connect(
+        complex_spike_gen, IO, "all_to_all", {"weight": 1000, "receptor_type": 1}
+    )
 
     # Set threshold of IOs and GrCs to 0.0 mV to avoid autonomous firing
     nest.SetStatus(IO, {"V_th": 0.0})
@@ -38,25 +49,25 @@ def test_complex_Gr_spike_sinexp():
     # Connections
     nest.Connect(IO, PC, "one_to_one", syn_spec={"receptor_type": 5})
 
-
     wr = nest.Create("weight_recorder")
-    nest.CopyModel("stdp_synapse_sinexp", "my_stdp_synapse_rec", {"weight_recorder": wr,"t_0":150})
-    conn_spec_dict = {'rule': 'fixed_indegree', 'indegree': 4}
-    syn_spec_dict = {'synapse_model': "my_stdp_synapse_rec", "receptor_type": 1}
-    nest.Connect(Gr, PC, conn_spec = conn_spec_dict, syn_spec = syn_spec_dict)
+    nest.CopyModel(
+        "stdp_synapse_sinexp",
+        "my_stdp_synapse_rec",
+        {"weight_recorder": wr, "t_0": 150},
+    )
+    conn_spec_dict = {"rule": "fixed_indegree", "indegree": 4}
+    syn_spec_dict = {"synapse_model": "my_stdp_synapse_rec", "receptor_type": 1}
+    nest.Connect(Gr, PC, conn_spec=conn_spec_dict, syn_spec=syn_spec_dict)
 
     cf_recorder = nest.Create("spike_recorder", {"record_to": "memory"})
-    PC_recorder = nest.Create("spike_recorder",  {"record_to": "memory"})
-    Gr_recorder = nest.Create("spike_recorder",  {"record_to": "memory"})
+    PC_recorder = nest.Create("spike_recorder", {"record_to": "memory"})
+    Gr_recorder = nest.Create("spike_recorder", {"record_to": "memory"})
 
     nest.Connect(IO, cf_recorder)
     nest.Connect(PC, PC_recorder)
     nest.Connect(Gr, Gr_recorder)
 
-
-
     pf_pc_conns = nest.GetConnections(synapse_model="my_stdp_synapse_rec")
-
 
     weights = []
     for i in range(1000):
@@ -65,9 +76,32 @@ def test_complex_Gr_spike_sinexp():
 
     weight_matrix = reformat_weights(weights)
 
-    corrected_cf_tms, cf_evs, corrected_PC_tms, PC_evs, PC_complex_tms, PC_complex_evs, corrected_gr_spikes, Gr_evs = correct_spike_times(cf_recorder, PC_recorder, Gr_recorder)
+    (
+        corrected_cf_tms,
+        cf_evs,
+        corrected_PC_tms,
+        PC_evs,
+        PC_complex_tms,
+        PC_complex_evs,
+        corrected_gr_spikes,
+        Gr_evs,
+    ) = correct_spike_times(cf_recorder, PC_recorder, Gr_recorder)
 
     data = nest.GetStatus(wr)[0]
-    plot_complex_spike(pf_pc_conns, data, weight_matrix, IO, PC, Gr, corrected_cf_tms, cf_evs, corrected_gr_spikes, Gr_evs, corrected_PC_tms, PC_evs, TEST_NUMBER)
+    plot_complex_spike(
+        pf_pc_conns,
+        data,
+        weight_matrix,
+        IO,
+        PC,
+        Gr,
+        corrected_cf_tms,
+        cf_evs,
+        corrected_gr_spikes,
+        Gr_evs,
+        corrected_PC_tms,
+        PC_evs,
+        TEST_NUMBER,
+    )
 
-    assert (np.all(weight_matrix == 0.14 ))
+    assert np.all(weight_matrix == 0.14)
