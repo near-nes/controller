@@ -56,18 +56,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ARG UID=1000
-ARG GID=1000
+ENV BUILD_UID=1000
+ENV BUILD_GID=1000
 ENV USERNAME=simuser
-RUN groupadd --gid $GID $USERNAME && \
-    useradd --uid $UID --gid $GID --create-home --shell /bin/bash $USERNAME \
-    && echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+RUN set -eux; \
+    if ! getent group ${BUILD_GID} >/dev/null; then \
+    groupadd --gid ${BUILD_GID} "$USERNAME"; \
+    fi; \
+    useradd --uid ${BUILD_UID} --gid ${BUILD_GID} --create-home --shell /bin/bash "$USERNAME"; \
+    echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN mkdir /sim && chown $USERNAME:$USERNAME /sim
 
 USER $USERNAME
 ARG PYTHON_MAJOR
 ARG PYTHON_MINOR
-ENV USERNAME=simuser
 
 
 WORKDIR /sim
@@ -218,14 +220,14 @@ RUN mkdir -p /tmp/nrp-core-src
 ENV CMAKE_CACHE_FILE=${NRP_SRC_DIR}/.ci/cmake_cache/t3_4.cmake
 # TODO: copy source files more elegant, but without breaking the cache
 # Copying the root (.) immediatly breaks the cache
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/src ${NRP_SRC_DIR}/src
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/docs ${NRP_SRC_DIR}/docs
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/examples ${NRP_SRC_DIR}/examples
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/cmake ${NRP_SRC_DIR}/cmake
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/CMakeLists.txt ${NRP_SRC_DIR}/CMakeLists.txt
-COPY --chown=${USERNAME}:${USERNAME} docker/nrp_t3_4.cmake ${CMAKE_CACHE_FILE}
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/.ci/11-prepare-build.sh ${NRP_SRC_DIR}/.ci/11-prepare-build.sh
-COPY --chown=${USERNAME}:${USERNAME} nrp-core/.ci/20-build.sh ${NRP_SRC_DIR}/.ci/20-build.sh
+COPY --chown=${USERNAME} nrp-core/src ${NRP_SRC_DIR}/src
+COPY --chown=${USERNAME} nrp-core/docs ${NRP_SRC_DIR}/docs
+COPY --chown=${USERNAME} nrp-core/examples ${NRP_SRC_DIR}/examples
+COPY --chown=${USERNAME} nrp-core/cmake ${NRP_SRC_DIR}/cmake
+COPY --chown=${USERNAME} nrp-core/CMakeLists.txt ${NRP_SRC_DIR}/CMakeLists.txt
+COPY --chown=${USERNAME} docker/nrp_t3_4.cmake ${CMAKE_CACHE_FILE}
+COPY --chown=${USERNAME} nrp-core/.ci/11-prepare-build.sh ${NRP_SRC_DIR}/.ci/11-prepare-build.sh
+COPY --chown=${USERNAME} nrp-core/.ci/20-build.sh ${NRP_SRC_DIR}/.ci/20-build.sh
 
 RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-build.sh
 
@@ -270,6 +272,12 @@ COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=builder ${CEREBELLUM_PATH} ${CEREBELLUM_PATH}
 COPY --from=core_reqs ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=planner_reqs ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+# install dirs world-readable (venv writable so users can pip install)
+USER 0
+RUN chmod -R a+rX ${INSTALL_DIR} ${CEREBELLUM_PATH} \
+    && chmod -R a+rwX ${VIRTUAL_ENV}
+USER $USERNAME
+ENV MPLCONFIGDIR=/tmp/matplotlib
 # openMPI needs this if no ssh/rsh available
 ENV OMPI_MCA_plm=^rsh
 
@@ -346,5 +354,4 @@ ENV SIMULATION_MODE=hpc
 # On HPC do not mount anythin on top of artifacts folder, so that the archive is not overwritten
 ENV BSB_NETWORK_FILE=/tmp/cerebellum_plastic_base.hdf5
 COPY . /sim/controller
-RUN chown -R simuser:simuser /sim/controller
-RUN chmod -R a+rwX /sim
+RUN chown -R $USERNAME /sim/controller
