@@ -12,5 +12,5 @@ def status_function(joint_pos_rad):
     ret = JsonRawData()
     ret.data["test_data"] = joint_pos_rad.data.value
 
-    # can be get from run_loop function: 
+    # can be get from run_loop function:
     return True, [ret]

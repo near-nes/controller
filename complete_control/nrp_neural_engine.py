@@ -17,7 +17,6 @@ from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 from utils_common.profile import Profile
 
-
 NANO_SEC = 1e-9
 
 

@@ -21,7 +21,7 @@ from .plant_models import JointState, JointStates, PlantPlotData
 
 plt.rcParams.update({"font.size": 15})
 
-(SHOULDER, ELBOW, HAND) = range(3)
+SHOULDER, ELBOW, HAND = range(3)
 log = structlog.get_logger(__name__)
 
 
@@ -184,7 +184,9 @@ def plot_joint_space_animated(
     ax.set_title("Joint Space Position")
     ax.set_xlim(x.min(), x.max())
     ax.set_ylim(0, np.degrees(2.8))
-    ax.secondary_yaxis("right", functions=(np.radians, np.degrees)).set_ylabel("Joint Angle (rad)")
+    ax.secondary_yaxis("right", functions=(np.radians, np.degrees)).set_ylabel(
+        "Joint Angle (rad)"
+    )
 
     legend_elements = [
         Line2D(

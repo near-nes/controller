@@ -459,7 +459,7 @@ def plot_overlay(
 
     fig_overl, ax = plt.subplots(1, 1, figsize=(10, 6), sharex=True)
 
-    (neural_concat, ref_mc, time_vect) = extract_neural_and_merge(metas)
+    neural_concat, ref_mc, time_vect = extract_neural_and_merge(metas)
 
     for file_prefix in populations_to_overlay:
         plot_name_t = file_prefix
