@@ -66,9 +66,7 @@ def main():
     script_dir = Path(__file__).parent.resolve()
     os.chdir(script_dir)
     log.info(f"Working directory: {os.getcwd()}")
-    log.info(
-        f"Starting NRP simulation series of {args.num_trials} trials."
-    )
+    log.info(f"Starting NRP simulation series of {args.num_trials} trials.")
 
     for i in range(args.num_trials):
         try:
