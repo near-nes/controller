@@ -1,4 +1,4 @@
-from complete_control.neural.NestClient import NESTClient
+# from complete_control.neural.NestClient import NESTClient
 
 _nest = None
 _initialized = False
@@ -8,8 +8,9 @@ def initialize_nest(coordinator_type=None):
     global _nest, _initialized
     if _initialized:
         return  # Already initialized
+    import nest
 
-    _nest = NESTClient()
+    _nest = nest
 
     _initialized = True
 

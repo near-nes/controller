@@ -2,7 +2,6 @@
 
 import os
 
-import nest
 import structlog
 from config.MasterParams import MasterParams
 from config.paths import COMPLETE_CONTROL, RunPaths
