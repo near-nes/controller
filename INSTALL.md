@@ -2,12 +2,11 @@
 
 This project is currently based on six main libraries
 - [NEST simulator](https://github.com/nest/nest-simulator/releases/tag/v3.7): this is our neural simulator
-- [MUSIC interface](https://github.com/INCF/MUSIC): one of two possible coordinators that enable communication between NEST and the physics simulation
 - cerebellum model: details population and connectivity patterns in the cerebellum
 - [BSB framework](https://bsb.readthedocs.io/en/latest/index.html): builds cerebellar network based on the model recipe
 - [pyBullet simulator](https://github.com/bulletphysics/bullet3): the physics simulator which simulates the robotic plant
 - [cerebellar models](https://github.com/dbbs-lab/cerebellar-models/tree/feature/plasticity): the `bsb` configuration tree that contains a plastic model of the cerebellum
-- [NRP-core](https://bitbucket.org/hbpneurorobotics/nrp-core/src/master/): the second possible coordinator
+- [NRP-core](https://bitbucket.org/hbpneurorobotics/nrp-core/src/master/): the coordinator and data manager between the two simulations
 
 and uses, in addition to our own code, a few supporting repos:
 - pyBullet [muscle simulation](https://github.com/UM-Projects-MZ/bullet_muscle_sim)
