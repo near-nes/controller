@@ -83,7 +83,6 @@ RUN pip install --upgrade pip setuptools wheel packaging -c /tmp/constraints.txt
 ENV INSTALL_DIR=/sim/install
 ENV DEPS_DIR=/sim/dependencies
 ENV NEST_INSTALL_DIR=$INSTALL_DIR/nest
-# ENV MUSIC_INSTALL_DIR=$INSTALL_DIR/music  # MUSIC deprecated
 ENV OMPI_INSTALL_DIR=$INSTALL_DIR/openmpi
 
 ENV CONTROLLER_DIR=/sim/controller
@@ -93,9 +92,8 @@ ENV NEST_PYTHON_MODULE_PATH=${NEST_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTH
 RUN mkdir -p $CONTROLLER_DIR $SHARED_DATA_DIR $NEST_MODULE_PATH
 
 ENV CEREBELLUM_PATH=/sim/cerebellum
-# ENV LD_LIBRARY_PATH="${MUSIC_INSTALL_DIR}/lib"  # MUSIC deprecated
 
-RUN mkdir -p $INSTALL_DIR $DEPS_DIR $NEST_INSTALL_DIR  # $MUSIC_INSTALL_DIR removed (MUSIC deprecated)
+RUN mkdir -p $INSTALL_DIR $DEPS_DIR $NEST_INSTALL_DIR
 
 # openmpi and nest
 FROM base AS builder
@@ -154,15 +152,6 @@ ENV CFLAGS=
 
 WORKDIR $DEPS_DIR
 
-####################### MUSIC (DEPRECATED) #######################
-# RUN git clone https://github.com/INCF/MUSIC \
-#     && cd MUSIC \
-#     && git checkout 6d12edf7094e1dbb473dd55f6fcbd0825f30b811 \
-#     && ./autogen.sh \
-#     && ./configure --prefix=$MUSIC_INSTALL_DIR --with-python=$VIRTUAL_ENV/bin/python \
-#     && make -j$(nproc) \
-#     && make install
-
 ####################### NEST 3.9 #######################
 ENV NEST_VERSION=3.9
 
@@ -175,7 +164,6 @@ RUN mkdir -p nest-build \
     && cd nest-build \
     && cmake -DCMAKE_INSTALL_PREFIX:PATH=$NEST_INSTALL_DIR \
     -Dwith-mpi=ON \
-    # -Dwith-music=$MUSIC_INSTALL_DIR  # MUSIC deprecated \
     -Dwith-python=ON \
     # just to make extra extra sure
     -DPYTHON_EXECUTABLE=$VIRTUAL_ENV/bin/python \
