@@ -118,17 +118,6 @@ class BrainParams(BaseModel, frozen=True):
     first_id_sens_neurons: int = 0  # not sure why we need this.
 
 
-class MusicParams(BaseModel, frozen=True):
-    const: float = 1e-6  # Constant to subtract to avoid rounding errors (ms)
-    input_latency: float = 0.0001  # seconds
-    # neural side ports
-    port_motcmd_out: str = "mot_cmd_out"
-    port_fbk_in: str = "fbk_in"
-    # robotic side ports
-    port_motcmd_in: str = "mot_cmd_in"
-    port_fbk_out: str = "fbk_out"
-
-
 class PlottingParams(BaseModel, frozen=True):
     PLOT_AFTER_SIMULATE: bool = True
     CAPTURE_VIDEO: list[str] = []  # ["x", "y", "z"]

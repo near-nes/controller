@@ -10,7 +10,6 @@ from .core_models import (
     BrainParams,
     ExperimentParams,
     MetaInfo,
-    MusicParams,
     PlottingParams,
     SimulationParams,
 )
@@ -30,7 +29,6 @@ class MasterParams(BaseModel):
 
     USE_CEREBELLUM: bool = True
     GUI_PYBULLET: bool = False
-    USE_MUSIC: bool = False
     SAVE_WEIGHTS_CEREB: bool = True
 
     NJT: int = 1
@@ -39,7 +37,6 @@ class MasterParams(BaseModel):
     simulation: SimulationParams = Field(default_factory=lambda: SimulationParams())
     experiment: ExperimentParams = Field(default_factory=lambda: ExperimentParams())
     brain: BrainParams = Field(default_factory=lambda: BrainParams())
-    music: MusicParams = Field(default_factory=lambda: MusicParams())
     bsb_config_paths: BSBConfigPaths = Field(default_factory=lambda: BSBConfigPaths())
 
     @computed_field
@@ -50,11 +47,7 @@ class MasterParams(BaseModel):
     @computed_field
     @property
     def total_num_virtual_procs(self) -> int:
-        if self.USE_MUSIC:
-            # https://github.com/nest/nest-simulator/issues/3446
-            return None
-        else:
-            return int(os.getenv("NPROC", 1))
+        return int(os.getenv("NPROC", 1))
 
     @computed_field
     @property

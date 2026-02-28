@@ -23,7 +23,6 @@ class SensoryNeuron:
         bas_rate=0.0,
         kp=1.0,
         res=1,
-        music_index_strategy=None,
     ):
 
         self.numNeurons = numNeurons
@@ -40,17 +39,9 @@ class SensoryNeuron:
         self.res = res
         self.rng = np.random.default_rng(SEED)
 
-        if music_index_strategy is not None:
-            # using MUSIC
-            self.outPort = []
-            self.music_index_strategy = music_index_strategy
-
     @property
     def spike(self):
         return self._spike
-
-    def connect(self, port):
-        self.outPort = port
 
     # Update theoretical spike rate based on input signal, and generate spikes
     def update(self, signal, simTime):
@@ -60,13 +51,6 @@ class SensoryNeuron:
         for i in range(self.numNeurons):
             if (nEv[i]) > 0:
                 self.spike.append([simTime, self.pop[i]])
-                if self.outPort:
-                    self.outPort.insertEvent(
-                        simTime, self.pop[i], self.music_index_strategy
-                    )
-                else:
-                    # print("Sensory neuron "+str(self.pop)+" not connected!")
-                    pass
 
     def lam(self, signal):
         if (self.pos and signal < 0) or (not self.pos and signal >= 0):

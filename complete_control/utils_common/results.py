@@ -46,7 +46,7 @@ def read_weights(master_params: MasterParams) -> list[Path] | None:
     with open(rp.params_json, "r") as f:
         par = MasterParams.model_validate_json(f.read())
 
-    if not par.USE_CEREBELLUM or not (par.USE_MUSIC == master_params.USE_MUSIC):
+    if not par.USE_CEREBELLUM:
         raise ValueError(f"specified run unsuitable for param loading")
 
     neural = res.load_neural()

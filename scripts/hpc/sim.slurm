@@ -13,14 +13,17 @@ export OMP_NUM_THREADS=7
 module purge
 module load openmpi/4.1.6--gcc--12.2.0
 
-mpirun -np 7 singularity exec \
+singularity exec \
     --bind ./scratch:/scratch_local \
     --bind ./results:/sim/controller/runs \
     --bind ./artifacts:/sim/controller/artifacts \
     --bind ./tmp:/tmp \
-    sim.sif/ music /sim/controller/complete_control/complete.music
+    sim.sif python /sim/controller/complete_control/nrp_start_sim.py
+
+# MUSIC deprecated - previously used:
+# mpirun -np 7 singularity exec ... sim.sif/ music /sim/controller/complete_control/complete.music
 
 # --bind ./scratch:/scratch_local \ openMPI coordinates using files in here
-# --bind ./results:/sim/controller/runs \ 
+# --bind ./results:/sim/controller/runs \
 # --bind ./artifacts:/sim/controller/artifacts \ for base hdf5 network uncompressing
 # --bind ./tmp:/tmp \ openMPI coordinates using files in here (i think)

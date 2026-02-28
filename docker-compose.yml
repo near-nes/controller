@@ -25,15 +25,6 @@ services:
     image: simulation:dev
     command: bash
 
-  simulation-music:
-    <<: *simulation-base
-    image: simulation:music
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-      target: hpc
-    command: gosu simuser mpirun -np 5 music /sim/controller/complete_control/complete.music
-
   simulation-nrp:
     <<: *simulation-base
     image: simulation:nrp
