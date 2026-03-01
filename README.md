@@ -4,19 +4,12 @@ This project involves multiple codebases interacting. In an attempt to make the 
 
 This branch of the repository features the core code needed to run simulations of reaching tasks on a virtual robotic arm driven by a closed-loop cerebellar controller. Various sub-modules are implemented in different repos: you'll need to clone all gitmodules (`git submodule update --init --recursive`) to run all possible configurations.
 
-As the project involves multiple simulators, the interaction between them is governed by a *coordinator*. We provide two possible coordinators: **MUSIC** and **NRP**. Because of the very different natures of the two, it may be useful to understand basic data and control flow in each, so we outline it here.
+As the project involves multiple simulators, the interaction between them is governed by a *coordinator*. We used to support two possible coordinators: **MUSIC** and **NRP**, but we've now deprecated MUSIC and only focus on NRP.
 
-## MUSIC - Deprecated
-
-Although basic usage still likely works, using MUSIC is deprecated. Please use NRP instead.
-
-MUSIC is an API that allows data exchange between simulators, implemented with MPI primitives. As it only focuses on data exchange (and between-process coordination), the main simulation loop is explicit and out of MUSIC control. Every MUSIC run is an MPI run (in fact, you run music directly with `mpirun`). NEST provides strong integration with MUSIC, so there are few explicit MUSIC calls in our neural-side implementation, which instead uses "MUSIC proxies", neuron models with MUSIC calls inside them. The robotic side, instead, needs explicit MUSIC calls.
-
-The main MUSIC configuration file is `complete_control/complete.music`. It defines the two Python scripts containing the two simulations to be synchronized by MUSIC. The NEST simulation is run by `complete_control/music_start_sim.py` and the PyBullet simulation by `complete_control/receiver_plant.py`. The file `./complete_control/complete.music` can be modified to allocate the desired number of slots (i.e. MPI procs) to both the controller script and the plant one. The simulation can be started by running: `mpirun -np <tot_number_procs> music /sim/controller/complete_control/complete.music` from `./complete_control`. The value of the -np parameter must correspond to the configuration file
 
 ## NRP
 
-NRP is a fully-fledged simulation coordinator, which expects simulation specifications (called "engines") to implement specific interfaces. Its configuration is `nrp_simulation_config_nest_docker_compose.json`, where you can find files for the two simulations: `nrp_neural_engine.py` and `nrp_bullet_engine.py`. As the loop component is inside the NRP, these files offer only single step functions. 
+NRP is a simulation coordinator, which expects simulation specifications (called "engines") to implement specific interfaces. Its configuration is replicated in a pydantic model in `complete_control/config/nrp_sim_config.py`, where you can find pointers to the two simulations: `nrp_neural_engine.py` and `nrp_bullet_engine.py`. As the loop component is inside the NRP, these files offer only single step functions. 
 
 ## Simulations
 
@@ -39,10 +32,6 @@ Quick notes before a more complete documentation:
     - create the singularity container: `singularity build sim.sif docker-archive://sim.tar`
 - create necessary folders **in HPC** for mounts (consider that the singularity container is fully read-only) `mkdir scratch results tmp`, then keep reading depending on what coordinator you're using.
 
-### MUSIC and MPI
-- load openmpi module, export PMIX_MCA_gds=hash to [suppress PMIX warning](https://docs.hpc.cineca.it/services/singularity.html#parallel-mpi-container)
-- allocate what you need: `salloc --ntasks-per-node=7 --mem=23000MB --account=<your_account_name> --time=01:00:00 --partition=g100_usr_interactive`
-- run the simulation: `mpirun -np 7 singularity exec --bind ./scratch:/scratch_local --bind ./results:/sim/controller/runs --bind ./artifacts:/sim/controller/artifacts --bind ./tmp:/tmp sim.sif/ music /sim/controller/complete_control/complete.music`
 
 ### NRP without MPI
 - edit `scripts/hpc/batch_job.sh` to make sure you have a valid resource allocation and run command
@@ -52,3 +41,16 @@ Quick notes before a more complete documentation:
 
 Optionally, mount (`--bind`) `complete_control` for "live" code changes. If paired with vscode remote, you can almost have a fully interactive development session on the cluster... Not sure if there's a way to do client vscode -> cineca HPC -> devcontainer, might check [this](https://github.com/microsoft/vscode-remote-release/issues/3066#issuecomment-1019500216)
 
+
+## MUSIC - Deprecated
+
+Although basic usage still likely works, using MUSIC is deprecated. Please use NRP instead.
+
+MUSIC is an API that allows data exchange between simulators, implemented with MPI primitives. As it only focuses on data exchange (and between-process coordination), the main simulation loop is explicit and out of MUSIC control. Every MUSIC run is an MPI run (in fact, you run music directly with `mpirun`). NEST provides strong integration with MUSIC, so there are few explicit MUSIC calls in our neural-side implementation, which instead uses "MUSIC proxies", neuron models with MUSIC calls inside them. The robotic side, instead, needs explicit MUSIC calls.
+
+The main MUSIC configuration file is `complete_control/complete.music`. It defines the two Python scripts containing the two simulations to be synchronized by MUSIC. The NEST simulation is run by `complete_control/music_start_sim.py` and the PyBullet simulation by `complete_control/receiver_plant.py`. The file `./complete_control/complete.music` can be modified to allocate the desired number of slots (i.e. MPI procs) to both the controller script and the plant one. The simulation can be started by running: `mpirun -np <tot_number_procs> music /sim/controller/complete_control/complete.music` from `./complete_control`. The value of the -np parameter must correspond to the configuration file
+
+### MUSIC and MPI - Deprecated
+- load openmpi module, export PMIX_MCA_gds=hash to [suppress PMIX warning](https://docs.hpc.cineca.it/services/singularity.html#parallel-mpi-container)
+- allocate what you need: `salloc --ntasks-per-node=7 --mem=23000MB --account=<your_account_name> --time=01:00:00 --partition=g100_usr_interactive`
+- run the simulation: `mpirun -np 7 singularity exec --bind ./scratch:/scratch_local --bind ./results:/sim/controller/runs --bind ./artifacts:/sim/controller/artifacts --bind ./tmp:/tmp sim.sif/ music /sim/controller/complete_control/complete.music`

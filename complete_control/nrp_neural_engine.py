@@ -2,7 +2,6 @@
 
 import os
 
-import nest
 import structlog
 from config.MasterParams import MasterParams
 from config.paths import COMPLETE_CONTROL, RunPaths
@@ -24,8 +23,7 @@ class Script(GrpcEngineScript):
     def __init__(self):
         super().__init__()
         self.log = structlog.get_logger("nrp_neural_engine")
-        initialize_nest("MUSIC")
-        # initialize_nest("NRP")
+        initialize_nest("NRP")
         self.master_config = None
         self.controller = None
         self.step = 0
@@ -45,7 +43,7 @@ class Script(GrpcEngineScript):
         self.log.info(f"Engine Log Path: {self.run_paths.logs}")
 
         self.master_config = MasterParams.from_runpaths(
-            self.run_paths, parent_id=parent_id, USE_MUSIC=False
+            self.run_paths, parent_id=parent_id
         )
         with open(self.run_paths.params_json, "w") as f:
             f.write(self.master_config.model_dump_json(indent=2))

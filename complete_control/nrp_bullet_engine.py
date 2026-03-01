@@ -9,7 +9,8 @@ from config.plant_config import PlantConfig
 from config.ResultMeta import extract_id
 from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
-from plant.plant_simulator import PlantSimulator, TrialSection
+from plant.plant_simulator import PlantSimulator
+from utils_common.utils import TrialSection
 from utils_common.profile import Profile
 
 
@@ -31,7 +32,6 @@ class Script(GrpcEngineScript):
         self.simulator = PlantSimulator(
             config=self.config,
             pybullet_instance=p,
-            music_setup=None,
         )
         self.current_sim_time_s = 0
         self.step = 0

@@ -71,7 +71,7 @@ echo "  singularity build sim.sif docker-archive://${TAR_FILE}"
 echo "create necessary folders with:"
 echo "  mkdir artifacts results scratch"
 echo "and run with:"
-echo "  mpirun -np 7 singularity exec --bind ./scratch:/scratch_local --bind ./results:/sim/controller/runs --bind ./artifacts:/sim/controller/artifacts sim.sif music /sim/controller/complete_control/complete.music"
+echo "  singularity exec --bind ./scratch:/scratch_local --bind ./results:/sim/controller/runs --bind ./artifacts:/sim/controller/artifacts sim.sif python /sim/controller/complete_control/nrp_start_sim.py"
 echo "clone the repo and mount complete_control for code/parameter changes"
 
 # --- Optional: transfer & build on remote if REMOTE provided ---
