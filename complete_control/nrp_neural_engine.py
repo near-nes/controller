@@ -1,12 +1,16 @@
 """NRP Neural Engine for the complete control simulation."""
 
+import json
 import os
 
+import nest
+import numpy as np
 import structlog
 from config.MasterParams import MasterParams
 from config.paths import COMPLETE_CONTROL, RunPaths
 from config.ResultMeta import extract_id
 from neural.nest_adapter import initialize_nest, nest
+from neural.population_view import PopView
 from neural_simulation_lib import (
     create_controller,
     setup_environment,
@@ -17,6 +21,40 @@ from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 from utils_common.profile import Profile
 
 NANO_SEC = 1e-9
+
+
+def get_connections_between(pre: PopView, post: PopView) -> dict:
+    """Extract all connections between two populations.
+
+    Returns a dict with:
+        - "pre_label": label of the pre-synaptic population
+        - "post_label": label of the post-synaptic population
+        - "sources": list of source global IDs
+        - "targets": list of target global IDs
+        - "weights": list of synaptic weights
+        - "delays": list of synaptic delays
+        - "synapse_models": list of synapse model names
+    """
+    conns = nest.GetConnections(source=pre.pop, target=post.pop)
+    if len(conns) == 0:
+        return {
+            "pre_label": pre.label,
+            "post_label": post.label,
+            "sources": [],
+            "targets": [],
+            "weights": [],
+            "delays": [],
+            "synapse_models": [],
+        }
+    return {
+        "pre_label": pre.label,
+        "post_label": post.label,
+        "sources": conns.get("source"),
+        "targets": conns.get("target"),
+        "weights": conns.get("weight"),
+        "delays": conns.get("delay"),
+        "synapse_models": conns.get("synapse_model"),
+    }
 
 
 class Script(GrpcEngineScript):
@@ -136,9 +174,12 @@ class Script(GrpcEngineScript):
         from neural.data_handling import collapse_files, save_conn_weights
 
         rec_paths = None
-        if self.controller.use_cerebellum and self.master_config.SAVE_WEIGHTS_CEREB:
-            w = self.controller.record_synaptic_weights()
-            rec_paths = save_conn_weights(w, self.run_paths.data_nest, comm=None)
+        # if self.controller.use_cerebellum and self.master_config.SAVE_WEIGHTS_CEREB:
+        # w = self.controller.record_synaptic_weights()
+        # rec_paths = save_conn_weights(w, self.run_paths.data_nest, comm=None)
+
+        if self.controller.use_cerebellum:
+            self._dump_connectivity()
 
         pop_views = self.controller.collect_populations()
         res = collapse_files(self.run_paths.data_nest, pop_views)
@@ -148,3 +189,31 @@ class Script(GrpcEngineScript):
             f.write(res.model_dump_json())
 
         nest.Cleanup()
+
+    def _dump_connectivity(self):
+        """Dump connection data between two populations for inspection."""
+        cereb = self.controller.cerebellum_handler.cerebellum
+        pops = cereb.populations
+        pre_pop = cereb.fwd_io_all
+        post_pop = cereb.fwd_pc_all
+        conn_data = get_connections_between(pre_pop, post_pop)
+        # Add plus/minus subpopulation GIDs for grouping
+        conn_data["pre_plus_gids"] = list(pops.forw_io_p.gids)
+        conn_data["pre_minus_gids"] = list(pops.forw_io_n.gids)
+        conn_data["post_plus_gids"] = list(pops.forw_pc_p.gids)
+        conn_data["post_minus_gids"] = list(pops.forw_pc_n.gids)
+        # Raw labelling debug info collected in Cerebellum.__init__
+        conn_data["label_debug"] = cereb.label_debug
+
+        out_path = self.run_paths.data_nest / "connectivity_debug.json"
+        serializable = {
+            k: v if isinstance(v, str) else [x for x in v] if isinstance(v, list) else v
+            for k, v in conn_data.items()
+        }
+        with open(out_path, "w") as f:
+            json.dump(serializable, f, indent=2)
+        self.log.info(
+            f"Connectivity dump saved",
+            path=str(out_path),
+            num_connections=len(conn_data["sources"]),
+        )

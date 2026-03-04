@@ -121,6 +121,14 @@ class Cerebellum:
         self.populations.forw_pc_p = self._find_popview(fwd, "purkinje_cell", "plus")
         self.populations.forw_pc_n = self._find_popview(fwd, "purkinje_cell", "minus")
 
+        ###
+        self.fwd_io_all = self._find_popview(fwd, "io")
+        self.fwd_io_all._label = "fwd_io_all"
+        self.fwd_pc_all = self._find_popview(fwd, "purkinje_cell")
+        self.fwd_pc_all._label = "fwd_pc_all"
+        self.label_debug = self._collect_label_debug(fwd, ("io", "purkinje_cell"))
+        ###
+
         # Inverse Model
         self.populations.inv_mf = self._find_popview(inv, "mossy_fibers")
         self.populations.inv_glom = self._find_popview(inv, "glomerulus")
@@ -137,6 +145,30 @@ class Cerebellum:
         self.log.debug(f"all populations correctly retrieved")
 
         self._update_weight_plastic_pops(weights)
+
+    def _collect_label_debug(self, simdata, model_names):
+        """Collect raw labelling info for debugging the plus/minus split."""
+        debug = {}
+        for model_name in model_names:
+            ps = next(
+                ps for nm, ps in simdata.placement.items()
+                if nm.name == model_name
+            )
+            all_gids = next(
+                gids for nm, gids in simdata.populations.items()
+                if nm.name == model_name
+            )
+            plus_indices = ps.get_labelled(["plus"])
+            minus_indices = ps.get_labelled(["minus"])
+            debug[model_name] = {
+                "all_gids": all_gids.tolist(),
+                "n_total": len(all_gids),
+                "plus_indices": plus_indices.tolist(),
+                "minus_indices": minus_indices.tolist(),
+                "plus_gids_via_index": all_gids[plus_indices].tolist(),
+                "minus_gids_via_index": all_gids[minus_indices].tolist(),
+            }
+        return debug
 
     def _find_popview(self, simdata, model_name, label=None):
         try:
