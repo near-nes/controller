@@ -1,4 +1,6 @@
-"""Plot connectivity matrix from connectivity_debug.json.
+"""!!! CAUTION !!! AI-generated, unreviewed code
+
+Plot connectivity matrix from connectivity_debug.json.
 
 Shows two views:
 1. Raw connectivity ordered by GID
@@ -30,13 +32,24 @@ def _label_array(gids, plus_set, minus_set):
 def _draw_label_bar(ax, labels, orientation):
     """Draw a thin color bar next to an axis showing claimed +/- labels."""
     cmap = ListedColormap(["#4393c3", "#cccccc", "#d6604d"])  # minus, unlabelled, plus
-    arr = (labels + 1).reshape(1, -1) if orientation == "h" else (labels + 1).reshape(-1, 1)
+    arr = (
+        (labels + 1).reshape(1, -1)
+        if orientation == "h"
+        else (labels + 1).reshape(-1, 1)
+    )
     if orientation == "h":
         extent = [-0.5, len(labels) - 0.5, 0, 1]
     else:
         extent = [0, 1, len(labels) - 0.5, -0.5]
-    ax.imshow(arr, aspect="auto", cmap=cmap, vmin=0, vmax=2,
-              interpolation="none", extent=extent)
+    ax.imshow(
+        arr,
+        aspect="auto",
+        cmap=cmap,
+        vmin=0,
+        vmax=2,
+        interpolation="none",
+        extent=extent,
+    )
     ax.set_xticks([])
     ax.set_yticks([])
 
@@ -56,9 +69,12 @@ def _setup_matrix_axes(fig, gs_slot, has_labels):
     """Create the gridspec for a single matrix panel with optional label bars."""
     if has_labels:
         inner = gs_slot.subgridspec(
-            2, 2,
-            width_ratios=[1, 30], height_ratios=[1, 20],
-            hspace=0.02, wspace=0.02,
+            2,
+            2,
+            width_ratios=[1, 30],
+            height_ratios=[1, 20],
+            hspace=0.02,
+            wspace=0.02,
         )
         ax_main = fig.add_subplot(inner[1, 1])
         ax_top = fig.add_subplot(inner[0, 1], sharex=ax_main)
@@ -71,9 +87,21 @@ def _setup_matrix_axes(fig, gs_slot, has_labels):
         return ax_main, None, None
 
 
-def _draw_matrix_panel(ax_main, ax_top, ax_left, matrix, src_gids, tgt_gids,
-                       src_labels, tgt_labels, pre_label, post_label, title,
-                       src_boundary=None, tgt_boundary=None):
+def _draw_matrix_panel(
+    ax_main,
+    ax_top,
+    ax_left,
+    matrix,
+    src_gids,
+    tgt_gids,
+    src_labels,
+    tgt_labels,
+    pre_label,
+    post_label,
+    title,
+    src_boundary=None,
+    tgt_boundary=None,
+):
     """Draw one connectivity matrix with labels and optional separator lines."""
     ax_main.imshow(matrix != 0, aspect="auto", cmap="Greys", interpolation="none")
 
@@ -154,21 +182,46 @@ def plot_connectivity(json_path: str):
 
     # Panel 1: raw GID order
     ax1, ax1_top, ax1_left = _setup_matrix_axes(fig, gs[0], has_labels)
-    _draw_matrix_panel(ax1, ax1_top, ax1_left, matrix,
-                       unique_src, unique_tgt, src_labels, tgt_labels,
-                       pre_label, post_label, "Ordered by GID")
+    _draw_matrix_panel(
+        ax1,
+        ax1_top,
+        ax1_left,
+        matrix,
+        unique_src,
+        unique_tgt,
+        src_labels,
+        tgt_labels,
+        pre_label,
+        post_label,
+        "Ordered by GID",
+    )
 
     # Panel 2: reordered by claimed label
     if has_labels:
-        src_sorted, src_lab_sorted, src_order, src_n_plus, _ = _sort_by_label(unique_src, src_labels)
-        tgt_sorted, tgt_lab_sorted, tgt_order, tgt_n_plus, _ = _sort_by_label(unique_tgt, tgt_labels)
+        src_sorted, src_lab_sorted, src_order, src_n_plus, _ = _sort_by_label(
+            unique_src, src_labels
+        )
+        tgt_sorted, tgt_lab_sorted, tgt_order, tgt_n_plus, _ = _sort_by_label(
+            unique_tgt, tgt_labels
+        )
         matrix_reordered = matrix[np.ix_(src_order, tgt_order)]
 
         ax2, ax2_top, ax2_left = _setup_matrix_axes(fig, gs[1], True)
-        _draw_matrix_panel(ax2, ax2_top, ax2_left, matrix_reordered,
-                           src_sorted, tgt_sorted, src_lab_sorted, tgt_lab_sorted,
-                           pre_label, post_label, "Grouped by claimed +/− label",
-                           src_boundary=src_n_plus, tgt_boundary=tgt_n_plus)
+        _draw_matrix_panel(
+            ax2,
+            ax2_top,
+            ax2_left,
+            matrix_reordered,
+            src_sorted,
+            tgt_sorted,
+            src_lab_sorted,
+            tgt_lab_sorted,
+            pre_label,
+            post_label,
+            "Grouped by claimed +/− label",
+            src_boundary=src_n_plus,
+            tgt_boundary=tgt_n_plus,
+        )
 
     fig.suptitle(
         f"{pre_label} → {post_label}  ({len(sources)} connections)\n{summary}",
@@ -209,11 +262,15 @@ def plot_connectivity(json_path: str):
                 print(f"  indices: OK — plus+minus covers [0, {n}) exactly")
             else:
                 missing = set(expected) - set(all_idx)
-                overlap = len(plus_idx) + len(minus_idx) - len(set(plus_idx + minus_idx))
+                overlap = (
+                    len(plus_idx) + len(minus_idx) - len(set(plus_idx + minus_idx))
+                )
                 print(f"  indices: PROBLEM")
                 if missing:
                     print(f"    missing indices: {sorted(missing)}")
-                    print(f"    GIDs at missing indices: {[all_gids[i] for i in sorted(missing)]}")
+                    print(
+                        f"    GIDs at missing indices: {[all_gids[i] for i in sorted(missing)]}"
+                    )
                 if overlap:
                     print(f"    {overlap} overlapping indices")
 

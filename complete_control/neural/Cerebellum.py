@@ -151,11 +151,11 @@ class Cerebellum:
         debug = {}
         for model_name in model_names:
             ps = next(
-                ps for nm, ps in simdata.placement.items()
-                if nm.name == model_name
+                ps for nm, ps in simdata.placement.items() if nm.name == model_name
             )
             all_gids = next(
-                gids for nm, gids in simdata.populations.items()
+                gids
+                for nm, gids in simdata.populations.items()
                 if nm.name == model_name
             )
             plus_indices = ps.get_labelled(["plus"])
