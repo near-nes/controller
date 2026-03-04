@@ -320,6 +320,7 @@ RUN echo 'if [ -d /etc/bashrc.d ]; then for f in /etc/bashrc.d/*; do [ -f "$f" ]
     >> /etc/bash.bashrc
 # (everything else is unsupported)
 RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc
+RUN pip install bsb-core @ git+https://github.com/dbbs-lab/bsb.git@fix/labelled_ps#subdirectory=packages/bsb-core
 
 # FROM nrp-runtime AS dev
 FROM runtime AS dev
