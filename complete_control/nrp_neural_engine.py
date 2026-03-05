@@ -174,9 +174,9 @@ class Script(GrpcEngineScript):
         from neural.data_handling import collapse_files, save_conn_weights
 
         rec_paths = None
-        # if self.controller.use_cerebellum and self.master_config.SAVE_WEIGHTS_CEREB:
-        # w = self.controller.record_synaptic_weights()
-        # rec_paths = save_conn_weights(w, self.run_paths.data_nest, comm=None)
+        if self.controller.use_cerebellum and self.master_config.SAVE_WEIGHTS_CEREB:
+            w = self.controller.record_synaptic_weights()
+            rec_paths = save_conn_weights(w, self.run_paths.data_nest, comm=None)
 
         if self.controller.use_cerebellum:
             self._dump_connectivity()

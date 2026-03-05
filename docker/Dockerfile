@@ -224,7 +224,7 @@ RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-b
 RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
     && pip install --no-deps . \
-    && git checkout 74a3a3502ba598f56dc78126c4d6d2ead2044948 \
+    && git checkout 4a3d93a594dcc616d3bfa5729fb8a2a6a87d45f0 \
     && cd custom_stdp \
     && cmake . \
     && make \
@@ -320,7 +320,10 @@ RUN echo 'if [ -d /etc/bashrc.d ]; then for f in /etc/bashrc.d/*; do [ -f "$f" ]
     >> /etc/bash.bashrc
 # (everything else is unsupported)
 RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc
-RUN pip install "bsb-core @ git+https://github.com/dbbs-lab/bsb.git@fix/labelled_ps#subdirectory=packages/bsb-core"
+
+# >>>>>> temp fix https://github.com/dbbs-lab/cerebellar-models/issues/68
+RUN pip install "bsb-core @ git+https://github.com/dbbs-lab/bsb.git@fix/labelled_ps#subdirectory=packages/bsb-core" "bsb-hdf5 @ git+https://github.com/dbbs-lab/bsb.git@fix/labelled_ps#subdirectory=packages/bsb-hdf5"
+# <<<<<<
 
 # FROM nrp-runtime AS dev
 FROM runtime AS dev
