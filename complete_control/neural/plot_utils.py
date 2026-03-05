@@ -8,7 +8,6 @@ import structlog
 from config.ResultMeta import ResultMeta
 from matplotlib.axis import Axis
 from matplotlib.figure import Figure
-from mpi4py import MPI
 from neural.neural_models import SynapseBlock
 from PIL import Image, ImageDraw
 
@@ -546,9 +545,6 @@ def merge_and_plot(
 
 def plot_controller_outputs(metas: list[ResultMeta]):
     """Plots outputs for various populations from a simulation run directory. Both entire simulation and per trial plots"""
-
-    if MPI.COMM_WORLD.rank != 0:
-        return  # Only rank 0 plots
 
     ref_mc = metas[0].load_params()
     ref_rp = ref_mc.run_paths
