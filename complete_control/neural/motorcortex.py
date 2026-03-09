@@ -1,13 +1,21 @@
+from typing import Protocol, Tuple
+
 import structlog
 from config.core_models import SimulationParams
 from config.module_params import M1MockConfig, M1Type, MotorCortexModuleConfig
-from interfaces.m1_base import M1SubModule
 from neural.nest_adapter import nest
 
 from .population_view import PopView
 
 
-class M1Mock(M1SubModule):
+class M1SubModule(Protocol):
+    """Structural interface for M1 submodule implementations."""
+
+    def connect(self, source_population): ...
+    def get_output_pops(self) -> Tuple: ...
+
+
+class M1Mock:
     #                motorcommands.txt
     #                        │
     #  ┌─────────┐    ┌──────┼──────────────────────────┐
@@ -110,18 +118,22 @@ class MotorCortex:
 
     def create_net(self, params: MotorCortexModuleConfig, numNeurons):
         if params.m1_type == M1Type.EPROP:
-            from motor_cortex_eprop.motor_controller_model.M1MotorCortexEprop import (
-                M1MotorCortexEprop,
+            from motor_cortex_eprop.motor_controller_model import m1_factory
+            from motor_cortex_eprop.motor_controller_model.config_schema import (
+                MotorControllerConfig,
+                SimulationConfig,
             )
 
-            self.m1 = M1MotorCortexEprop(
-                params.m1_eprop_config.config_path,
-                params.m1_eprop_config.weights_path,
-                self.sim.sim_steps,
-                nest,
-                expected_delay=self.m1_delay,
-                resolution=self.sim.resolution,
+            # TODO we don't really need to override anything IMO
+            m1_config = MotorControllerConfig(
+                simulation=SimulationConfig(step=self.sim.resolution),
             )
+            network = m1_factory.get_m1_or_raise(m1_config, params.m1_eprop_config.artifacts_dir)
+            network.build_network(
+                simulation_time_ms=self.sim.duration_ms,
+                output_neuron_model="basic_neuron_nestml",
+            )
+            self.m1 = network
             m1_to_out = "all_to_all"
         else:
             from utils_common.generate_signals_minjerk import (
