@@ -128,7 +128,9 @@ class MotorCortex:
             m1_config = MotorControllerConfig(
                 simulation=SimulationConfig(step=self.sim.resolution),
             )
-            network = m1_factory.get_m1_or_raise(m1_config, params.m1_eprop_config.artifacts_dir)
+            network = m1_factory.get_m1_or_raise(
+                m1_config, params.m1_eprop_config.artifacts_dir
+            )
             network.build_network(
                 simulation_time_ms=self.sim.duration_ms,
                 output_neuron_model="basic_neuron_nestml",

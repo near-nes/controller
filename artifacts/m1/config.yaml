@@ -1,7 +1,7 @@
 simulation:
   rng_seed: 1234
   print_time: false
-  total_num_virtual_procs: 16
+  total_num_virtual_procs: 4
   step: 1.0
 task:
   samples_per_trajectory_in_dataset: 10
@@ -94,4 +94,4 @@ recording:
     - error_signal
 plotting:
   do_plotting: true
-git_commit: b8f3512783a0b39c0fc426e6d9ebadd094f48324
+git_commit: e920bf0816a6c67c4e11daf9ac34934713db6018
