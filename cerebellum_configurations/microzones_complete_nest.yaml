@@ -557,6 +557,7 @@ simulations:
 
 $import:
   ref: /sim/cerebellum/circuit.yaml#/
+  # ref: /sim/cerebellum/circuit_ataxia.yaml#/
   values:
   - network
   - partitions
