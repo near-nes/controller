@@ -28,9 +28,7 @@ SUBMODULES = ROOT / "submodules"
 
 M1 = SUBMODULES / "motor_cortex_eprop"
 MOTOR_MODEL = M1 / "motor_controller_model"
-M1_CONFIG = MOTOR_MODEL / "config" / "config.yaml"
 ARTIFACTS_M1 = ARTIFACTS / "m1"
-M1_WEIGHTS = ARTIFACTS_M1 / "trained_weights.npz"
 
 PFC_PLANNER = SUBMODULES / "pfc_planner"
 ARTIFACTS_PLANNER = ARTIFACTS / "pfc_planner"
