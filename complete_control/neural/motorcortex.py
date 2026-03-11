@@ -133,7 +133,14 @@ class MotorCortex:
             )
             network.build_network(
                 simulation_time_ms=self.sim.duration_ms,
-                output_neuron_model="basic_neuron_nestml",
+                output_neuron_model="iaf_psc_delta",
+                output_neuron_params={
+                    "tau_m": m1_config.neurons.out.tau_m,
+                    "C_m": m1_config.neurons.out.C_m,
+                    "E_L": m1_config.neurons.out.E_L,
+                    "V_th": 70.0,  # tuning knob
+                },
+                n_out=params.m1_eprop_config.n_out_pop,
             )
             self.m1 = network
             m1_to_out = "all_to_all"
