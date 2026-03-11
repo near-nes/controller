@@ -16,7 +16,13 @@ from complete_control.config.MasterParams import MasterParams
 from complete_control.utils_common.results import concatenate_neural_results
 
 from .neural_models import PopulationSpikes
-from .population_utils import POPS, POPS_PAIRED, POPS_SINGLE, POPS_TREE
+from .population_utils import (
+    POPS,
+    POPS_PAIRED,
+    POPS_PAIRED_NO_CEREB,
+    POPS_SINGLE,
+    POPS_SINGLE_NO_CEREB,
+)
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
 FIGURE_EXT = "png"
@@ -510,6 +516,9 @@ def merge_and_plot(
 ):
     neural_concat, ref_mc, time_vect = extract_neural_and_merge(metas)
     path_fig = path_fig or ref_mc.run_paths.figures
+    if not ref_mc.USE_CEREBELLUM:
+        pops_single = POPS_SINGLE_NO_CEREB
+        pops_paired = POPS_PAIRED_NO_CEREB
 
     plotted = {}
     for pair in pops_paired:
