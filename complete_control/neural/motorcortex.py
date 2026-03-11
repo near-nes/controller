@@ -142,7 +142,7 @@ class MotorCortex:
                 generate_motor_commands_minjerk,
             )
 
-            motor_commands = generate_motor_commands_minjerk(self.sim, self.m1_delay)
+            motor_commands = generate_motor_commands_minjerk(self.sim)
             self.m1 = M1Mock(
                 numNeurons,
                 motor_commands,
