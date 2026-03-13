@@ -311,12 +311,7 @@ def plot_population_single(
     ax[1].set_ylim(bottom=0, top=max_y + 1)
     fig.tight_layout()
 
-    if filepath:
-        fig.savefig(filepath)
-        _log.debug(f"Saved plot at {filepath}")
-        plt.close(fig)
-
-    return fig, ax, filepath
+    return fig, ax
 
 
 def list_depth(lst):
@@ -547,8 +542,11 @@ def merge_and_plot(
             neural_concat.get_pop(pop),
             title=f"{plot_name.replace('_', ' ').title()}",
             buffer_size=15,
-            filepath=filepath,
-        )
+        filepath = path_fig / f"{plot_name}.{FIGURE_EXT}"
+        if filepath:
+            fig.savefig(filepath)
+            _log.debug(f"Saved plot at {filepath}")
+            plt.close(fig)
         plotted[pop] = (fig, ax, filepath)
     return plotted
 
