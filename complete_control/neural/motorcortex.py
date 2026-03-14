@@ -122,11 +122,12 @@ class MotorCortex:
             from motor_cortex_eprop.motor_controller_model.config_schema import (
                 MotorControllerConfig,
                 SimulationConfig,
+                TaskConfig,
             )
 
-            # TODO we don't really need to override anything IMO
             m1_config = MotorControllerConfig(
                 simulation=SimulationConfig(step=self.sim.resolution),
+                task=TaskConfig(input_shift_ms=self.m1_delay),
             )
             network = m1_factory.get_m1_or_raise(
                 m1_config, params.m1_eprop_config.artifacts_dir
