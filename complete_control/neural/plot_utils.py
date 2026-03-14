@@ -12,7 +12,7 @@ from matplotlib.figure import Figure
 from mpi4py import MPI
 from neural.neural_models import SynapseBlock
 from PIL import Image, ImageDraw
-from utils_common.utils import TrialSection
+from utils_common.utils import draw_trial_phases
 
 from complete_control.config.MasterParams import MasterParams
 from complete_control.utils_common.results import concatenate_neural_results
@@ -123,53 +123,6 @@ def plot_rate(time_v, ts, pop_size, buffer_sz, ax, title="", normalize=False, **
 def global_to_local_ids(x: PopulationSpikes, hist_logscale=False):
     old2newid = {oldid: i for i, oldid in enumerate(x.gids)}
     return np.array([old2newid[i] for i in x.senders])
-
-
-PHASE_COLORS = {
-    TrialSection.TIME_PREP: "#1A92F4",
-    TrialSection.TIME_MOVE: "#42B046",
-    TrialSection.TIME_LOCKED_WITH_FEEDBACK: "#FF9900",
-    TrialSection.TIME_POST: "#7C432F",
-}
-
-
-def _get_trial_phase_boundaries(sim_params: SimulationParams, trial_offset: float = 0):
-    """Return list of (start_ms, end_ms, section, color) for each phase in one trial."""
-    t = trial_offset
-    phases = []
-    for section, dur in [
-        (TrialSection.TIME_PREP, sim_params.time_prep),
-        (TrialSection.TIME_MOVE, sim_params.time_move),
-        (TrialSection.TIME_LOCKED_WITH_FEEDBACK, sim_params.time_locked_with_feedback),
-        (TrialSection.TIME_POST, sim_params.time_grasp + sim_params.time_post),
-    ]:
-        color = PHASE_COLORS[section]
-        phases.append((t, t + dur, section, color))
-        t += dur
-    return phases
-
-
-def draw_trial_phases(
-    axes,
-    sim_params: SimulationParams,
-    num_trials: int = 1,
-    alpha: float = 0.2,
-):
-    """Draw vertical lines and light shading for trial phase boundaries on given axes."""
-    if not isinstance(axes, (list, np.ndarray)):
-        axes = [axes]
-
-    trial_dur = sim_params.duration_ms
-    for trial_idx in range(num_trials):
-        phases = _get_trial_phase_boundaries(
-            sim_params, trial_offset=trial_idx * trial_dur
-        )
-        for start, end, label, color in phases:
-            for ax in axes:
-                ax.axvspan(start, end, alpha=alpha, color=color, zorder=0)
-                ax.axvline(
-                    start, color=color, linestyle="--", linewidth=0.1, alpha=1, zorder=1
-                )
 
 
 def generate_plot_fig(
