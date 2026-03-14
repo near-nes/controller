@@ -1,8 +1,8 @@
 from enum import Enum
 
 import numpy as np
-from config.MasterParams import MasterParams
 from config.core_models import SimulationParams
+from config.MasterParams import MasterParams
 
 
 class TrialSection(Enum):
@@ -60,9 +60,16 @@ def draw_trial_phases(
         )
         for start, end, label, color in phases:
             for ax in axes:
-                ax.axvspan(start * scale, end * scale, alpha=alpha, color=color, zorder=0)
+                ax.axvspan(
+                    start * scale, end * scale, alpha=alpha, color=color, zorder=0
+                )
                 ax.axvline(
-                    start * scale, color=color, linestyle="--", linewidth=0.1, alpha=1, zorder=1
+                    start * scale,
+                    color=color,
+                    linestyle="--",
+                    linewidth=0.1,
+                    alpha=1,
+                    zorder=1,
                 )
 
 
