@@ -188,17 +188,31 @@ def generate_joint_space_plot(metas: list[ResultMeta], figs_path: Path) -> Path:
 
     run_paths_list = [RunPaths.from_run_id(m.id) for m in metas]
     trjs = []
-    for rp in run_paths_list:
+    trjs_shifted = []
+    for rp, p in zip(run_paths_list, params):
         with open(rp.trajectory, "r") as f:
             planner_data: PlannerData = PlannerData.model_validate_json(f.read())
             trjs.append(planner_data.trajectory)
+            delay_steps = int(p.connections.m1_delay / p.simulation.resolution)
+            trjs_shifted.append(
+                np.concatenate(
+                    [
+                        np.full(delay_steps, planner_data.trajectory[0]),
+                        planner_data.trajectory[:-delay_steps],
+                    ]
+                )
+            )
     desired_trajectory = np.concatenate(trjs, axis=0)
+    desired_shifted = np.concatenate(trjs_shifted, axis=0)
 
     _, _, joint_plot_path = plot_joint_space_animated(
         pth_fig_receiver=figs_path,
         time_vector_s=time_vector_total_s,
         pos_j_rad_actual=joint_data.pos_rad,
-        desired_trj_joint_rad=desired_trajectory,
+        desired_rad=desired_shifted,
+        unshifted_planner_rad=desired_trajectory,
+        sim_params=ref_mp.simulation,
+        num_trials=len(metas),
         animated=False,
         save_fig=True,
     )
