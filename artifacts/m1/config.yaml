@@ -1,0 +1,97 @@
+simulation:
+  rng_seed: 1234
+  print_time: false
+  total_num_virtual_procs: 4
+  step: 1.0
+task:
+  samples_per_trajectory_in_dataset: 10
+  trajectory_ids_to_use:
+  - 0
+  - 1
+  n_samples_per_trajectory_to_use: 1
+  gradient_batch_size: 1
+  n_iter: 100
+  sequence: 1500.0
+  silent_period: 0.0
+  input_shift_ms: 100.0
+  learning_start: 650.0
+  learning_end: 1500.0
+rbf:
+  num_centers: 20
+  width: 0.06
+  scale_rate: 500.0
+  shift_min_rate: 0.0
+  desired_upper_hz: 60000.0
+  kp: 1000.0
+  base_rate: 0.0
+  buffer_size: 10.0
+  sdev_hz: 3600.0
+  max_peak_rate_hz: 800.0
+neurons:
+  n_rec: 300
+  n_out: 2
+  exc_ratio: 0.8
+  rec:
+    C_m: 250.0
+    c_reg: 300.0
+    E_L: 0.0
+    f_target: 10.0
+    gamma: 0.3
+    I_e: 0.0
+    regular_spike_arrival: false
+    surrogate_gradient_function: piecewise_linear
+    t_ref: 2.0
+    tau_m: 20.0
+    V_m: 0.0
+    V_th: 20.0
+  out:
+    C_m: 250.0
+    E_L: 0.0
+    I_e: 0.0
+    loss: mean_squared_error
+    regular_spike_arrival: false
+    tau_m: 20.0
+    V_m: 0.0
+synapses:
+  w_input: 20.0
+  w_rec: 20.0
+  g: 4.0
+  conn_bernoulli_p: 0.1
+  average_gradient: false
+  static_delay: 1.0
+  feedback_delay: 1.0
+  rate_target_delay: 1.0
+  receptor_type: 2
+  exc:
+    optimizer:
+      type: gradient_descent
+      eta: 0.01
+      Wmin: 0.0
+      Wmax: 1000.0
+  inh:
+    optimizer:
+      type: gradient_descent
+      eta: 0.01
+      Wmin: -1000.0
+      Wmax: 0.0
+    weight: -400.0
+recording:
+  n_record: 2
+  n_record_w: 5
+  mm_rec:
+    interval: 1.0
+    record_from:
+    - V_m
+    - surrogate_gradient
+    - learning_signal
+  mm_out:
+    interval: 1.0
+    record_from:
+    - V_m
+    - readout_signal
+    - readout_signal_unnorm
+    - target_signal
+    - error_signal
+plotting:
+  do_plotting: true
+git_commit: afce0e6c109e5fd8ed0adbe4f6edaf984319b320

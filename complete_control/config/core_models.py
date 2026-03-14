@@ -33,13 +33,13 @@ class RobotSpecParams(BaseModel, frozen=True):
 
 
 class ExperimentParams(BaseModel, frozen=True):
-    enable_gravity: bool = True
+    enable_gravity: bool = False
     z_gravity_magnitude: float = 2  # m/s^2
 
 
 class OracleData(BaseModel):
     init_joint_angle: float = 90
-    tgt_joint_angle: float = 140
+    tgt_joint_angle: float = 20
     target_visual_offset: float = 4.0
     target_tolerance_angle_deg: float = 10
     target_color: TargetColor = Field(default=TargetColor.RED_RIGHT)

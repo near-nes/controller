@@ -1,14 +1,21 @@
-import config.paths as paths
+from typing import Protocol, Tuple
+
 import structlog
 from config.core_models import SimulationParams
-from config.module_params import M1MockConfig, MotorCortexModuleConfig
-from interfaces.m1_base import M1SubModule
+from config.module_params import M1MockConfig, M1Type, MotorCortexModuleConfig
 from neural.nest_adapter import nest
 
 from .population_view import PopView
 
 
-class M1Mock(M1SubModule):
+class M1SubModule(Protocol):
+    """Structural interface for M1 submodule implementations."""
+
+    def connect(self, source_population): ...
+    def get_output_pops(self) -> Tuple: ...
+
+
+class M1Mock:
     #                motorcommands.txt
     #                        │
     #  ┌─────────┐    ┌──────┼──────────────────────────┐
@@ -25,10 +32,18 @@ class M1Mock(M1SubModule):
     #           - │   │  │  neuron)│                    │
     #             │   │  └─────────┘                    │
     #                 └─────────────────────────────────┘
-    def __init__(self, numNeurons, motorCommands, params: M1MockConfig, sim_steps):
+    def __init__(
+        self,
+        numNeurons,
+        motorCommands,
+        params: M1MockConfig,
+        sim_steps,
+        delay_ms: float,
+    ):
         self.N = numNeurons
         self.params = params
         self.motorCommands = motorCommands
+        self.delay_ms = delay_ms
         self.sim_steps = sim_steps
         self.create_network()
 
@@ -88,24 +103,47 @@ class MotorCortex:
     """
 
     def __init__(
-        self, numNeurons, params: MotorCortexModuleConfig, sim: SimulationParams
+        self,
+        numNeurons,
+        params: MotorCortexModuleConfig,
+        sim: SimulationParams,
+        m1_delay: float,
     ):
         self._log = structlog.get_logger("motorcortex")
         self.sim = sim
         self.N = numNeurons
         self.params = params
+        self.m1_delay = m1_delay
         self.create_net(params, numNeurons)
 
     def create_net(self, params: MotorCortexModuleConfig, numNeurons):
-        if params.use_m1_eprop:
-            # TODO let's make this a bit less convoluted
-            from motor_cortex_eprop.eprop_motor_control.M1MotorCortexEprop import (
-                M1MotorCortexEprop,
+        if params.m1_type == M1Type.EPROP:
+            from motor_cortex_eprop.motor_controller_model import m1_factory
+            from motor_cortex_eprop.motor_controller_model.config_schema import (
+                MotorControllerConfig,
+                SimulationConfig,
+                TaskConfig,
             )
 
-            self.m1 = M1MotorCortexEprop(
-                paths.M1_CONFIG, paths.M1_WEIGHTS, self.sim.sim_steps, nest
+            m1_config = MotorControllerConfig(
+                simulation=SimulationConfig(step=self.sim.resolution),
+                task=TaskConfig(input_shift_ms=self.m1_delay),
             )
+            network = m1_factory.get_m1_or_raise(
+                m1_config, params.m1_eprop_config.artifacts_dir
+            )
+            network.build_network(
+                simulation_time_ms=self.sim.duration_ms,
+                output_neuron_model="iaf_psc_delta",
+                output_neuron_params={
+                    "tau_m": m1_config.neurons.out.tau_m,
+                    "C_m": m1_config.neurons.out.C_m,
+                    "E_L": m1_config.neurons.out.E_L,
+                    "V_th": 70.0,  # tuning knob
+                },
+                n_out=params.m1_eprop_config.n_out_pop,
+            )
+            self.m1 = network
             m1_to_out = "all_to_all"
         else:
             from utils_common.generate_signals_minjerk import (
@@ -114,7 +152,11 @@ class MotorCortex:
 
             motor_commands = generate_motor_commands_minjerk(self.sim)
             self.m1 = M1Mock(
-                numNeurons, motor_commands, params.m1_mock_config, self.sim.sim_steps
+                numNeurons,
+                motor_commands,
+                params.m1_mock_config,
+                self.sim.sim_steps,
+                delay_ms=self.m1_delay,
             )
             m1_to_out = "one_to_one"
 

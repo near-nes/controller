@@ -281,6 +281,7 @@ class Controller:
             self.sim_params,
             self.master_params.run_paths.input_image,
             self.master_params.run_paths.trajectory,
+            m1_delay=self.conn_params.m1_delay,
         )
         self.log.debug(
             "Initializing Planner sub-module",
@@ -323,8 +324,11 @@ class Controller:
             N=self.N,
             njt=1,
             mc_params=self.mc_params,
+            m1_delay=self.conn_params.m1_delay,
         )
-        self.mc = MotorCortex(self.N, self.mc_params, self.sim_params)
+        self.mc = MotorCortex(
+            self.N, self.mc_params, self.sim_params, self.conn_params.m1_delay
+        )
         self.pops.mc_M1_p = self.mc.m1_out_p
         self.pops.mc_M1_n = self.mc.m1_out_n
         self.pops.mc_fbk_p = self.mc.fbk_p

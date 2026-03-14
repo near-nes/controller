@@ -13,6 +13,7 @@ def generate_trajectory_gle(
     image_path: Path,
     sim: SimulationParams,
     gle_params: GLETrajGeneratorConfig,
+    m1_delay: float = 0.0,
 ) -> tuple[np.ndarray, int]:
     import torch
     from pfc_planner.src.config import PlannerParams
@@ -26,9 +27,9 @@ def generate_trajectory_gle(
     params = PlannerParams(
         model_type=TrajGeneratorType.GLE.value,
         resolution=sim.resolution,
-        time_prep=sim.time_prep,
+        time_prep=sim.time_prep - m1_delay,
         time_move=sim.time_move,
-        time_locked_with_feedback=sim.time_locked_with_feedback,
+        time_locked_with_feedback=sim.time_locked_with_feedback + m1_delay,
         time_grasp=sim.time_grasp,
         time_post=sim.time_post,
     )
