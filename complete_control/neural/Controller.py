@@ -281,6 +281,7 @@ class Controller:
             self.sim_params,
             self.master_params.run_paths.input_image,
             self.master_params.run_paths.trajectory,
+            m1_delay=self.conn_params.m1_delay,
         )
         self.log.debug(
             "Initializing Planner sub-module",

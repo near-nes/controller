@@ -21,15 +21,18 @@ def minimumJerk(x_init, x_des, timespan):
     return pp, pol
 
 
-def generate_trajectory_minjerk(sim: SimulationParams):
+def generate_trajectory_minjerk(sim: SimulationParams, m1_delay: float = 0.0):
     """Generate trajectory for the simulation.
+
+    The trajectory is shifted earlier by m1_delay so that the planner feeds M1
+    during the end of prep, giving it time to process before TIME_MOVE starts.
 
     Returns:
         np.ndarray: Trajectory array for the simulation
     """
     res = sim.resolution
     time_move = sim.time_move
-    time_prep = sim.time_prep
+    time_prep = sim.time_prep - m1_delay
     time_post = sim.time_grasp + sim.time_post
 
     time_sim_vec = np.linspace(
@@ -44,7 +47,7 @@ def generate_trajectory_minjerk(sim: SimulationParams):
 
     trj_prep = trj[0] * np.ones(int(time_prep / res))
     trj_locked_with_feedback = trj[-1] * np.ones(
-        int(sim.time_locked_with_feedback / res)
+        int((sim.time_locked_with_feedback + m1_delay) / res)
     )
     trj_post = 0 * np.ones(int(time_post / res))
     trj = np.concatenate((trj_prep, trj.flatten(), trj_locked_with_feedback, trj_post))
