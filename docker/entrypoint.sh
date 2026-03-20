@@ -86,6 +86,9 @@ else
     echo "Uncompressed network file ${BSB_NETWORK_FILE} already exists. Skipping decompression."
 fi
 
+# --- Install shared packages (editable) ---
+pip install --quiet -e "${CONTROLLER_DIR}/complete_control/shared/minjerk"
+
 # --- Environment Summary ---
 echo "Final LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 echo "Final PATH: $PATH"
