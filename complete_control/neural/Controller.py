@@ -118,6 +118,7 @@ class Controller:
         self.cerebellum_paths = cerebellum_paths
         self.comm = comm
         self.label = f"{label_prefix}"
+        self.connected_m1 = False
 
         self.log.debug(
             "Controller Parameters",
@@ -327,7 +328,11 @@ class Controller:
             m1_delay=self.conn_params.m1_delay,
         )
         self.mc = MotorCortex(
-            self.N, self.mc_params, self.sim_params, self.conn_params.m1_delay
+            self.N,
+            self.mc_params,
+            self.sim_params,
+            self.conn_params.m1_delay,
+            plan_params=self.plan_params,
         )
         self.pops.mc_M1_p = self.mc.m1_out_p
         self.pops.mc_M1_n = self.mc.m1_out_n
@@ -716,6 +721,16 @@ class Controller:
         curr_section = get_current_section(sim_time_s * 1000, self.master_params)
         if self.master_params.USE_CEREBELLUM:
             self.cerebellum_handler.apply_blocking_window(curr_section)
+
+        connect_m1_at = (
+            self.master_params.simulation.time_prep - self.conn_params.m1_delay
+        )
+
+        # if not self.connected_m1 and sim_time_s * 1000 > connect_m1_at:
+        #     self.log.warning(f"reached {connect_m1_at}ms! connecting m1...")
+        #     self.mc.m1.connect_rec_out()
+        #     self.connected_m1 = True
+        #     self.log.warning(f"connected m1 rec to out!")
 
         if (
             curr_section != TrialSection.TIME_GRASP

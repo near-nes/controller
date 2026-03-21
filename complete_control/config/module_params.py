@@ -40,7 +40,7 @@ class M1MockConfig(BaseModel):
 
 class M1EPropConfig(BaseModel):
     artifacts_dir: Path = p.ARTIFACTS_M1
-    n_out_pop: int = 2
+    n_out_pop: int = 400
 
 
 class MotorCortexModuleConfig(BaseModel):

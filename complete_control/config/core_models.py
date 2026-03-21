@@ -11,7 +11,7 @@ class TargetColor(Enum):
     RED_RIGHT = [1, 0, 0, 1]
 
 
-from utils_common.git_utils import get_git_commit_hash
+from complete_control.utils_common.git_utils import get_git_commit_hash
 
 from . import paths
 
