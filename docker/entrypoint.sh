@@ -91,18 +91,13 @@ echo "Final LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 echo "Final PATH: $PATH"
 echo "Final PYTHONPATH: $PYTHONPATH"
 
-# --- Install near-nes-controller package in editable mode (dev mode) ---
+# --- Install near-nes-controller package in editable mode (dev mode) as non-root user ---
 if [ "$SIMULATION_MODE" = "dev" ]; then
     if [ -f "${CONTROLLER_DIR}/pyproject.toml" ]; then
-        echo "Installing near-nes-controller package in editable mode..."
-        cd "${CONTROLLER_DIR}"
-        $VENV_PATH/bin/pip install -e . --no-deps 2>&1 | grep -E "(Successfully|already satisfied|ERROR)"
-        if [ ${PIPESTATUS[0]} -eq 0 ]; then
-            echo "Package installation complete."
-        else
-            echo "Warning: Package installation may have failed. Check output above."
-        fi
-        cd - > /dev/null
+        echo "Installing near-nes-controller package in editable mode as user $USERNAME..."
+        # Install with --no-build-isolation to skip downloading setuptools
+        gosu "$USERNAME" bash -c "cd ${CONTROLLER_DIR} && ${VENV_PATH}/bin/pip install -e . --no-build-isolation" 2>&1 | tail -5 || true
+        echo "Package installation completed."
     else
         echo "Warning: pyproject.toml not found in ${CONTROLLER_DIR}. Skipping package installation."
     fi
