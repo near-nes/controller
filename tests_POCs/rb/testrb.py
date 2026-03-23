@@ -28,12 +28,7 @@ def desiredTrajectory(x_init, x_des, T_max, timespan):
     e = 0
     g = x_init
 
-    pp = (
-        a * np.power(timespan, 5)
-        + b * np.power(timespan, 4)
-        + c * np.power(timespan, 3)
-        + g
-    )
+    pp = a * np.power(timespan, 5) + b * np.power(timespan, 4) + c * np.power(timespan, 3) + g
     # pol = np.array([a,b,c,d,e,g])
     return pp
 
@@ -48,12 +43,7 @@ def minimumJerk_ddt(x_init, x_des, T_max, timespan):
         d = np.zeros(1)
 
     # pol = np.array([a,b,c,d])
-    pp = (
-        a * np.power(timespan, 3)
-        + b * np.power(timespan, 2)
-        + c * np.power(timespan, 1)
-        + d
-    )
+    pp = a * np.power(timespan, 3) + b * np.power(timespan, 2) + c * np.power(timespan, 1) + d
 
     return pp
 
@@ -265,12 +255,8 @@ plt.xticks(fontsize=25)
 y_min = feedback_p_prt.get("global_id")[0]
 y_max = feedback_p_prt.get("global_id")[-1]
 plt.figure(figsize=(10, 8))
-plt.scatter(
-    SD_feedback_p_tm, SD_feedback_p_ev - y_min, marker=".", s=200, label="Positive"
-)
-plt.scatter(
-    SD_feedback_n_tm, SD_feedback_n_ev - y_max, marker=".", s=200, label="Negative"
-)
+plt.scatter(SD_feedback_p_tm, SD_feedback_p_ev - y_min, marker=".", s=200, label="Positive")
+plt.scatter(SD_feedback_n_tm, SD_feedback_n_ev - y_max, marker=".", s=200, label="Negative")
 plt.title("Scatter plot Feedback", size=25)
 plt.xlabel("Time [ms]", size=25)
 plt.ylabel("Neuron ID", size=25)

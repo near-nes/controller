@@ -85,9 +85,7 @@ time_span = sim.timeMax + sim.timeWait
 time_vect = np.linspace(0, time_span, num=int(np.round(time_span / res)), endpoint=True)
 
 total_time = time_span * n_trials
-total_time_vect = np.linspace(
-    0, total_time, num=int(np.round(total_time / res)), endpoint=True
-)
+total_time_vect = np.linspace(0, total_time, num=int(np.round(total_time / res)), endpoint=True)
 njt = 1
 
 assert len(trj) == len(total_time_vect)
@@ -341,9 +339,7 @@ wgt_plnr_mtxFbk = conn_params["planner_mc_fbk"]["weight"]
 # Delay between planner and motor cortex feedback.
 # It needs to compensate for the delay introduced by the state estimator
 # delay_plnr_mtxFbk = brain.stEst_param["buf_sz"] # USE THIS WITH REAL STATE ESTIMATOR
-delay_plnr_mtxFbk = conn_params["planner_mc_fbk"][
-    "delay"
-]  # USE THIS WITH "FAKE" STATE ESTIMATOR
+delay_plnr_mtxFbk = conn_params["planner_mc_fbk"]["delay"]  # USE THIS WITH "FAKE" STATE ESTIMATOR
 
 for j in range(njt):
     planner.pops_p[j].connect(
@@ -425,9 +421,7 @@ for j in range(njt):
             "simulation_steps": len(total_time_vect),
         },
     )
-    brain_stem_new_p.append(
-        PopView(tmp_p, total_time_vect, to_file=True, label="brainstem_p")
-    )
+    brain_stem_new_p.append(PopView(tmp_p, total_time_vect, to_file=True, label="brainstem_p"))
     # Negative neurons
     tmp_n = nest.Create("basic_neuron_nestml", N)
     nest.SetStatus(
@@ -440,9 +434,7 @@ for j in range(njt):
             "simulation_steps": len(total_time_vect),
         },
     )
-    brain_stem_new_n.append(
-        PopView(tmp_n, total_time_vect, to_file=True, label="brainstem_n")
-    )
+    brain_stem_new_n.append(PopView(tmp_n, total_time_vect, to_file=True, label="brainstem_n"))
 
 
 for j in range(njt):
@@ -545,19 +537,11 @@ spikedetector_io_forw_input_neg = nest.Create("spike_recorder", params={"withgid
 spikedetector_io_inv_input_pos = nest.Create("spike_recorder", params={"withgid": True,"withtime": True, "to_file": True, "label": "Input inferior Olive Inv pos"})
 spikedetector_io_inv_input_neg = nest.Create("spike_recorder", params={"withgid": True,"withtime": True, "to_file": True, "label": "Input inferior Olive Inv neg"})
 """
-spikedetector_stEst_pos = nest.Create(
-    "spike_recorder", params={"label": "State estimator pos"}
-)
-spikedetector_stEst_neg = nest.Create(
-    "spike_recorder", params={"label": "State estimator neg"}
-)
+spikedetector_stEst_pos = nest.Create("spike_recorder", params={"label": "State estimator pos"})
+spikedetector_stEst_neg = nest.Create("spike_recorder", params={"label": "State estimator neg"})
 
-spikedetector_planner_pos = nest.Create(
-    "spike_recorder", params={"label": "Planner pos"}
-)
-spikedetector_planner_neg = nest.Create(
-    "spike_recorder", params={"label": "Planner neg"}
-)
+spikedetector_planner_pos = nest.Create("spike_recorder", params={"label": "Planner pos"})
+spikedetector_planner_neg = nest.Create("spike_recorder", params={"label": "Planner neg"})
 
 # spikedetector_pred_pos = nest.Create("spike_recorder", params={"withgid": True,"withtime": True, "to_file": True, "label": "Cereb pred pos"})
 # spikedetector_pred_neg = nest.Create("spike_recorder", params={"withgid": True,"withtime": True, "to_file": True, "label": "Cereb pred neg"})
@@ -572,12 +556,8 @@ spikedetector_fbk_smoothed_neg = nest.Create(
     "spike_recorder", params={"label": "Feedback smoothed neg"}
 )
 
-spikedetector_brain_stem_pos = nest.Create(
-    "spike_recorder", params={"label": "Brain stem pos"}
-)
-spikedetector_brain_stem_neg = nest.Create(
-    "spike_recorder", params={"label": "Brain stem neg"}
-)
+spikedetector_brain_stem_pos = nest.Create("spike_recorder", params={"label": "Brain stem pos"})
+spikedetector_brain_stem_neg = nest.Create("spike_recorder", params={"label": "Brain stem neg"})
 
 nest.Connect(brain_stem_new_p[j].pop, spikedetector_brain_stem_pos)
 nest.Connect(brain_stem_new_n[j].pop, spikedetector_brain_stem_neg)
@@ -717,12 +697,8 @@ if mpi4py.MPI.COMM_WORLD.rank == 0:
 
     bins_p, count_p, rate_p = planner.pops_p[0].computePSTH(time_vect_paused, 15)
     bins_n, count_n, rate_n = planner.pops_n[0].computePSTH(time_vect_paused, 15)
-    bins_stEst_p, count_stEst_p, rate_stEst_p = stEst.pops_p[0].computePSTH(
-        time_vect_paused, 15
-    )
-    bins_stEst_n, count_stEst_n, rate_stEst_n = stEst.pops_n[0].computePSTH(
-        time_vect_paused, 15
-    )
+    bins_stEst_p, count_stEst_p, rate_stEst_p = stEst.pops_p[0].computePSTH(time_vect_paused, 15)
+    bins_stEst_n, count_stEst_n, rate_stEst_n = stEst.pops_n[0].computePSTH(time_vect_paused, 15)
 
     print("mc fbk")
     reference = [rate_p - rate_stEst_p, rate_n - rate_stEst_n]
@@ -821,12 +797,8 @@ if mpi4py.MPI.COMM_WORLD.rank == 0:
 
     bins_p, count_p, rate_p = sn_p[0].computePSTH(time_vect_paused, 15)
     bins_n, count_n, rate_n = sn_n[0].computePSTH(time_vect_paused, 15)
-    bins_pred_p, count_pred_p, rate_pred_p = prediction_p[0].computePSTH(
-        time_vect_paused, 15
-    )
-    bins_pred_n, count_pred_n, rate_pred_n = prediction_n[0].computePSTH(
-        time_vect_paused, 15
-    )
+    bins_pred_p, count_pred_p, rate_pred_p = prediction_p[0].computePSTH(time_vect_paused, 15)
+    bins_pred_n, count_pred_n, rate_pred_n = prediction_n[0].computePSTH(time_vect_paused, 15)
 
     reference = [rate_p - rate_n, rate_pred_p - rate_pred_n]
     time_vecs = [bins_p[:-1], bins_n[:-1]]
@@ -852,12 +824,8 @@ if mpi4py.MPI.COMM_WORLD.rank == 0:
     print("net")
     bins_p, count_p, rate_p = planner.pops_p[0].computePSTH(time_vect_paused, 15)
     bins_n, count_n, rate_n = planner.pops_n[0].computePSTH(time_vect_paused, 15)
-    bins_stEst_p, count_stEst_p, rate_stEst_p = stEst.pops_p[0].computePSTH(
-        time_vect_paused, 15
-    )
-    bins_stEst_n, count_stEst_n, rate_stEst_n = stEst.pops_n[0].computePSTH(
-        time_vect_paused, 15
-    )
+    bins_stEst_p, count_stEst_p, rate_stEst_p = stEst.pops_p[0].computePSTH(time_vect_paused, 15)
+    bins_stEst_n, count_stEst_n, rate_stEst_n = stEst.pops_n[0].computePSTH(time_vect_paused, 15)
 
     fig, ax = plt.subplots(2, 2)
     ax[0, 0].plot(bins_p[:-1], rate_p, label="planner pos")

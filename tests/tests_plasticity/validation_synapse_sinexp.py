@@ -50,9 +50,7 @@ def plot_synaptic_weight(
         # print("Pc simple spikes: ", simple_PC_times)
         # print("Pc complex spikes: ", complex_PC_times)
 
-        total_Gr_times = [
-            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
-        ]
+        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
         # complex_Gr_times = [t for t in total_Gr_times if t in complex_PC_times]
         simple_Gr_times = [t for t in total_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -77,9 +75,7 @@ def plot_synaptic_weight(
             color="red",
             label="Complex spikes",
         )
-        ax[1].scatter(
-            simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
-        )
+        ax[1].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
         # ax[1].scatter(complex_PC_times, source_id*np.ones(len(complex_PC_times)), color = "white")
         ax[1].legend(fontsize="small")
         ax[1].set_ylim(0, 20)
@@ -135,9 +131,7 @@ def plot_synaptic_weight(
                 color="red",
                 label="Complex spikes",
             )
-            ax[1].scatter(
-                simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
-            )
+            ax[1].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
 
             ax[1].set_ylim(0, 5)
             ax[1].set_xlabel("Time [ms]", fontsize=12)
@@ -149,9 +143,7 @@ def plot_synaptic_weight(
             LTD_mask = diffs < 0  # LTD occurs when weight decreases
 
             # Define a Δt window from -200 ms to 0 ms
-            spike_time_diffs = np.linspace(
-                -200, 0, len(diffs)
-            )  # Assuming uniform mapping
+            spike_time_diffs = np.linspace(-200, 0, len(diffs))  # Assuming uniform mapping
             LTD_values = -diffs[LTD_mask]  # Make LTD amounts positive
             LTD_times = spike_time_diffs[LTD_mask]
 
@@ -235,9 +227,7 @@ def plot_LTP(
         print(first_complex_spike)
         first_complex_step = int(first_complex_spike / 0.1)
         print(first_complex_step)
-        total_Gr_times = [
-            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
-        ]
+        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
         complex_Gr_times = [t for t in total_Gr_times if t in complex_PC_times]
         simple_Gr_times = [t for t in total_Gr_times if t not in complex_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -354,9 +344,7 @@ def plot_LTP(
                 color="red",
                 label="Complex spikes",
             )
-            ax[1].scatter(
-                simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
-            )
+            ax[1].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
             # ax[1].scatter(complex_PC_times, source_id*np.ones(len(complex_PC_times)), color = "white")
             ax[2].legend(fontsize="small")
             ax[1].set_ylim(0, 5)
@@ -431,18 +419,14 @@ def plot_LTD(
         total_PC_times = [t for t, e in zip(corrected_PC_tms, PC_evs) if e == target_id]
         complex_PC_times_tot = [t for t in total_PC_times if t - 1.0 in IO_times_tot]
         print("complex times: ", complex_PC_times_tot)
-        simple_PC_times_tot = [
-            t for t in total_PC_times if t not in complex_PC_times_tot
-        ]
+        simple_PC_times_tot = [t for t in total_PC_times if t not in complex_PC_times_tot]
         # print("Pc simple spikes: ", simple_PC_times)
         # print("Pc complex spikes: ", complex_PC_times)
 
         first_complex_spike = complex_PC_times_tot[0]
         first_complex_step = int(first_complex_spike / 0.1)
 
-        total_Gr_times = [
-            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
-        ]
+        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
         complex_Gr_times = [t for t in total_Gr_times if t in complex_PC_times_tot]
         simple_Gr_times_tot = [t for t in total_Gr_times if t not in complex_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -475,32 +459,27 @@ def plot_LTD(
             # print('IO_times prima array: ', IO_times)
             IO_times = np.array(IO_times_tot)
             # print('IO_times dopo array: ', IO_times)
-            IO_indices = np.where(
-                (IO_times >= time_window[0]) & (IO_times <= time_window[-1])
-            )
+            IO_indices = np.where((IO_times >= time_window[0]) & (IO_times <= time_window[-1]))
             IO_times = IO_times[IO_indices]
             print("IO_times: ", IO_times)
 
             simple_PC_times = np.array(simple_PC_times_tot)
             simple_PC_indices = np.where(
-                (simple_PC_times >= time_window[0])
-                & (simple_PC_times <= time_window[-1])
+                (simple_PC_times >= time_window[0]) & (simple_PC_times <= time_window[-1])
             )
             simple_PC_times = simple_PC_times[simple_PC_indices]
             print("simple PC times: ", simple_PC_times)
 
             complex_PC_times = np.array(complex_PC_times_tot)
             complex_PC_indices = np.where(
-                (complex_PC_times >= time_window[0])
-                & (complex_PC_times <= time_window[-1])
+                (complex_PC_times >= time_window[0]) & (complex_PC_times <= time_window[-1])
             )
             complex_PC_times = complex_PC_times[complex_PC_indices]
             print("complex PC times: ", complex_PC_times)
 
             simple_Gr_times = np.array(simple_Gr_times_tot)
             simple_Gr_indices = np.where(
-                (simple_Gr_times >= time_window[0])
-                & (simple_Gr_times <= time_window[-1])
+                (simple_Gr_times >= time_window[0]) & (simple_Gr_times <= time_window[-1])
             )
             simple_Gr_times = simple_Gr_times[simple_Gr_indices]
             print("Gr times: ", simple_Gr_times)
@@ -527,9 +506,7 @@ def plot_LTD(
                 color="red",
                 label="Complex spikes",
             )
-            ax[0].scatter(
-                simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
-            )
+            ax[0].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
             ax[0].set_ylim(0, 8)
             # ax[1].set_xlim(start, end)
             ax[0].set_xlabel("Time [ms]")
@@ -638,9 +615,7 @@ def plot_synaptic_matrix(
         # print("Pc simple spikes: ", simple_PC_times)
         # print("Pc complex spikes: ", complex_PC_times)
 
-        total_Gr_times = [
-            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
-        ]
+        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
         complex_Gr_times = [t for t in total_Gr_times if t in complex_PC_times]
         simple_Gr_times = [t for t in total_Gr_times if t not in complex_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -664,9 +639,7 @@ def plot_synaptic_matrix(
                 color="red",
                 label="Complex spikes",
             )
-            ax[1].scatter(
-                simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
-            )
+            ax[1].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
             ax[1].scatter(
                 complex_PC_times,
                 source_id * np.ones(len(complex_PC_times)),
@@ -717,9 +690,7 @@ def plot_synaptic_matrix(
                 color="red",
                 label="Complex spikes",
             )
-            ax[2].scatter(
-                simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
-            )
+            ax[2].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
             # ax[2].scatter(complex_PC_times, source_id*np.ones(len(complex_PC_times)), color = "white")
             ax[2].legend(fontsize="small")
             ax[2].set_ylim(0, 20)
@@ -796,9 +767,7 @@ def plot_simple_spike(
         # print("Pc simple spikes: ", simple_PC_times)
         # print("Pc complex spikes: ", complex_PC_times)
 
-        total_Gr_times = [
-            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
-        ]
+        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
         complex_Gr_times = [t for t in total_Gr_times if t in complex_PC_times]
         simple_Gr_times = [t for t in total_Gr_times if t not in complex_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -901,9 +870,7 @@ def plot_complex_spike(
         # print("Pc simple spikes: ", simple_PC_times)
         # print("Pc complex spikes: ", complex_PC_times)
 
-        total_Gr_times = [
-            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
-        ]
+        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
         complex_Gr_times = [t for t in total_Gr_times if t in complex_PC_times]
         simple_Gr_times = [t for t in total_Gr_times if t not in complex_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -987,9 +954,7 @@ def correct_spike_times(cf_recorder, PC_recorder, Gr_recorder):
     corrected_PC_tms = [round(t, 1) for t in corrected_PC_tms]
     # print('PC spikes: (', corrected_PC_tms, '), (', PC_evs, ')\n')
 
-    PC_complex_tms = [
-        spike for spike in corrected_PC_tms if (spike - 1.0) in corrected_cf_tms
-    ]
+    PC_complex_tms = [spike for spike in corrected_PC_tms if (spike - 1.0) in corrected_cf_tms]
     PC_complex_evs = [
         ev for (spike, ev) in zip(corrected_PC_tms, PC_evs) if spike in PC_complex_tms
     ]

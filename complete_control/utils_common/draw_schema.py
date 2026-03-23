@@ -544,9 +544,7 @@ def draw_schema(metas: list[ResultMeta], scale_factor: float = 0.005):
         ax.plot(path_x, path_y, color=color, linewidth=2, zorder=4)
         dx = path_x[-1] - path_x[-2]
         dy = path_y[-1] - path_y[-2]
-        ax.add_patch(
-            FancyArrow(path_x[-2], path_y[-2], dx, dy, color=color, **arrow_props)
-        )
+        ax.add_patch(FancyArrow(path_x[-2], path_y[-2], dx, dy, color=color, **arrow_props))
 
     # Drawing paths between components
     paths = {
@@ -671,15 +669,12 @@ def draw_schema(metas: list[ResultMeta], scale_factor: float = 0.005):
             ),
             (
                 components["motor prediction"][0],
-                components["motor prediction"][1]
-                + components["motor prediction"][3]
-                - 1,
+                components["motor prediction"][1] + components["motor prediction"][3] - 1,
             ),
         ],
         "motor_pred_to_smoothing": [
             (
-                components["motor prediction"][0]
-                + components["motor prediction"][2] / 2,
+                components["motor prediction"][0] + components["motor prediction"][2] / 2,
                 components["motor prediction"][1],
             ),
             (
@@ -758,26 +753,22 @@ def draw_schema(metas: list[ResultMeta], scale_factor: float = 0.005):
             ),
             (
                 components["Human Figure Plot"][0],
-                components["Human Figure Plot"][1]
-                + components["Human Figure Plot"][3] / 2,
+                components["Human Figure Plot"][1] + components["Human Figure Plot"][3] / 2,
             ),
         ],
         "human_to_sensory": [
             (
-                components["Human Figure Plot"][0]
-                + components["Human Figure Plot"][2] / 2,
+                components["Human Figure Plot"][0] + components["Human Figure Plot"][2] / 2,
                 components["Human Figure Plot"][1],
             ),
             (
-                components["Sensory feedback"][0]
-                + components["Sensory feedback"][2] / 2,
+                components["Sensory feedback"][0] + components["Sensory feedback"][2] / 2,
                 components["Sensory feedback"][1] + components["Sensory feedback"][3],
             ),
         ],
         "sensory_to_feedback": [
             (
-                components["Sensory feedback"][0]
-                + components["Sensory feedback"][2] / 2,
+                components["Sensory feedback"][0] + components["Sensory feedback"][2] / 2,
                 components["Sensory feedback"][1],
             ),
             (

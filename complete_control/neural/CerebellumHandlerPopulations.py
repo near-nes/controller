@@ -43,24 +43,17 @@ class CerebellumHandlerPopulationsGeneric(BaseModel, Generic[T]):
         arbitrary_types_allowed = True
 
 
-class CerebellumHandlerPopulationsRecordings(
-    CerebellumHandlerPopulationsGeneric[PopulationSpikes]
-):
+class CerebellumHandlerPopulationsRecordings(CerebellumHandlerPopulationsGeneric[PopulationSpikes]):
     pass
 
 
 class CerebellumHandlerPopulations(CerebellumHandlerPopulationsGeneric[PopView]):
     def to_recording(self, *args, **kwargs) -> CerebellumHandlerPopulationsRecordings:
-        return convert_to_recording(
-            self, CerebellumHandlerPopulationsRecordings, *args, **kwargs
-        )
+        return convert_to_recording(self, CerebellumHandlerPopulationsRecordings, *args, **kwargs)
 
     def __setattr__(self, name, value):
         # Auto-label PopView instances when assigned
-        if (
-            isinstance(value, PopView)
-            and name in CerebellumHandlerPopulations.model_fields
-        ):
+        if isinstance(value, PopView) and name in CerebellumHandlerPopulations.model_fields:
             if value.label is None:
                 # set value name as population label, trigger detector initialization
                 value.label = name

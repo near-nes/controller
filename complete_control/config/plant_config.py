@@ -38,9 +38,7 @@ class PlantConfig:
         self.TIME_POST_S: float = self.TIME_POST_MS / 1000.0
 
         self.TIME_TRIAL_S: float = self.master_config.simulation.duration_ms / 1000.0
-        self.TOTAL_SIM_DURATION_S: float = (
-            self.master_config.simulation.duration_ms / 1000.0
-        )
+        self.TOTAL_SIM_DURATION_S: float = self.master_config.simulation.duration_ms / 1000.0
 
         self.time_vector_total_s: np.ndarray = np.arange(
             0, self.TOTAL_SIM_DURATION_S, self.RESOLUTION_S
@@ -52,12 +50,8 @@ class PlantConfig:
         self.NJT = self.master_config.NJT
         self.CONNECT_GUI = self.master_config.GUI_PYBULLET
 
-        self.initial_joint_pos_rad: float = (
-            self.master_config.simulation.oracle.init_pos_angle_rad
-        )
-        self.target_joint_pos_rad: float = (
-            self.master_config.simulation.oracle.tgt_pos_angle_rad
-        )
+        self.initial_joint_pos_rad: float = self.master_config.simulation.oracle.init_pos_angle_rad
+        self.target_joint_pos_rad: float = self.master_config.simulation.oracle.tgt_pos_angle_rad
 
         self.N_NEURONS: int = self.master_config.brain.population_size
 
@@ -66,16 +60,12 @@ class PlantConfig:
         self.BUFFER_SIZE_S: float = 1.0 / 100.0
 
         # Sensory Neuron parameters from MasterConfig
-        self.SENS_NEURON_BASE_RATE: float = (
-            self.master_config.modules.spine.sensNeur_base_rate
-        )
+        self.SENS_NEURON_BASE_RATE: float = self.master_config.modules.spine.sensNeur_base_rate
         self.SENS_NEURON_KP: float = self.master_config.modules.spine.sensNeur_kp
         self.SENS_NEURON_ID_START: int = self.master_config.brain.first_id_sens_neurons
 
         # Weight for motor command calculation from MasterConfig
-        self.WGT_MOTCTX_MOTNEUR: float = (
-            self.master_config.modules.spine.wgt_motCtx_motNeur
-        )
+        self.WGT_MOTCTX_MOTNEUR: float = self.master_config.modules.spine.wgt_motCtx_motNeur
 
         self.PLOT_DATA_FILENAME = "plant_plot_data.json"
 

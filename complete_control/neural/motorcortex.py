@@ -87,9 +87,7 @@ class MotorCortex:
     and a mock one, implemented above.
     """
 
-    def __init__(
-        self, numNeurons, params: MotorCortexModuleConfig, sim: SimulationParams
-    ):
+    def __init__(self, numNeurons, params: MotorCortexModuleConfig, sim: SimulationParams):
         self._log = structlog.get_logger("motorcortex")
         self.sim = sim
         self.N = numNeurons
@@ -113,9 +111,7 @@ class MotorCortex:
             )
 
             motor_commands = generate_motor_commands_minjerk(self.sim)
-            self.m1 = M1Mock(
-                numNeurons, motor_commands, params.m1_mock_config, self.sim.sim_steps
-            )
+            self.m1 = M1Mock(numNeurons, motor_commands, params.m1_mock_config, self.sim.sim_steps)
             m1_to_out = "one_to_one"
 
         par_fbk = {"base_rate": params.fbk_base_rate, "kp": params.fbk_kp}

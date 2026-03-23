@@ -41,9 +41,7 @@ def generate_traj(
             generate_trajectory_gle,
         )
 
-        traj, idx_choice = generate_trajectory_gle(
-            input_image_path, sim, params.gle_config
-        )
+        traj, idx_choice = generate_trajectory_gle(input_image_path, sim, params.gle_config)
         choice = TargetColor.BLUE_LEFT if idx_choice == 0 else TargetColor.RED_RIGHT
     else:
         raise NotImplementedError(f"Unknown planner type: {traj_gen_type}")

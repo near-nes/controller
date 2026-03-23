@@ -33,9 +33,7 @@ def setup_environment(master_config: MasterParams):
             error=str(e),
             exc_info=True,
         )
-        log.error(
-            "Ensure module is compiled and accessible (check LD_LIBRARY_PATH/compilation)."
-        )
+        log.error("Ensure module is compiled and accessible (check LD_LIBRARY_PATH/compilation).")
         sys.exit(1)
 
 

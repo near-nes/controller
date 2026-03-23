@@ -17,9 +17,7 @@ from . import paths
 
 
 class MetaInfo(BaseModel, frozen=True):
-    controller_commit_hash: str = Field(
-        default_factory=lambda: get_git_commit_hash(paths.ROOT)
-    )
+    controller_commit_hash: str = Field(default_factory=lambda: get_git_commit_hash(paths.ROOT))
     cerebellum_commit_hash: str = Field(
         default_factory=lambda: get_git_commit_hash(paths.CEREBELLUM)
     )
@@ -108,8 +106,7 @@ class SimulationParams(BaseModel, frozen=True):
     @property
     def manual_control_steps(self) -> int:
         return int(
-            (self.time_locked_with_feedback + self.time_grasp + self.time_post)
-            / self.resolution
+            (self.time_locked_with_feedback + self.time_grasp + self.time_post) / self.resolution
         )
 
 

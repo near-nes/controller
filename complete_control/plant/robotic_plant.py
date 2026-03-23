@@ -84,9 +84,7 @@ class RoboticPlant:
             RobotArm1Dof.ELBOW_JOINT_ID,
             position_rad,
         )
-        return self.p.getLinkState(
-            self.bullet_robot._body_id, RobotArm1Dof.HAND_LINK_ID
-        )[0]
+        return self.p.getLinkState(self.bullet_robot._body_id, RobotArm1Dof.HAND_LINK_ID)[0]
 
     def _set_pos_all_joints(self, state: JointStates):
         self.p.resetJointState(
@@ -112,9 +110,7 @@ class RoboticPlant:
             RobotArm1Dof.SHOULDER_A_JOINT_ID,
             position_rad,
         )
-        return self.p.getLinkState(
-            self.bullet_robot._body_id, RobotArm1Dof.SHOULDER_A_JOINT_ID
-        )[0]
+        return self.p.getLinkState(self.bullet_robot._body_id, RobotArm1Dof.SHOULDER_A_JOINT_ID)[0]
 
     def _capture_state_and_save(self, image_path: Path, axis="y") -> None:
         from PIL import Image
@@ -138,9 +134,7 @@ class RoboticPlant:
         near = 0.1
         far = 100
         projection_matrix = self.p.computeProjectionMatrixFOV(fov, aspect, near, far)
-        view_matrix = self.p.computeViewMatrix(
-            camera_position, camera_target_position, up_vector
-        )
+        view_matrix = self.p.computeViewMatrix(camera_position, camera_target_position, up_vector)
         # self.log.debug("getting image...")
         img_arr = self.p.getCameraImage(
             width,
@@ -185,15 +179,9 @@ class RoboticPlant:
         """
         Gets the current state (position and velocity) all joints.
         """
-        s = self.p.getJointState(
-            bodyUniqueId=self.robot_id, jointIndex=self.shoulder_joint_id
-        )
-        e = self.p.getJointState(
-            bodyUniqueId=self.robot_id, jointIndex=self.elbow_joint_id
-        )
-        h = self.p.getJointState(
-            bodyUniqueId=self.robot_id, jointIndex=self.hand_joint_id
-        )
+        s = self.p.getJointState(bodyUniqueId=self.robot_id, jointIndex=self.shoulder_joint_id)
+        e = self.p.getJointState(bodyUniqueId=self.robot_id, jointIndex=self.elbow_joint_id)
+        h = self.p.getJointState(bodyUniqueId=self.robot_id, jointIndex=self.hand_joint_id)
         return JointStates(
             shoulder=JointState(s[0], s[1]),
             elbow=JointState(e[0], e[1]),
@@ -234,13 +222,9 @@ class RoboticPlant:
                 "Torques list must contain exactly one value for 1-DOF arm.",
                 num_torques=len(torques),
             )
-            raise ValueError(
-                "Torques list must contain exactly one value for 1-DOF arm."
-            )
+            raise ValueError("Torques list must contain exactly one value for 1-DOF arm.")
         self.unlock_joint()
-        self.bullet_robot.SetJointTorques(
-            joint_ids=[self.elbow_joint_id], torques=torques
-        )
+        self.bullet_robot.SetJointTorques(joint_ids=[self.elbow_joint_id], torques=torques)
 
     def simulate_step(self, duration: float) -> None:
         """
@@ -327,9 +311,7 @@ class RoboticPlant:
                 targetVelocity=0.0,
                 force=10000,  # whatever is strong enough to hold it
             )
-            self.log.debug(
-                "Joint locked at current position", pos=current_joint_pos_rad, vel=vel
-            )
+            self.log.debug("Joint locked at current position", pos=current_joint_pos_rad, vel=vel)
             self.elbow_joint_locked = True
 
     def unlock_joint(self) -> None:

@@ -118,6 +118,4 @@ def test_offset_encoding_sinexp():
 
         for idx, connection in enumerate(pf_pc_conns):
             if connection not in plastic_connections:
-                assert np.all(
-                    np.diff(weight_matrix[idx, :]) >= 0
-                )  # Make sure LTD is not happening
+                assert np.all(np.diff(weight_matrix[idx, :]) >= 0)  # Make sure LTD is not happening

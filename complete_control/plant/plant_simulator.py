@@ -29,9 +29,7 @@ class PlantSimulator:
             config: a PlantConfig object.
             pybullet_instance: The initialized PyBullet instance (e.g., p from `import pybullet as p`).
         """
-        self.log: structlog.stdlib.BoundLogger = structlog.get_logger(
-            type(self).__name__
-        )
+        self.log: structlog.stdlib.BoundLogger = structlog.get_logger(type(self).__name__)
         self.log.info("Initializing PlantSimulator...")
         self.config: PlantConfig = config
         self.p = pybullet_instance
@@ -43,9 +41,7 @@ class PlantSimulator:
         total_num_joints = (
             self.config.master_config.NJT + self.config.master_config.JOINTS_NO_CONTROL
         )
-        self.joint_data = [
-            JointData.empty(self.num_total_steps) for _ in range(total_num_joints)
-        ]
+        self.joint_data = [JointData.empty(self.num_total_steps) for _ in range(total_num_joints)]
         self.ee_data: EEData = EEData.empty(self.num_total_steps)
         # For storing raw received spikes before processing (per joint)
         self.received_spikes_pos: List[List[Tuple[float, int]]] = [
@@ -62,10 +58,7 @@ class PlantSimulator:
             (self.config.run_paths.video_frames / ax).mkdir(exist_ok=True, parents=True)
 
         # TODO this has to be saved from planner, and currently it's not. mock it!
-        if (
-            self.config.master_config.simulation.oracle.target_color
-            == TargetColor.BLUE_LEFT
-        ):
+        if self.config.master_config.simulation.oracle.target_color == TargetColor.BLUE_LEFT:
             self.direction = 0.1
         else:
             self.direction = -0.1
@@ -78,9 +71,7 @@ class PlantSimulator:
 
     def _grasp_if_target_close(self) -> float:
         if not self.checked_proximity:
-            self.log.debug(
-                "In TIME_GRASP. Verifying whether EE is in range for attachment..."
-            )
+            self.log.debug("In TIME_GRASP. Verifying whether EE is in range for attachment...")
             self.checked_proximity = True
             if self.plant.check_target_proximity():
                 self.log.debug("EE is in range. Attaching...")
@@ -119,9 +110,7 @@ class PlantSimulator:
         joint_states = self.plant.get_joint_states()
         joint_pos_rad, joint_vel_rad_s = joint_states.elbow
         ee_pos_m, ee_vel_m_list = self.plant.get_ee_pose_and_velocity()
-        curr_section = get_current_section(
-            current_sim_time_s * 1000, self.config.master_config
-        )
+        curr_section = get_current_section(current_sim_time_s * 1000, self.config.master_config)
 
         if step >= self.num_total_steps:
             self.log.warning(
@@ -148,9 +137,7 @@ class PlantSimulator:
                 )
 
         if not (step % 500):
-            self.log.debug(
-                "Simulation progress", step=step, sim_time_s=current_sim_time_s
-            )
+            self.log.debug("Simulation progress", step=step, sim_time_s=current_sim_time_s)
 
         self.plant.update_stats()
 
