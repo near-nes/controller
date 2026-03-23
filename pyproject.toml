@@ -1,0 +1,103 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "near-nes-controller"
+version = "0.1.0"
+description = "NRP-based neural simulation and cerebellar control experiment"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "NRP Team"}
+]
+license = {text = "MIT"}
+
+dependencies = [
+    # Core dependencies from docker/requirements.txt
+    "bsb>=6.0.0",
+    "bsb-nest>=6.0.0",
+    "pandas>=2.2.3",
+    "scipy>=1.15.2",
+    "numpy==1.26.0",
+    "plotly>=6.0.1",
+    "matplotlib>=3.9",
+    "pybullet>=3.2.7",
+    "structlog>=25.3.0",
+    "pydantic>=2.11",
+    "Pillow==11.3.0",
+    "cairosvg>=2.8",
+    "jupyter==1.1.1",
+    "ffmpeg>=1.4",
+    "ffmpeg-python>=0.2.0",
+    # Flask/REST dependencies
+    "Flask==3.1.1",
+    "flask-cors==6.0.1",
+    "gunicorn>=23.0",
+    "requests>=2.32",
+    "RestrictedPython>=8.0",
+    "h5py>=3.14.0",
+    # Parallel processing
+    "mpi4py==4.0.3",
+    "mpilock==1.1.0",
+    # GLE code dependencies
+    "pydenticon==0.3.1",
+    "mnist1d>=0.0.2",
+    "Gridspeccer==0.2.2",
+    "gle-code@git+https://github.com/unibe-cns/gle-code@e0b44082e620a95e9799f75ebece502091ffaa66",
+    # Additional utilities
+    "Cython==3.0.12",
+    "typing-extensions==4.15",
+    "tqdm",
+]
+
+# Direct URLs for PyTorch CPU wheels (requires PEP 440 compliance)
+# Note: pip will handle these from constraints.txt if provided
+[project.optional-dependencies]
+pytorch = [
+    "torch @ https://download.pytorch.org/whl/cpu/torch-2.6.0%2Bcpu-cp310-cp310-linux_x86_64.whl",
+    "torchvision @ https://download.pytorch.org/whl/cpu/torchvision-0.21.0%2Bcpu-cp310-cp310-linux_x86_64.whl",
+    "torchaudio @ https://download.pytorch.org/whl/cpu/torchaudio-2.6.0%2Bcpu-cp310-cp310-linux_x86_64.whl",
+]
+
+[project.urls]
+Homepage = "https://github.com/example/near-nes-controller"
+Repository = "https://github.com/example/near-nes-controller"
+
+[project.scripts]
+run-trials = "complete_control.run_trials:main"
+
+[tool.setuptools]
+packages = ["complete_control"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+complete_control = [
+    "config/**/*.py",
+    "config/**/*.txt",
+    "config/**/*.json",
+    "neural/**/*",
+    "plant/**/*",
+    "interfaces/**/*",
+    "utils_common/**/*",
+    "reference_data/**/*",
+    "deprecated/**/*",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false

@@ -1,0 +1,35 @@
+bsb>=6.0.0
+bsb-nest>=6.0.0
+pandas>=2.2.3
+scipy>=1.15.2
+numpy==1.26.0
+plotly>=6.0.1
+matplotlib>=3.9
+pybullet>=3.2.7
+structlog>=25.3.0
+pydantic>=2.11
+Pillow==11.3.0
+cairosvg>=2.8
+jupyter==1.1.1
+ffmpeg>=1.4
+ffmpeg-python>=0.2.0
+Flask==3.1.1
+flask-cors==6.0.1
+gunicorn>=23.0
+requests>=2.32
+RestrictedPython>=8.0
+h5py>=3.14.0
+mpi4py==4.0.3
+mpilock==1.1.0
+pydenticon==0.3.1
+mnist1d>=0.0.2
+Gridspeccer==0.2.2
+gle-code @ git+https://github.com/unibe-cns/gle-code@e0b44082e620a95e9799f75ebece502091ffaa66
+Cython==3.0.12
+typing-extensions==4.15
+tqdm
+
+[pytorch]
+torch @ https://download.pytorch.org/whl/cpu/torch-2.6.0%2Bcpu-cp310-cp310-linux_x86_64.whl
+torchvision @ https://download.pytorch.org/whl/cpu/torchvision-0.21.0%2Bcpu-cp310-cp310-linux_x86_64.whl
+torchaudio @ https://download.pytorch.org/whl/cpu/torchaudio-2.6.0%2Bcpu-cp310-cp310-linux_x86_64.whl
