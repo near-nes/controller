@@ -9,7 +9,11 @@ description = "NRP-based neural simulation and cerebellar control experiment"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    {name = "NRP Team"}
+    {name = "pollomarzo"}
+]
+maintainers = [
+    {name = "pollomarzo"},
+    {name = "vvorobjov"}
 ]
 license = {text = "MIT"}
 
@@ -61,8 +65,8 @@ pytorch = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/example/near-nes-controller"
-Repository = "https://github.com/example/near-nes-controller"
+Homepage = "https://github.com/near-nes/controller"
+Repository = "https://github.com/near-nes/controller"
 
 [project.scripts]
 run-trials = "complete_control.run_trials:main"

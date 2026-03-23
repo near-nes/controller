@@ -280,8 +280,8 @@ ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 
 # point nest to nest installation
 RUN echo ${NEST_INSTALL_DIR}/lib/${PYTHON_MAJOR_MINOR}/site-packages >> ${VIRTUAL_ENV}/lib/${PYTHON_MAJOR_MINOR}/site-packages/nest.pth
-# pythonpath construction
-ENV PYTHONPATH="${NRP_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages:${CONTROLLER_DIR}:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
+# pythonpath construction (note: CONTROLLER_DIR no longer needed as package is installed via pip)
+ENV PYTHONPATH="${NRP_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
 WORKDIR /sim
@@ -325,22 +325,24 @@ FROM runtime AS dev
 # In dev, the controller directory is mounted from the host and the user is the same as the host user.
 ENV SIMULATION_MODE=dev
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
-ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 ENV SDF_MODELS_DIR=${SUBMODULES_PATH}/embodiment_sdf_models
+# Package is auto-installed in editable mode by entrypoint (after mount), PYTHONPATH includes submodules
+ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
 FROM runtime AS hpc
-# >>>>>>>tmp, move to git-installable packages asap TODO
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
-ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 ENV SDF_MODELS_DIR=${SUBMODULES_PATH}/embodiment_sdf_models
+ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
-# <<<<<<<
 
 # In HPC, the controller directory is copied into the image and the user is the default simuser.
 ENV SIMULATION_MODE=hpc
-# On HPC do not mount anythin on top of artifacts folder, so that the archive is not overwritten
+# On HPC do not mount anything on top of artifacts folder, so that the archive is not overwritten
 ENV BSB_NETWORK_FILE=/tmp/cerebellum_plastic_base.hdf5
 COPY . /sim/controller
 RUN chown -R $USERNAME /sim/controller
-# RUN chmod -R a+rwX /sim
+# Install package from copied directory in editable mode
+WORKDIR ${CONTROLLER_DIR}
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -e . --no-deps
