@@ -39,7 +39,7 @@ class ExperimentParams(BaseModel, frozen=True):
 
 class OracleData(BaseModel):
     init_joint_angle: float = 90
-    tgt_joint_angle: float = 20
+    tgt_joint_angle: float = 140
     target_visual_offset: float = 4.0
     target_tolerance_angle_deg: float = 10
     target_color: TargetColor = Field(default=TargetColor.RED_RIGHT)

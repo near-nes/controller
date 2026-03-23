@@ -436,7 +436,8 @@ class Controller:
         self.log.debug("Connecting internal controller blocks")
 
         # Planner -> M1
-        self.mc.connect(self.pops.planner_p, self.pops.planner_n)
+        # only feed input to M1 at TIME_PREP - m1_delay
+        # self.mc.connect_planner_to_m1(self.pops.planner_p, self.pops.planner_n)
 
         # Planner -> Motor Cortex Feedback Input
         conn_spec = self.conn_params.planner_mc_fbk
@@ -723,14 +724,17 @@ class Controller:
             self.cerebellum_handler.apply_blocking_window(curr_section)
 
         connect_m1_at = (
-            self.master_params.simulation.time_prep - self.conn_params.m1_delay
+            self.master_params.simulation.time_prep
+            - self.master_params.connections.m1_delay
         )
 
-        # if not self.connected_m1 and sim_time_s * 1000 > connect_m1_at:
-        #     self.log.warning(f"reached {connect_m1_at}ms! connecting m1...")
-        #     self.mc.m1.connect_rec_out()
-        #     self.connected_m1 = True
-        #     self.log.warning(f"connected m1 rec to out!")
+        if not self.connected_m1 and sim_time_s * 1000 > connect_m1_at:
+            self.log.warning(f"reached {connect_m1_at}ms! connecting m1...")
+            self.mc.connect_planner_to_m1(self.pops.planner_p, self.pops.planner_n)
+            # self.mc.m1.connect_rec_out()
+            # self.mc.connect_m1_to_out()
+            self.connected_m1 = True
+            self.log.warning(f"connected m1 rec to out!")
 
         if (
             curr_section != TrialSection.TIME_GRASP

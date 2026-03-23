@@ -139,6 +139,7 @@ class MotorCortex:
                 simulation=SimulationConfig(step=self.sim.resolution),
                 task=TaskConfig(input_shift_ms=self.m1_delay),
                 training=TrainingSignalConfig(
+                    n_input_neurons=numNeurons,
                     time_move_ms=self.sim.time_move,
                     m1_kp=params.m1_mock_config.m1_kp,
                     m1_base_rate=params.m1_mock_config.m1_base_rate,
@@ -147,15 +148,16 @@ class MotorCortex:
                     planner_base_rate=self.plan_params.base_rate,
                 ),
             )
-            network = m1_factory.get_m1_or_raise(
+            self.m1 = m1_factory.get_m1_or_raise(
                 m1_config, params.m1_eprop_config.artifacts_dir
             )
-            network.build_network(
+            self.m1.build_network(
                 simulation_time_ms=self.sim.duration_ms,
                 output_neuron_model="basic_neuron_nestml",
                 output_neuron_params={
                     "simulation_steps": self.sim.sim_steps,
                     "kp": 0.001,
+                    "buffer_size": 50,  # 5 for downwards, 50 for upwards
                     # "tau_m": m1_config.neurons.out.tau_m,
                     # "C_m": m1_config.neurons.out.C_m,
                     # "E_L": m1_config.neurons.out.E_L,
@@ -163,8 +165,7 @@ class MotorCortex:
                 },
                 n_out=params.m1_eprop_config.n_out_pop,
             )
-            self.m1 = network
-            m1_to_out = "one_to_one"
+            self.conn_type_m1_to_out = "one_to_one"
         else:
             from utils_common.generate_signals_minjerk import (
                 generate_motor_commands_minjerk,
@@ -178,7 +179,7 @@ class MotorCortex:
                 self.sim.sim_steps,
                 delay_ms=self.m1_delay,
             )
-            m1_to_out = "one_to_one"
+            self.conn_type_m1_to_out = "one_to_one"
 
         par_fbk = {"base_rate": params.fbk_base_rate, "kp": params.fbk_kp}
         par_out = {"base_rate": params.out_base_rate, "kp": params.out_kp}
@@ -238,31 +239,7 @@ class MotorCortex:
             },
         )
         self.out_n = PopView(tmp_pop_n, to_file=True, label="mc_out_n")
-
-        nest.Connect(
-            m1_out_p,
-            self.out_p.pop,
-            m1_to_out,
-            {"weight": params.wgt_ffwd_out},
-        )
-        nest.Connect(
-            m1_out_p,
-            self.out_n.pop,
-            m1_to_out,
-            {"weight": params.wgt_ffwd_out},
-        )
-        nest.Connect(
-            m1_out_n,
-            self.out_p.pop,
-            m1_to_out,
-            {"weight": -params.wgt_ffwd_out},
-        )
-        nest.Connect(
-            m1_out_n,
-            self.out_n.pop,
-            m1_to_out,
-            {"weight": -params.wgt_ffwd_out},
-        )
+        # self.connect_m1_to_out()
 
         nest.Connect(
             self.fbk_p.pop,
@@ -288,6 +265,33 @@ class MotorCortex:
             "one_to_one",
             {"weight": -params.wgt_fbk_out},
         )
+        self.connect_m1_to_out()
 
-    def connect(self, planner_p: PopView, planner_n: PopView):
+    def connect_m1_to_out(self):
+        nest.Connect(
+            self.m1_out_p.pop,
+            self.out_p.pop,
+            self.conn_type_m1_to_out,
+            {"weight": self.params.wgt_ffwd_out},
+        )
+        nest.Connect(
+            self.m1_out_p.pop,
+            self.out_n.pop,
+            self.conn_type_m1_to_out,
+            {"weight": self.params.wgt_ffwd_out},
+        )
+        nest.Connect(
+            self.m1_out_n.pop,
+            self.out_p.pop,
+            self.conn_type_m1_to_out,
+            {"weight": -self.params.wgt_ffwd_out},
+        )
+        nest.Connect(
+            self.m1_out_n.pop,
+            self.out_n.pop,
+            self.conn_type_m1_to_out,
+            {"weight": -self.params.wgt_ffwd_out},
+        )
+
+    def connect_planner_to_m1(self, planner_p: PopView, planner_n: PopView):
         self.m1.connect(planner_p.pop)

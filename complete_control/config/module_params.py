@@ -35,7 +35,7 @@ class PlannerModuleConfig(BaseModel):
 
 class M1MockConfig(BaseModel):
     m1_base_rate: float = 0.0
-    m1_kp: float = 2000.0296740997816629
+    m1_kp: float = 2000
 
 
 class M1EPropConfig(BaseModel):

@@ -1,31 +1,36 @@
 simulation:
   rng_seed: 1234
   print_time: false
-  total_num_virtual_procs: 4
+  total_num_virtual_procs: 16
   step: 1.0
 task:
-  samples_per_trajectory_in_dataset: 10
-  trajectory_ids_to_use:
-  - 0
-  - 1
-  n_samples_per_trajectory_to_use: 1
   gradient_batch_size: 1
-  n_iter: 100
-  sequence: 1500.0
-  silent_period: 0.0
-  input_shift_ms: 100.0
-  learning_start: 650.0
-  learning_end: 1500.0
+  n_iter: 200
+  input_shift_ms: 50.0
+  learning_window_ms: 500.0
+training:
+  trajectories:
+  - init_angle_deg: 90.0
+    target_angle_deg: 140.0
+  - init_angle_deg: 90.0
+    target_angle_deg: 20.0
+  n_input_neurons: 200
+  planner_kp: 100.0
+  planner_base_rate: 5
+  m1_kp: 2000.0
+  m1_base_rate: 0.0
+  inertia: 0.00189
+  time_prep_ms: 50.0
+  time_move_ms: 500.0
+  time_post_ms: 0.0
 rbf:
   num_centers: 20
-  width: 0.06
-  scale_rate: 500.0
-  shift_min_rate: 0.0
-  desired_upper_hz: 60000.0
+  desired_min_rate: 0.0
+  desired_max_rate: 60000.0
   kp: 1000.0
   base_rate: 0.0
   buffer_size: 10.0
-  sdev_hz: 3600.0
+  sdev_hz: 1500.0
   max_peak_rate_hz: 800.0
 neurons:
   n_rec: 300
@@ -43,7 +48,7 @@ neurons:
     t_ref: 2.0
     tau_m: 20.0
     V_m: 0.0
-    V_th: 20.0
+    V_th: 0.03
   out:
     C_m: 250.0
     E_L: 0.0
@@ -62,19 +67,12 @@ synapses:
   feedback_delay: 1.0
   rate_target_delay: 1.0
   receptor_type: 2
-  exc:
+  syn:
     optimizer:
       type: gradient_descent
-      eta: 0.01
-      Wmin: 0.0
-      Wmax: 1000.0
-  inh:
-    optimizer:
-      type: gradient_descent
-      eta: 0.01
+      eta: 0.0001
       Wmin: -1000.0
-      Wmax: 0.0
-    weight: -400.0
+      Wmax: 1000.0
 recording:
   n_record: 2
   n_record_w: 5
@@ -94,4 +92,4 @@ recording:
     - error_signal
 plotting:
   do_plotting: true
-git_commit: afce0e6c109e5fd8ed0adbe4f6edaf984319b320
+git_commit: 63e8553225650e729721b05e6c88fdebea7e8bfc
