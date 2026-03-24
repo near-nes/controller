@@ -96,6 +96,9 @@ class Cerebellum:
         adapter.create_neurons(simulation_inv)
         self.log.debug("created cerebellum neurons")
 
+        # set t0 sinexp_sinapse equal to sensorydelay
+        nest.SetDefaults("stdp_synapse_sinexp", {"t_0": self.conn_params.sensory_delay})
+
         adapter.connect_neurons(simulation_forw)
         adapter.connect_neurons(simulation_inv)
         self.log.debug("connected cerebellum neurons")
