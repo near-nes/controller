@@ -106,6 +106,12 @@ class CerebellumHandler:
         self.blocking_window_pred_neg_neg_conns = None
         self.blocking_window_pred_pos_neg_conns = None
         self.blocking_window_pred_neg_pos_conns = None
+        self.blocking_window_io_inv_pos_conns = None
+        self.blocking_window_io_inv_neg_conns = None
+        self.blocking_window_motor_pred_pos_pos_conns = None
+        self.blocking_window_motor_pred_neg_neg_conns = None
+        self.blocking_window_motor_pred_pos_neg_conns = None
+        self.blocking_window_motor_pred_neg_pos_conns = None
 
         # --- Initialize Interface Populations Dataclass ---
         self.interface_pops = CerebellumHandlerPopulations()
@@ -688,12 +694,48 @@ class CerebellumHandler:
             target=self.controller_pops.pred_p.pop,
             synapse_model="static_synapse",
         )
+
+        # BLOCK connections from error_inv to inv_io
+        self.blocking_window_io_inv_pos_conns = nest.GetConnections(
+            source=self.interface_pops.error_inv_p.pop,
+            target=self.cerebellum.populations.inv_io_p.pop,
+            synapse_model="static_synapse",
+        )
+
+        self.blocking_window_io_inv_neg_conns = nest.GetConnections(
+            source=self.interface_pops.error_inv_n.pop,
+            target=self.cerebellum.populations.inv_io_n.pop,
+            synapse_model="static_synapse",
+        )
+
+        # BLOCK connections from DCN:inv to motor_pred
+        self.blocking_window_motor_pred_pos_pos_conns = nest.GetConnections(
+            source=self.cerebellum.populations.inv_dcnp_p.pop,
+            target=self.interface_pops.motor_prediction_p.pop,
+            synapse_model="static_synapse",
+        )
+        self.blocking_window_motor_pred_neg_neg_conns = nest.GetConnections(
+            source=self.cerebellum.populations.inv_dcnp_n.pop,
+            target=self.interface_pops.motor_prediction_n.pop,
+            synapse_model="static_synapse",
+        )
+        self.blocking_window_motor_pred_pos_neg_conns = nest.GetConnections(
+            source=self.cerebellum.populations.inv_dcnp_p.pop,
+            target=self.interface_pops.motor_prediction_n.pop,
+            synapse_model="static_synapse",
+        )
+        self.blocking_window_motor_pred_neg_pos_conns = nest.GetConnections(
+            source=self.cerebellum.populations.inv_dcnp_n.pop,
+            target=self.interface_pops.motor_prediction_p.pop,
+            synapse_model="static_synapse",
+        )
         return
 
     def apply_blocking_window(self, curr_section):
         if curr_section == TrialSection.TIME_PREP:
             if not self.blocking_window_is_applied:
                 self.log.debug("[neural] Applying blocking window to IO-MF-PRED")
+                # BLOCKING WINDOW ON - FORWARD
                 # block io_fwd
                 nest.SetStatus(self.blocking_window_io_fwd_pos_conns, {"weight": 0.0})
                 nest.SetStatus(self.blocking_window_io_fwd_neg_conns, {"weight": 0.0})
@@ -710,11 +752,37 @@ class CerebellumHandler:
                 nest.SetStatus(self.blocking_window_pred_pos_neg_conns, {"weight": 0.0})
                 nest.SetStatus(self.blocking_window_pred_neg_pos_conns, {"weight": 0.0})
 
+                # BLOCKING WINDOW ON - INVERSE
+                # block io_inv
+                nest.SetStatus(self.blocking_window_io_inv_pos_conns, {"weight": 0.0})
+                nest.SetStatus(self.blocking_window_io_inv_neg_conns, {"weight": 0.0})
+
+                # block mf_inv
+                nest.SetStatus(
+                    self.interface_pops.plan_to_inv.pop,
+                    {"max_peak_rate": 0.0, "base_rate": 0.0},
+                )
+
+                # block motor_pred
+                nest.SetStatus(
+                    self.blocking_window_motor_pred_pos_pos_conns, {"weight": 0.0}
+                )
+                nest.SetStatus(
+                    self.blocking_window_motor_pred_neg_neg_conns, {"weight": 0.0}
+                )
+                nest.SetStatus(
+                    self.blocking_window_motor_pred_pos_neg_conns, {"weight": 0.0}
+                )
+                nest.SetStatus(
+                    self.blocking_window_motor_pred_neg_pos_conns, {"weight": 0.0}
+                )
+
                 self.blocking_window_is_applied = True
 
         else:
             if self.blocking_window_is_applied:
                 self.log.debug("[neural] Removing blocking window to IO-MF-PRED")
+                # BLOCKING WINDOW OFF - FORWARD
                 # active  io_fwd
                 w = self.conn_params.error_io_f.weight
                 nest.SetStatus(self.blocking_window_io_fwd_pos_conns, {"weight": w})
@@ -733,5 +801,33 @@ class CerebellumHandler:
                 nest.SetStatus(self.blocking_window_pred_pos_neg_conns, {"weight": w})
                 nest.SetStatus(self.blocking_window_pred_neg_pos_conns, {"weight": -w})
                 nest.SetStatus(self.blocking_window_pred_neg_neg_conns, {"weight": -w})
+
+                # BLOCKING WINDOW OFF - INVERSE
+                # active  io_inv
+                w = self.conn_params.error_inv_io_i.weight
+                nest.SetStatus(self.blocking_window_io_inv_pos_conns, {"weight": w})
+                nest.SetStatus(self.blocking_window_io_inv_neg_conns, {"weight": -w})
+
+                # active mf_inv
+                base_rate_mc = self.pops_params.plan_to_inv.base_rate
+                nest.SetStatus(
+                    self.interface_pops.plan_to_inv.pop,
+                    {"max_peak_rate": 300.0, "base_rate": base_rate_mc},
+                )
+
+                # active motor_pred
+                w = self.conn_params.dcn_i_motor_pred.weight
+                nest.SetStatus(
+                    self.blocking_window_motor_pred_pos_pos_conns, {"weight": w}
+                )
+                nest.SetStatus(
+                    self.blocking_window_motor_pred_pos_neg_conns, {"weight": w}
+                )
+                nest.SetStatus(
+                    self.blocking_window_motor_pred_neg_pos_conns, {"weight": -w}
+                )
+                nest.SetStatus(
+                    self.blocking_window_motor_pred_neg_neg_conns, {"weight": -w}
+                )
 
                 self.blocking_window_is_applied = False
