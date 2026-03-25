@@ -12,9 +12,7 @@ FIG_FOLDER = Path(".") / "res"
 
 
 def parse_and_plot_rbf_data(data):
-    pattern = re.compile(
-        r"in_rate:\s*([\d\.]+)\s*out_rate:\s*([\d\.]+)\s*sens:\s*(-?[\d\.]+)"
-    )
+    pattern = re.compile(r"in_rate:\s*([\d\.]+)\s*out_rate:\s*([\d\.]+)\s*sens:\s*(-?[\d\.]+)")
 
     out_rates = []
     sens_values = []

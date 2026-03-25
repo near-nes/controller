@@ -56,9 +56,7 @@ class ControllerPopulationsRecordings(ControllerPopulationsGeneric[PopulationSpi
 
 class ControllerPopulations(ControllerPopulationsGeneric[PopView]):
     def to_recording(self, *args, **kwargs) -> ControllerPopulationsRecordings:
-        return convert_to_recording(
-            self, ControllerPopulationsRecordings, *args, **kwargs
-        )
+        return convert_to_recording(self, ControllerPopulationsRecordings, *args, **kwargs)
 
     def __setattr__(self, name, value):
         # Auto-label PopView instances when assigned

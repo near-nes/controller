@@ -127,9 +127,7 @@ upperarm = p.getLinkState(
 forearm = p.getLinkState(
     bullet_robot._body_id, RobotArm1Dof.FOREARM_LINK_ID, computeLinkVelocity=True
 )[0]
-hand = p.getLinkState(
-    bullet_robot._body_id, RobotArm1Dof.HAND_LINK_ID, computeLinkVelocity=True
-)[0]
+hand = p.getLinkState(bullet_robot._body_id, RobotArm1Dof.HAND_LINK_ID, computeLinkVelocity=True)[0]
 
 # hand = bullet_robot.EEPose()[0]
 # _init_pos = [hand[0], hand[2]]  # NO! only update it after resetting joint state
@@ -197,9 +195,7 @@ hand_at_zero = p.getLinkState(
 print(f"hand at zero {hand_at_zero}")
 
 
-p.resetJointState(
-    bullet_robot._body_id, RobotArm1Dof.ELBOW_JOINT_ID, exp._tgt_joint_angle
-)
+p.resetJointState(bullet_robot._body_id, RobotArm1Dof.ELBOW_JOINT_ID, exp._tgt_joint_angle)
 hand_at_desired = p.getLinkState(
     bullet_robot._body_id, RobotArm1Dof.HAND_LINK_ID, computeLinkVelocity=True
 )[0]
@@ -208,9 +204,7 @@ _desired_abs_tgt_ee = (hand_at_desired[0], hand_at_desired[2])
 
 print(f"\n\n\n _desired_abs_tgt_ee={_desired_abs_tgt_ee}")
 ############################ BRAIN ############################
-p.resetJointState(
-    bullet_robot._body_id, RobotArm1Dof.ELBOW_JOINT_ID, exp.init_pos_angle
-)
+p.resetJointState(bullet_robot._body_id, RobotArm1Dof.ELBOW_JOINT_ID, exp.init_pos_angle)
 hand_at_effective_start = p.getLinkState(
     bullet_robot._body_id, RobotArm1Dof.HAND_LINK_ID, computeLinkVelocity=True
 )[0]
@@ -290,16 +284,12 @@ sn_n = []  # Negative sensory neurons
 for i in range(njt):
     # Positive
     idSt_p = sensNeur_idSt + 2 * N * i
-    tmp = SensoryNeuron(
-        N, pos=True, idStart=idSt_p, bas_rate=sensNeur_baseRate, kp=sensNeur_gain
-    )
+    tmp = SensoryNeuron(N, pos=True, idStart=idSt_p, bas_rate=sensNeur_baseRate, kp=sensNeur_gain)
     tmp.connect(outdata)  # Connect to output port
     sn_p.append(tmp)
     # Negative
     idSt_n = idSt_p + N
-    tmp = SensoryNeuron(
-        N, pos=False, idStart=idSt_n, bas_rate=sensNeur_baseRate, kp=sensNeur_gain
-    )
+    tmp = SensoryNeuron(N, pos=False, idStart=idSt_n, bas_rate=sensNeur_baseRate, kp=sensNeur_gain)
     tmp.connect(outdata)  # Connect to output port
     sn_n.append(tmp)
 
@@ -511,9 +501,7 @@ np.savetxt(pthDat + "pos_des_joint.csv", trj, delimiter=",")  # Joints
 
 # Motor commands
 np.savetxt(pthDat + "inputCmd_des.csv", inputDes, delimiter=",")  # Desired torques
-np.savetxt(
-    pthDat + "inputCmd_motNeur.csv", inputCmd, delimiter=","
-)  # Torques from motor neurons
+np.savetxt(pthDat + "inputCmd_motNeur.csv", inputCmd, delimiter=",")  # Torques from motor neurons
 np.savetxt(
     pthDat + "inputCmd_tot.csv", inputCmd_tot, delimiter=","
 )  # Torques from motor neurons + perturbation
@@ -618,12 +606,16 @@ for trial in range(n_trial):
             bullet_robot._body_id,
             RobotArm1Dof.HAND_LINK_ID,
             computeLinkVelocity=True,
-        )[0][0],
+        )[
+            0
+        ][0],
         p.getLinkState(
             bullet_robot._body_id,
             RobotArm1Dof.HAND_LINK_ID,
             computeLinkVelocity=True,
-        )[0][2],
+        )[
+            0
+        ][2],
         marker=".",
         color="green",
         label="final hand pos",

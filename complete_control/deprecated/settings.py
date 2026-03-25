@@ -76,16 +76,12 @@ class Experiment:
         alpha = 0  # np.arctan(self._tgt_pos[:,1]/self._tgt_pos[:,0])/np.pi*180
         left = 180 - alpha
         right = -alpha
-        self._frcFld_angle = (
-            right  # Angle of the perturbation force wrt movement velocity
-        )
+        self._frcFld_angle = right  # Angle of the perturbation force wrt movement velocity
         self._frcFld_k = 2  # Gain of the perturbation force wrt movement velocity
         self._ff_application = (
             1e6  # Trial at which the Force Field is applied (1e6 = no force field)
         )
-        self._ff_removal = (
-            1e6  # Trial at which the Force Field is removed for extinction
-        )
+        self._ff_removal = 1e6  # Trial at which the Force Field is removed for extinction
 
         # Dynamical system
         self._robot_spec = {
@@ -325,9 +321,7 @@ class Brain:
 
     def initSpine(self):
 
-        self._firstIdSensNeurons = (
-            0  # First ID of the sensory neurons (keep it at zero)
-        )
+        self._firstIdSensNeurons = 0  # First ID of the sensory neurons (keep it at zero)
 
         # self._spine_param = {
         #     "wgt_motCtx_motNeur" : 1.0, # Weight motor cortex - motor neurons

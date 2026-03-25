@@ -25,6 +25,15 @@ services:
     image: simulation:dev
     command: bash
 
+  production:
+    <<: *simulation-base
+    image: simulation:prod
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: prod
+    command: bash
+
   simulation-nrp:
     <<: *simulation-base
     image: simulation:nrp

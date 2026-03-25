@@ -96,9 +96,9 @@ class Controller:
             use_cerebellum (bool): Flag to enable/disable cerebellum integration.
             cerebellum_paths: paths for Cerebellum build, required if use_cerebellum is True.
         """
-        self.log: structlog.stdlib.BoundLogger = structlog.get_logger(
-            f"controller"
-        ).bind(controller_dof=dof_id)
+        self.log: structlog.stdlib.BoundLogger = structlog.get_logger(f"controller").bind(
+            controller_dof=dof_id
+        )
         self.log.info("Initializing Controller")
         self.dof_id = dof_id
         self.N = N
@@ -224,9 +224,7 @@ class Controller:
         """Instantiates the internal CerebellumHandler."""
         self.log.info("Instantiating internal CerebellumHandler")
         if self.cerebellum_paths is None:
-            raise ValueError(
-                "Cerebellum config must be provided when use_cerebellum is True"
-            )
+            raise ValueError("Cerebellum config must be provided when use_cerebellum is True")
 
         cereb_pops_params = self.pops_params
         cereb_conn_params = self.conn_params
@@ -432,9 +430,9 @@ class Controller:
         # Planner -> Motor Cortex Feedback Input
         conn_spec = self.conn_params.planner_mc_fbk
         syn_spec_p = conn_spec.model_dump(exclude_none=True)
-        syn_spec_n = conn_spec.model_copy(
-            update={"weight": -conn_spec.weight}
-        ).model_dump(exclude_none=True)
+        syn_spec_n = conn_spec.model_copy(update={"weight": -conn_spec.weight}).model_dump(
+            exclude_none=True
+        )
         self.log.debug(
             "Connecting Planner to MC Fbk",
             syn_spec_p=syn_spec_p,
@@ -555,9 +553,9 @@ class Controller:
         # Connections INTO State Estimator
         conn_spec = self.conn_params.sensory_delayed_state
         syn_spec_p = conn_spec.model_dump(exclude_none=True)
-        syn_spec_n = conn_spec.model_copy(
-            update={"weight": -conn_spec.weight}
-        ).model_dump(exclude_none=True)
+        syn_spec_n = conn_spec.model_copy(update={"weight": -conn_spec.weight}).model_dump(
+            exclude_none=True
+        )
         nest.Connect(
             self.pops.sensory_delayed_p.pop,
             self.pops.state_p.pop,
@@ -585,9 +583,9 @@ class Controller:
 
         conn_spec = self.conn_params.pred_state
         syn_spec_p = conn_spec.model_dump(exclude_none=True)
-        syn_spec_n = conn_spec.model_copy(
-            update={"weight": -conn_spec.weight}
-        ).model_dump(exclude_none=True)
+        syn_spec_n = conn_spec.model_copy(update={"weight": -conn_spec.weight}).model_dump(
+            exclude_none=True
+        )
         nest.Connect(
             self.pops.pred_p.pop,
             self.pops.state_p.pop,
@@ -632,12 +630,8 @@ class Controller:
             },
         )
 
-        nest.Connect(
-            self.pops.brainstem_p.pop, self.proxy_out[0], "all_to_all", conn_spec
-        )
-        nest.Connect(
-            self.pops.brainstem_n.pop, self.proxy_out[1], "all_to_all", conn_spec
-        )
+        nest.Connect(self.pops.brainstem_p.pop, self.proxy_out[0], "all_to_all", conn_spec)
+        nest.Connect(self.pops.brainstem_n.pop, self.proxy_out[1], "all_to_all", conn_spec)
 
         # positive
         self.proxy_in_p = SensoryNeuron(
@@ -684,9 +678,7 @@ class Controller:
         )
 
     def extract_motor_command_NRP(self):
-        rate_pos, rate_neg = [
-            i / self.N for i in nest.GetStatus(self.proxy_out, "in_rate")[0:2]
-        ]
+        rate_pos, rate_neg = [i / self.N for i in nest.GetStatus(self.proxy_out, "in_rate")[0:2]]
 
         return rate_pos, rate_neg
 

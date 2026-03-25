@@ -53,9 +53,7 @@ class NESTClient:
     def Connect(self, *args, **kwargs):
         args = [i if isinstance(i, list) else [i] for i in args[0:2]] + list(args[2:])
         kwargs["args"] = args
-        response = requests.post(
-            self.url + "api/Connect", json=kwargs, headers=self.headers
-        )
+        response = requests.post(self.url + "api/Connect", json=kwargs, headers=self.headers)
         if response.ok:
             res = response.json()
             if not isinstance(res, list):
@@ -72,9 +70,7 @@ class NESTClient:
     def __getattr__(self, call):
         def method(*args, **kwargs):
             kwargs.update({"args": args})
-            response = requests.post(
-                self.url + "api/" + call, json=kwargs, headers=self.headers
-            )
+            response = requests.post(self.url + "api/" + call, json=kwargs, headers=self.headers)
             return encode(response, call, kwargs)
 
         return method

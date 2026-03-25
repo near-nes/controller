@@ -68,9 +68,7 @@ def plot_synaptic_weight_evolution(synapse_json_path, max_synapses=10, fig_path=
 
     ax.set_xlabel("Trial")
     ax.set_ylabel("Synaptic weight")
-    ax.set_title(
-        f"Weight evolution: {syn_block.source_pop_label} → {syn_block.target_pop_label}"
-    )
+    ax.set_title(f"Weight evolution: {syn_block.source_pop_label} → {syn_block.target_pop_label}")
 
     ax.legend(fontsize="small")
     fig.tight_layout()
@@ -370,9 +368,7 @@ def plot_populations_per_trial(
             if path_fig:
                 trial_plot_path = path_fig / "Trials" / f"{plot_name_t}_{i}"
                 trial_plot_path.mkdir(parents=True, exist_ok=True)
-                fig_ipop.savefig(
-                    trial_plot_path / f"Trial_{nt}_{plot_name_t}_{i}.{FIGURE_EXT}"
-                )
+                fig_ipop.savefig(trial_plot_path / f"Trial_{nt}_{plot_name_t}_{i}.{FIGURE_EXT}")
                 _log.debug(
                     f"Saved plot at {trial_plot_path} / Trial_{nt}_{plot_name_t}_{i}.{FIGURE_EXT}"
                 )
@@ -437,9 +433,7 @@ def extract_neural_and_merge(metas: list[ResultMeta]):
     neural_concat = concatenate_neural_results(metas)
     ref_mc: MasterParams = metas[0].load_params()
 
-    total_sim_duration = sum(
-        p.simulation.duration_ms for p in [m.load_params() for m in metas]
-    )
+    total_sim_duration = sum(p.simulation.duration_ms for p in [m.load_params() for m in metas])
     time_vect = np.linspace(
         0,
         total_sim_duration,
@@ -485,9 +479,7 @@ def plot_overlay(
     if path_fig:
         overl_path = path_fig / f"overlayed/{'normalized' if normalize else ''}"
         overl_path.mkdir(parents=True, exist_ok=True)
-        save_path = (
-            overl_path / f"{label}_{'normalized' if normalize else ''}.{FIGURE_EXT}"
-        )
+        save_path = overl_path / f"{label}_{'normalized' if normalize else ''}.{FIGURE_EXT}"
         fig_overl.savefig(save_path)
         _log.debug(f"Saved overlayed plot at {save_path}")
         plt.close(fig_overl)

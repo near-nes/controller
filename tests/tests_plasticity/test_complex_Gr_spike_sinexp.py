@@ -35,12 +35,8 @@ def test_complex_Gr_spike_sinexp():
     # nest.SetStatus(Gr, GR_params) # If used, Gr does not spike
 
     complex_spike_time = [997]
-    complex_spike_gen = nest.Create(
-        "spike_generator", {"spike_times": complex_spike_time}
-    )
-    nest.Connect(
-        complex_spike_gen, IO, "all_to_all", {"weight": 1000, "receptor_type": 1}
-    )
+    complex_spike_gen = nest.Create("spike_generator", {"spike_times": complex_spike_time})
+    nest.Connect(complex_spike_gen, IO, "all_to_all", {"weight": 1000, "receptor_type": 1})
 
     # Set threshold of IOs and GrCs to 0.0 mV to avoid autonomous firing
     nest.SetStatus(IO, {"V_th": 0.0})

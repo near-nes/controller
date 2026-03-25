@@ -20,3 +20,5 @@ target/state_MAD_neuron.cpp
 target/state_MAD_neuron.h
 tests_POCs/PLV_Emiliano.py
 tests_POCs/test_receptor_paolo.py
+
+*.egg-info

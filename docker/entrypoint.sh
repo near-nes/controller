@@ -68,7 +68,7 @@ if [ "$SIMULATION_MODE" = "dev" ]; then
     USER_ID_TO_USE=$TARGET_UID
     GROUP_ID_TO_USE=$TARGET_GID
 else
-    echo "Running in 'hpc' mode. Skipping UID/GID synchronization."
+    echo "Running in '${SIMULATION_MODE}' mode. Skipping UID/GID synchronization."
     USER_ID_TO_USE=$(id -u "$USERNAME")
     GROUP_ID_TO_USE=$(id -g "$USERNAME")
 fi
@@ -91,8 +91,23 @@ echo "Final LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 echo "Final PATH: $PATH"
 echo "Final PYTHONPATH: $PYTHONPATH"
 
-# --- Execute the command directly if in HPC mode ---
-if [ "$SIMULATION_MODE" = "hpc" ]; then
+# --- Install near-nes-controller package in editable mode (dev mode) as non-root user ---
+if [ "$SIMULATION_MODE" = "dev" ]; then
+    if [ -f "${CONTROLLER_DIR}/pyproject.toml" ]; then
+        echo "Refreshing near-nes-controller package in editable mode as user $USERNAME..."
+        # Remove preinstalled package from site-packages but keep dependencies in place.
+        gosu "$USERNAME" "${VENV_PATH}/bin/pip" uninstall -y near-nes-controller >/dev/null 2>&1 || true
+        # Install with --no-build-isolation to skip downloading setuptools
+        gosu "$USERNAME" bash -c "cd ${CONTROLLER_DIR} && ${VENV_PATH}/bin/pip install -e . --no-build-isolation" 2>&1 | tail -5 || true
+        echo "Package installation completed."
+    else
+        echo "Warning: pyproject.toml not found in ${CONTROLLER_DIR}. Skipping package installation."
+        exit 1
+    fi
+fi
+
+# --- Execute the command directly if in HPC or prod mode ---
+if [ "$SIMULATION_MODE" = "hpc" ] || [ "$SIMULATION_MODE" = "prod" ]; then
     exec "$@"
 fi
 

@@ -18,6 +18,57 @@ The folder `config` contains several pydantic models used for parameters. The ma
 ## Development
 We develop this using a (docker) devcontainer, made to the specifications of `devcontainer.json`, `docker-compose` and `docker/Dockerfile`. The HPC container (singularity) is also created from the docker container.
 
+### Using the Pip-Installable Package in Development
+
+The experiment can be installed as a Python package (`near-nes-controller`) for both development and production use.
+
+#### Quick Setup (dev container)
+
+In dev mode, the package is automatically installed in editable mode when the container starts:
+
+```bash
+# Just run the container - package installation happens automatically
+docker compose run development
+
+# Inside the container, you can now use:
+run-trials 10 --label "my_experiment"
+```
+
+Changes you make to source files in `complete_control/` are immediately reflected—no reinstall needed.
+
+#### Quick Setup (local venv)
+
+If you already have a virtual environment with dependencies installed locally:
+
+```bash
+# Install the package in editable (development) mode
+pip install -e .
+
+# Now you can run the experiment
+run-trials 10 --label "my_experiment"
+```
+
+In editable mode (`-e`), changes you make to source files in `complete_control/` are immediately reflected when you run the package—no reinstall needed.
+
+#### Package features
+- **Entry point**: `run-trials` command wraps `complete_control/run_trials.py`
+- **Data files**: Automatically locates `artifacts/` and `cerebellum_configurations/` from the installed package
+- **BSB decompression**: Automatically decompresses `cerebellum_plastic_base.hdf5.gz` on first import
+- **Backward compatible**: Still respects `CONTROLLER_DIR` environment variable if set (for Docker/HPC mounts)
+
+#### Building the package
+
+To create distributable wheels and source distributions:
+
+```bash
+python -m pip install build
+python -m build
+
+# Outputs to dist/
+# - near_nes_controller-0.1.0.tar.gz (source distribution)
+# - near_nes_controller-0.1.0-py3-none-any.whl (wheel, if built)
+```
+
 ## Build and run the container
 `echo -e "UID=$(id -u)\nGID=$(id -g)" > .env && docker compose build`
 You only need to create the `.env` once. This file is used to synchronize directories internally for live code editing. 

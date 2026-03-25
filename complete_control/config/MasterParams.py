@@ -55,9 +55,7 @@ class MasterParams(BaseModel):
     def bsb_config_copies(self) -> BSBConfigCopies:
         return BSBConfigCopies.create(self.bsb_config_paths)
 
-    modules: ModuleContainerConfig = Field(
-        default_factory=lambda: ModuleContainerConfig()
-    )
+    modules: ModuleContainerConfig = Field(default_factory=lambda: ModuleContainerConfig())
     populations: PopulationsParams = Field(default_factory=lambda: PopulationsParams())
     connections: ConnectionsParams = Field(default_factory=lambda: ConnectionsParams())
 
@@ -69,8 +67,5 @@ class MasterParams(BaseModel):
     @classmethod
     def from_runpaths(cls, run_paths: RunPaths, parent_id: str, **kwargs):
         return MasterParams(
-            run_paths=run_paths,
-            run_id=run_paths.run.name,
-            parent_id=parent_id,
-            **kwargs
+            run_paths=run_paths, run_id=run_paths.run.name, parent_id=parent_id, **kwargs
         )

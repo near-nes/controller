@@ -65,10 +65,7 @@ def merge_synapse_blocks(blocks: List[SynapseBlock]) -> SynapseBlock:
     reference_target = blocks[0].target_pop_label
 
     for i, block in enumerate(blocks[1:], start=1):
-        if (
-            block.source_pop_label != reference_source
-            or block.target_pop_label != reference_target
-        ):
+        if block.source_pop_label != reference_source or block.target_pop_label != reference_target:
             raise ValueError(
                 f"Inconsistent source_pop_label: block 0 has '{reference_source}>{reference_target}', "
                 f"but block {i} has '{block.source_pop_label}>{block.target_pop_label}'"
@@ -94,9 +91,7 @@ def save_conn_weights(weights: list[SynapseBlock], dir: Path, comm=None) -> list
                 block = merge_synapse_blocks(gathered)
 
         if comm is None or comm.rank == 0:
-            label = create_key_plastic_connection(
-                block.source_pop_label, block.target_pop_label
-            )
+            label = create_key_plastic_connection(block.source_pop_label, block.target_pop_label)
             rec_path = dir / f"{label}.json"
             _log.debug(f"saving {label}, with {len(block.synapse_recordings)} synapses")
             with open(rec_path, "w") as f:
