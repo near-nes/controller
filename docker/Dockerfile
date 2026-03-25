@@ -231,20 +231,11 @@ RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
 # allow all users to run git commands here
 RUN git config --global --add safe.directory $CEREBELLUM_PATH 
 
-# parallelize slow pip installs    
-FROM base AS core_reqs
-WORKDIR ${DEPS_DIR}
-COPY ./docker/requirements.txt .
+FROM builder AS package_install
+WORKDIR ${CONTROLLER_DIR}
+COPY . ${CONTROLLER_DIR}
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt -c /tmp/constraints.txt
-
-FROM base AS planner_reqs
-WORKDIR ${DEPS_DIR}
-# split from reqs to download CPU only
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install gle-code -c /tmp/constraints.txt
+    pip install . --no-build-isolation -c /tmp/constraints.txt
 
 # final runtime image
 FROM base AS runtime
@@ -258,8 +249,7 @@ ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${NRP_INSTALL_DIR}/lib:${NRP_DEPS
 COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=builder ${CEREBELLUM_PATH} ${CEREBELLUM_PATH}
-COPY --from=core_reqs ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-COPY --from=planner_reqs ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY --from=package_install ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 # install dirs world-readable (venv writable so users can pip install)
 USER 0
 RUN chmod -R a+rX ${INSTALL_DIR} ${CEREBELLUM_PATH} \
@@ -330,19 +320,22 @@ ENV SDF_MODELS_DIR=${SUBMODULES_PATH}/embodiment_sdf_models
 ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
-FROM runtime AS hpc
+FROM runtime AS prod
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
 ENV SDF_MODELS_DIR=${SUBMODULES_PATH}/embodiment_sdf_models
 ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
+ENV SIMULATION_MODE=prod
 
-# In HPC, the controller directory is copied into the image and the user is the default simuser.
-ENV SIMULATION_MODE=hpc
-# On HPC do not mount anything on top of artifacts folder, so that the archive is not overwritten
+# In prod, the package is already installed (via package_install stage).
+# Only runtime data and submodules (on PYTHONPATH) need to be copied.
+# Do not mount anything on top of artifacts folder, so that the archive is not overwritten.
 ENV BSB_NETWORK_FILE=/tmp/cerebellum_plastic_base.hdf5
-COPY . /sim/controller
-RUN chown -R $USERNAME /sim/controller
-# Install package from copied directory in editable mode
+COPY --chown=${USERNAME} artifacts ${CONTROLLER_DIR}/artifacts
+COPY --chown=${USERNAME} cerebellum_configurations ${CONTROLLER_DIR}/cerebellum_configurations
+COPY --chown=${USERNAME} submodules ${CONTROLLER_DIR}/submodules
 WORKDIR ${CONTROLLER_DIR}
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -e . --no-deps
+
+# HPC compatibility target (same image content as prod, different mode flag)
+FROM prod AS hpc
+ENV SIMULATION_MODE=hpc
