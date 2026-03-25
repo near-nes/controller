@@ -65,7 +65,7 @@ pytorch = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/near-nes/controller"
+Homepage = "https://wiki.ebrains.eu/bin/view/Collabs/closed-loop-motor-t3-4/"
 Repository = "https://github.com/near-nes/controller"
 
 [project.scripts]
