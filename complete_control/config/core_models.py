@@ -11,7 +11,7 @@ class TargetColor(Enum):
     RED_RIGHT = [1, 0, 0, 1]
 
 
-from utils_common.git_utils import get_git_commit_hash
+from complete_control.utils_common.git_utils import get_git_commit_hash
 
 from . import paths
 
@@ -33,7 +33,7 @@ class RobotSpecParams(BaseModel, frozen=True):
 
 
 class ExperimentParams(BaseModel, frozen=True):
-    enable_gravity: bool = True
+    enable_gravity: bool = False
     z_gravity_magnitude: float = 2  # m/s^2
 
 

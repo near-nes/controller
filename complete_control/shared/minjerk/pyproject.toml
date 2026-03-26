@@ -1,0 +1,10 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minjerk-dynamics"
+version = "0.1.0"
+description = "Minimum-jerk trajectory and 1-DOF inverse dynamics"
+requires-python = ">=3.10"
+dependencies = ["numpy"]
