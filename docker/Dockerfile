@@ -326,14 +326,12 @@ FROM runtime AS dev
 ENV SIMULATION_MODE=dev
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
 ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
-ENV SDF_MODELS_DIR=${SUBMODULES_PATH}/embodiment_sdf_models
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
 FROM runtime AS hpc
 # >>>>>>>tmp, move to git-installable packages asap TODO
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
 ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
-ENV SDF_MODELS_DIR=${SUBMODULES_PATH}/embodiment_sdf_models
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 # <<<<<<<
 

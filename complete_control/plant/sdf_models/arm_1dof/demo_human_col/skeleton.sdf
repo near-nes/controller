@@ -1,0 +1,463 @@
+<?xml version='1.0'?>
+<sdf version="1.5">
+    <model name="skeleton">
+        <pose>0 0 0 0 -0 0</pose>
+        <link name="skeleton">
+            <pose>-0.02371838688850403 -0.006475403904914856 1.7455708980560303 1.5707963705062866 -0.0 0.0</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.0001</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0001</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0001</izz>
+                </inertia>
+                <mass>0.20000000298023224</mass>
+            </inertial>
+            <visual name="visual">
+                <pose>0 0 0 -1.5757 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/skeleton.dae</uri></mesh>
+                </geometry>
+            </visual>
+            <collision name="collision">
+                <pose>0 0 0 -1.5757 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/skeleton.dae</uri></mesh>
+                </geometry>
+            </collision>
+        </link>
+        <link name="upper_arm">
+            <pose>-0.017282448709011078 -0.1665889173746109 1.6547614336013794 1.5707963705062866 -0.0 0.0</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.0001</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0001</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0001</izz>
+                </inertia>
+                <mass>0.19999998807907104</mass>
+            </inertial>
+            <visual name="visual">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/upper_arm.obj</uri></mesh>
+                </geometry>
+            </visual>
+            <collision name="collision">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/upper_arm.obj</uri></mesh>
+                </geometry>
+            </collision>
+        </link>
+        <link name="forearm">
+            <pose>-0.015147986821830273 -0.19349825382232666 1.3854427337646484 1.5707963705062866 -0.0 0.0</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.0001</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0001</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0001</izz>
+                </inertia>
+                <mass>0.19999998807907104</mass>
+            </inertial>
+            <visual name="visual">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/forearm.obj</uri></mesh>
+                </geometry>
+            </visual>
+            <collision name="collision">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/forearm.obj</uri></mesh>
+                </geometry>
+            </collision>
+        </link>
+        <link name="hand">
+            <pose>0.00017236836720257998 -0.22414515912532806 1.2197521924972534 1.5707963705062866 -0.0 0.0</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.0001</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0001</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0001</izz>
+                </inertia>
+                <mass>0.19999998807907104</mass>
+            </inertial>
+            <visual name="visual">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/hand.obj</uri></mesh>
+                </geometry>
+            </visual>
+            <collision name="collision">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/hand_col.dae</uri></mesh>
+                </geometry>
+                <surface>
+                    <friction>
+                        <ode>
+                            <mu>10</mu>
+                            <mu2>10</mu2>
+                        </ode>
+                    </friction>
+		        </surface>
+            </collision>
+        </link>
+	<link name="thumb_1">
+            <pose>0.01882072165608406 -0.2590509057044983 1.2172046899795532 1.5707963705062866 -0.0 0.0</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.0001</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0001</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0001</izz>
+                </inertia>
+                <mass>0.19999998807907104</mass>
+            </inertial>
+            <visual name="visual">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/thumb_1.obj</uri></mesh>
+                </geometry>
+            </visual>
+	        <!--<collision name="collision">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/thumb_1.obj</uri></mesh>
+                </geometry>
+	        </collision>-->
+        </link>
+        <link name="thumb_2">
+            <pose>0.035507991909980774 -0.2781006395816803 1.1910896301269531 1.5707963705062866 2.980238988925521e-08 -3.7253098383871475e-09</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.0001</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0001</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0001</izz>
+                </inertia>
+                <mass>0.19999998807907104</mass>
+            </inertial>
+            <visual name="visual">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/thumb_2.obj</uri></mesh>
+                </geometry>
+            </visual>
+	        <!--<collision name="collision">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/thumb_2.obj</uri></mesh>
+                </geometry>
+	        </collision>-->
+        </link>
+        <link name="thumb_3">
+            <pose>0.04606077820062637 -0.29002290964126587 1.1742767095565796 1.5381336212158203 -0.012799005955457687 -0.015970906242728233</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.0001</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0001</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0001</izz>
+                </inertia>
+                <mass>0.19999998807907104</mass>
+            </inertial>
+            <visual name="visual">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/thumb_3.obj</uri></mesh>
+                </geometry>
+            </visual>
+	        <!--<collision name="collision">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/thumb_3.obj</uri></mesh>
+                </geometry>
+	        </collision>-->
+        </link>
+        <link name="proximal">
+            <pose>0.004435993731021881 -0.23311419785022736 1.1511282920837402 1.5707964897155762 0.049396030604839325 1.5318446511258799e-09</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.0001</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0001</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0001</izz>
+                </inertia>
+                <mass>0.19999998807907104</mass>
+            </inertial>
+            <visual name="visual">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/proximal.obj</uri></mesh>
+                </geometry>
+            </visual>
+            <collision name="collision">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/proximal_col.dae</uri></mesh>
+                </geometry>
+                <surface>
+                    <friction>
+                        <ode>
+                            <mu>10</mu>
+                            <mu2>10</mu2>
+                        </ode>
+                    </friction>
+                </surface>
+            </collision>
+        </link>
+        <link name="middle">
+            <pose>0.01475201454013586 -0.23537978529930115 1.1197322607040405 1.5707963705062866 -0.12925152480602264 -1.8796277034827114e-10</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.0001</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0001</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0001</izz>
+                </inertia>
+                <mass>0.19999998807907104</mass>
+            </inertial>
+            <visual name="visual">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/middle.obj</uri></mesh>
+                </geometry>
+            </visual>
+            <collision name="collision">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/middle_col.dae</uri></mesh>
+                </geometry>
+                <surface>
+                    <friction>
+                        <ode>
+                            <mu>10</mu>
+                            <mu2>10</mu2>
+                        </ode>
+                    </friction>
+                </surface>
+            </collision>
+        </link>
+        <link name="distal">
+            <pose>0.024000873789191246 -0.2371281534433365 1.1017308235168457 1.5707963705062866 -0.14935961365699768 4.265647834955644e-09</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.0001</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0001</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0001</izz>
+                </inertia>
+                <mass>0.19999998807907104</mass>
+            </inertial>
+            <visual name="visual">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/distal.obj</uri></mesh>
+                </geometry>
+            </visual>
+            <collision name="collision">
+                <pose>0 0 0 0 -0 0</pose>
+                <geometry>
+                    <mesh><uri>model://demo_human_col/meshes/distal.obj</uri></mesh>
+                </geometry>
+                <surface>
+                    <friction>
+                        <ode>
+                            <mu>10</mu>
+                            <mu2>10</mu2>
+                        </ode>
+                    </friction>
+                </surface>
+            </collision>
+        </link>
+        
+        <!-- <joint name="world_root" type="fixed">
+            <parent>world</parent>
+            <child>skeleton</child>
+        </joint> -->
+        <joint name="shoulder_joint" type="fixed">
+            <parent>skeleton</parent>
+            <child>upper_arm</child>
+            <pose>-0.0002625510096549988 0.1382385492324829 0.0034110769629478455 5.479091100824007e-07 -4.2146872658577195e-08 -1.570796251296997</pose>
+            <axis>
+                <xyz>0 0 1</xyz>
+                <limit>
+                    <lower>-0.1</lower>
+                    <upper>0.7853981852531433</upper>
+                </limit>
+            </axis>
+            <dynamics>
+                <spring_reference>0.4</spring_reference>
+                <spring_stiffness>20</spring_stiffness>
+                <damping>4</damping>
+            </dynamics>
+        </joint>
+        <joint name="elbow_joint" type="revolute">
+            <parent>upper_arm</parent>
+            <child>forearm</child>
+            <pose>0.003702986752614379 0.11655723303556442 -0.035798244178295135 5.479091100824007e-07 -4.2146872658577195e-08 -1.570796251296997</pose>
+            <axis>
+                <xyz>0 0 1</xyz>
+                <limit>
+                    <lower>0.0</lower>
+                    <upper>1.5707963705062866</upper>
+                </limit>
+            </axis>
+                <dynamics>
+                    <spring_reference>0.2</spring_reference>
+                    <spring_stiffness>5</spring_stiffness>
+                    <damping>1</damping>
+                </dynamics>
+        </joint>
+        <joint name="hand_joint_1" type="fixed">
+            <parent>forearm</parent>
+            <child>hand</child>
+            <pose>-0.003728454699739814 0.04303407669067383 -0.002157732844352722 5.479091100824007e-07 -4.2146872658577195e-08 -1.570796251296997</pose>
+            <axis>
+                <xyz>0 0 1</xyz>
+                <limit>
+                    <lower>0.0</lower>
+                    <upper>1.5707963705062866</upper>
+                </limit>
+                <dynamics>
+                    <spring_reference>0</spring_reference>
+                    <spring_stiffness>10</spring_stiffness>
+                    <damping>1</damping>
+                </dynamics>
+            </axis>
+        </joint>
+        <joint name="proximal_joint" type="fixed">
+            <parent>hand</parent>
+            <child>proximal</child>
+            <pose>-0.006849215365946293 0.01723306067287922 -0.006170365028083324 0.18470512330532074 -0.15172354876995087 -1.2801685333251953</pose>
+            <axis>
+                <xyz>0 0 1</xyz>
+                <limit>
+                    <lower>0.0</lower>
+                    <!-- <upper>2.268928028</upper> -->
+                    <upper>2.0</upper>
+                </limit>
+                <dynamics>
+                    <spring_reference>2.0</spring_reference>
+                    <spring_stiffness>0.5</spring_stiffness>
+                    <damping>0.01</damping>
+                </dynamics>
+            </axis>
+        </joint>
+        <joint name="thumb_joint_01" type="fixed">
+            <parent>hand</parent>
+            <child>thumb_1</child>
+            <pose>-0.01046721264719963 0.01605987548828125 -0.016701191663742065 -2.392087459564209 -0.6794252395629883 -0.9853883385658264</pose>
+            <axis>
+                <xyz>0 0 1</xyz>
+                <limit>
+                    <lower>-0.7853981852531433</lower>
+                    <upper>0.7853981852531433</upper>
+                </limit>
+                <dynamics>
+                    <spring_reference>0</spring_reference>
+                    <spring_stiffness>1</spring_stiffness>
+                    <damping>0.1</damping>
+                </dynamics>
+            </axis>
+        </joint>
+        <joint name="thumb_joint_12" type="fixed">
+            <parent>thumb_1</parent>
+            <child>thumb_2</child>
+            <pose>-0.007540013175457716 0.013107539154589176 -0.009685487486422062 -1.7563650608062744 -0.576974093914032 -1.0101017951965332</pose>
+            <axis>
+                <xyz>0 0 1</xyz>
+                <limit>
+                    <lower>0.0</lower>
+                    <upper>1.5707963705062866</upper>
+                </limit>
+                <dynamics>
+                    <spring_reference>0</spring_reference>
+                    <spring_stiffness>1</spring_stiffness>
+                    <damping>0.1</damping>
+                </dynamics>
+            </axis>
+        </joint>
+        <joint name="thumb_joint_23" type="fixed">
+            <parent>thumb_2</parent>
+            <child>thumb_3</child>
+            <pose>-0.004397843033075333 0.006628620438277721 -0.00488283671438694 -1.7522913217544556 -0.5405974984169006 -1.0248005390167236</pose>
+            <axis>
+                <xyz>0 0 1</xyz>
+                <limit>
+                    <lower>0.0</lower>
+                    <upper>1.5707963705062866</upper>
+                </limit>
+                <dynamics>
+                    <spring_reference>0</spring_reference>
+                    <spring_stiffness>1</spring_stiffness>
+                    <damping>0.1</damping>
+                </dynamics>
+            </axis>
+        </joint>
+        <joint name="middle_joint" type="fixed">
+            <parent>proximal</parent>
+            <child>middle</child>
+            <pose>-0.005126905627548695 0.008538579568266869 -0.001958192093297839 0.18470518290996552 -0.1517234593629837 -1.4588162899017334</pose>
+            <axis>
+                <xyz>0 0 1</xyz>
+                <limit>
+                    <lower>0.0</lower>
+                    <upper>1.5707963705062866</upper>
+                </limit>
+                <dynamics>
+                    <spring_reference>1.57</spring_reference>
+                    <spring_stiffness>0.5</spring_stiffness>
+                    <damping>0.1</damping>
+                </dynamics>
+            </axis>
+        </joint>
+        <joint name="distal_joint" type="fixed">
+            <parent>middle</parent>
+            <child>distal</child>
+            <pose>-0.0028767052572220564 0.0012630047276616096 -0.0008793922024779022 0.18470518290996552 -0.1517234444618225 -1.4789243936538696</pose>
+            <axis>
+                <xyz>0 0 1</xyz>
+                <limit>
+                    <lower>0.0</lower>
+                    <upper>1.5707963705062866</upper>
+                </limit>
+                <dynamics>
+                    <spring_reference>1.57</spring_reference>
+                    <spring_stiffness>0.5</spring_stiffness>
+                    <damping>0.01</damping>
+                </dynamics>
+            </axis>
+        </joint>
+        <plugin name="CapMaterial" filename="ModelCapacitivePropertiesPlugin.so">
+            <RelativePermittivity>100000.0</RelativePermittivity>
+            <!-- <CylLength></CylLength>
+            <CylRadius></CylRadius>
+            <NumWedges></NumWedges> -->
+        </plugin>
+    </model>
+</sdf>
