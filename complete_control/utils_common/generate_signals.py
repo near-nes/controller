@@ -54,16 +54,3 @@ def generate_traj(
         f.write(data.model_dump_json(indent=2))
 
     return traj
-
-
-def generate_mock_motor_commands(
-    sim: SimulationParams,
-):
-    from complete_control.utils_common.generate_signals_minjerk import (
-        generate_motor_commands_minjerk,
-    )
-
-    log = structlog.get_logger("main.generate_signals")
-    log.info(f"Generating motor commands...")
-
-    return generate_motor_commands_minjerk(sim)

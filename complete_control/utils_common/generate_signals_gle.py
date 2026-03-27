@@ -27,6 +27,7 @@ def generate_trajectory_gle(
     params = PlannerParams(
         model_type=TrajGeneratorType.GLE.value,
         resolution=sim.resolution,
+        # planner is ignorant of m1_delay handling, so handle this in advance
         time_prep=sim.time_prep - m1_delay,
         time_move=sim.time_move,
         time_locked_with_feedback=sim.time_locked_with_feedback + m1_delay,

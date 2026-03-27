@@ -24,7 +24,7 @@ class GLETrajGeneratorConfig(BaseModel):
 
 class PlannerModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
-    trajgen_type: TrajGeneratorType = Field(default=TrajGeneratorType.MOCKED)
+    trajgen_type: TrajGeneratorType = Field(default=TrajGeneratorType.GLE)
     gle_config: GLETrajGeneratorConfig = Field(
         default_factory=lambda: GLETrajGeneratorConfig()
     )
