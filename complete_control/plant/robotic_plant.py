@@ -90,14 +90,10 @@ class RoboticPlant:
         self.p.setAdditionalSearchPath(
             path=_SDF_SEARCH_PATH, physicsClientId=self._server_id
         )
-        self._timestep = self.p.getPhysicsEngineParameters(
-            physicsClientId=self._server_id
-        )["fixedTimeStep"]
-
-        # self.p.setPhysicsEngineParameter(
-        #     fixedTimeStep=self.config.RESOLUTION_S,
-        #     physicsClientId=self._server_id,
-        # )
+        self.p.setPhysicsEngineParameter(
+            fixedTimeStep=self.config.RESOLUTION_S,
+            physicsClientId=self._server_id,
+        )
 
     def _load_robot(self) -> int:
         """Load robot URDF and disable default motor controls."""
