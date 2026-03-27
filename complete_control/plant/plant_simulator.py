@@ -152,8 +152,6 @@ class PlantSimulator:
                 "Simulation progress", step=step, sim_time_s=current_sim_time_s
             )
 
-        self.plant.update_stats()
-
         if curr_section == TrialSection.TIME_MOVE:
             self.plant.set_elbow_joint_torque([elbow_torque])
         else:

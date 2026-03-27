@@ -127,12 +127,6 @@ class RoboticPlant:
             forces=[0.0, 0.0],
             physicsClientId=self._server_id,
         )
-        self._ee_link_state = self.p.getLinkState(
-            robot_id,
-            self.HAND_LINK_ID,
-            computeLinkVelocity=True,
-            physicsClientId=self._server_id,
-        )
         return robot_id
 
     def _load_plane(self) -> None:
@@ -261,15 +255,6 @@ class RoboticPlant:
         else:
             self.p.setGravity(0, 0, 0)
 
-    def update_stats(self) -> None:
-        """Updates cached end-effector link state."""
-        self._ee_link_state = self.p.getLinkState(
-            self.robot_id,
-            self.HAND_LINK_ID,
-            computeLinkVelocity=True,
-            physicsClientId=self._server_id,
-        )
-
     def get_joint_states(self) -> JointStates:
         """
         Gets the current state (position and velocity) all joints.
@@ -296,8 +281,13 @@ class RoboticPlant:
         Returns:
             A tuple (pose_xyz_list, velocity_xyz_list).
         """
-        pose_xyz = list(self._ee_link_state[0])
-        linear_velocity_xyz = list(self._ee_link_state[6])
+        ee_state = self.p.getLinkState(
+            self.robot_id,
+            self.HAND_LINK_ID,
+            computeLinkVelocity=True,
+        )
+        pose_xyz = list(ee_state[0])
+        linear_velocity_xyz = list(ee_state[6])
         return pose_xyz, linear_velocity_xyz
 
     def set_elbow_joint_torque(self, torques: List[float]) -> None:
@@ -371,7 +361,6 @@ class RoboticPlant:
             controlMode=self.p.VELOCITY_CONTROL,
             targetVelocity=0,
         )
-        self.update_stats()
         self.log.debug(
             "Plant reset to initial position and zero velocity.",
             target_pos_rad=self.initial_joint_position_rad,
