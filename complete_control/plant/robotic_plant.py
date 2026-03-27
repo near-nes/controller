@@ -315,17 +315,9 @@ class RoboticPlant:
             physicsClientId=self._server_id,
         )
 
-    def simulate_step(self, duration: float) -> None:
-        """
-        Steps the PyBullet simulation by the given duration.
-
-        Args:
-            duration: The time duration to simulate in seconds.
-        """
-        t = 0.0
-        while t < duration:
-            self.p.stepSimulation(physicsClientId=self._server_id)
-            t += self._timestep
+    def simulate_step(self) -> None:
+        """Steps the PyBullet simulation by one timestep."""
+        self.p.stepSimulation(physicsClientId=self._server_id)
 
     def reset_plant(self) -> None:
         """

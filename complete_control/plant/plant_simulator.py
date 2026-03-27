@@ -163,8 +163,7 @@ class PlantSimulator:
         if curr_section == TrialSection.TIME_POST:
             shoulder_torque = self._move_shoulder(self.direction)
 
-        # Step PyBullet simulation
-        self.plant.simulate_step(self.config.RESOLUTION_S)
+        self.plant.simulate_step()
 
         imposed_torques = [hand_torque, elbow_torque, shoulder_torque]
         for torque, (i, state) in zip(
