@@ -16,8 +16,8 @@ def generate_trajectory_gle(
     m1_delay: float = 0.0,
 ) -> tuple[np.ndarray, int]:
     import torch
-    from pfc_planner.src.config import PlannerParams
-    from pfc_planner.src.factory import get_planner
+    from pfc_planner.config import PlannerParams
+    from pfc_planner.factory import get_planner
 
     torch.set_num_threads(int(os.getenv("OMP_NUM_THREADS")))
     torch.manual_seed(sim.seed)

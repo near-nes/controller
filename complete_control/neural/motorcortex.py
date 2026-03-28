@@ -127,8 +127,8 @@ class MotorCortex:
 
     def create_net(self, params: MotorCortexModuleConfig, numNeurons):
         if params.m1_type == M1Type.EPROP:
-            from motor_cortex_eprop.motor_controller_model import m1_factory
-            from motor_cortex_eprop.motor_controller_model.config_schema import (
+            from motor_controller_model import m1_factory
+            from motor_controller_model.config_schema import (
                 MotorControllerConfig,
                 SimulationConfig,
                 TaskConfig,
