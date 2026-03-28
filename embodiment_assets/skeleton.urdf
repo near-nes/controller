@@ -91,13 +91,13 @@
     <collision name="skeleton__collision">
       <origin xyz="0.13823  0.00026 -0.00341" rpy="0      0      1.57079"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/upper_arm.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/upper_arm.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
     <visual name="skeleton__visual">
       <origin xyz="0.13823  0.00026 -0.00341" rpy="0      0      1.57079"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/upper_arm.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/upper_arm.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>
@@ -110,13 +110,13 @@
     <collision name="skeleton__collision">
       <origin xyz="0.11655 -0.0037   0.03579" rpy="0      0      1.57079"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/forearm.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/forearm.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
     <visual name="skeleton__visual">
       <origin xyz="0.11655 -0.0037   0.03579" rpy="0      0      1.57079"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/forearm.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/forearm.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>
@@ -135,7 +135,7 @@
     <visual name="skeleton__visual">
       <origin xyz="0.04303 0.00372 0.00215" rpy="0      0      1.57079"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/hand.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/hand.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>
@@ -148,7 +148,7 @@
     <visual name="skeleton__visual">
       <origin xyz="0.0254  -0.00053 -0.00079" rpy="-3.1294  -0.96488 -0.71552"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/thumb_1.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/thumb_1.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>
@@ -161,7 +161,7 @@
     <visual name="skeleton__visual">
       <origin xyz="0.01794  0.00023 -0.00055" rpy="1.91061 -1.08836  0.28141"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/thumb_2.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/thumb_2.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>
@@ -174,7 +174,7 @@
     <visual name="skeleton__visual">
       <origin xyz="0.00932 -0.00015  0.00029" rpy="1.91527 -1.09474  0.23923"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/thumb_3.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/thumb_3.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>
@@ -193,7 +193,7 @@
     <visual name="skeleton__visual">
       <origin xyz="0.01919 0.0022  0.00295" rpy="0.09206 0.2203  1.27627"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/proximal.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/proximal.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>
@@ -212,7 +212,7 @@
     <visual name="skeleton__visual">
       <origin xyz="0.00925  0.00417 -0.0002" rpy="0.13008 0.20044 1.45783"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/middle.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/middle.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>
@@ -225,13 +225,13 @@
     <collision name="skeleton__collision">
       <origin xyz="0.00163 0.00281 0.00012" rpy="0.1341  0.1978  1.47817"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/distal.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/distal.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
     <visual name="skeleton__visual">
       <origin xyz="0.00163 0.00281 0.00012" rpy="0.1341  0.1978  1.47817"/>
       <geometry>
-        <mesh filename="package://demo_human_col/meshes/distal.obj" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://meshes/distal.obj" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>

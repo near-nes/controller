@@ -18,13 +18,13 @@
             <visual name="visual">
                 <pose>0 0 0 -1.5757 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/skeleton.dae</uri></mesh>
+                    <mesh><uri>model://meshes/skeleton.dae</uri></mesh>
                 </geometry>
             </visual>
             <collision name="collision">
                 <pose>0 0 0 -1.5757 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/skeleton.dae</uri></mesh>
+                    <mesh><uri>model://meshes/skeleton.dae</uri></mesh>
                 </geometry>
             </collision>
         </link>
@@ -44,13 +44,13 @@
             <visual name="visual">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/upper_arm.obj</uri></mesh>
+                    <mesh><uri>model://meshes/upper_arm.obj</uri></mesh>
                 </geometry>
             </visual>
             <collision name="collision">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/upper_arm.obj</uri></mesh>
+                    <mesh><uri>model://meshes/upper_arm.obj</uri></mesh>
                 </geometry>
             </collision>
         </link>
@@ -70,13 +70,13 @@
             <visual name="visual">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/forearm.obj</uri></mesh>
+                    <mesh><uri>model://meshes/forearm.obj</uri></mesh>
                 </geometry>
             </visual>
             <collision name="collision">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/forearm.obj</uri></mesh>
+                    <mesh><uri>model://meshes/forearm.obj</uri></mesh>
                 </geometry>
             </collision>
         </link>
@@ -96,13 +96,13 @@
             <visual name="visual">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/hand.obj</uri></mesh>
+                    <mesh><uri>model://meshes/hand.obj</uri></mesh>
                 </geometry>
             </visual>
             <collision name="collision">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/hand_col.dae</uri></mesh>
+                    <mesh><uri>model://meshes/hand_col.dae</uri></mesh>
                 </geometry>
                 <surface>
                     <friction>
@@ -130,13 +130,13 @@
             <visual name="visual">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/thumb_1.obj</uri></mesh>
+                    <mesh><uri>model://meshes/thumb_1.obj</uri></mesh>
                 </geometry>
             </visual>
 	        <!--<collision name="collision">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/thumb_1.obj</uri></mesh>
+                    <mesh><uri>model://meshes/thumb_1.obj</uri></mesh>
                 </geometry>
 	        </collision>-->
         </link>
@@ -156,13 +156,13 @@
             <visual name="visual">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/thumb_2.obj</uri></mesh>
+                    <mesh><uri>model://meshes/thumb_2.obj</uri></mesh>
                 </geometry>
             </visual>
 	        <!--<collision name="collision">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/thumb_2.obj</uri></mesh>
+                    <mesh><uri>model://meshes/thumb_2.obj</uri></mesh>
                 </geometry>
 	        </collision>-->
         </link>
@@ -182,13 +182,13 @@
             <visual name="visual">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/thumb_3.obj</uri></mesh>
+                    <mesh><uri>model://meshes/thumb_3.obj</uri></mesh>
                 </geometry>
             </visual>
 	        <!--<collision name="collision">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/thumb_3.obj</uri></mesh>
+                    <mesh><uri>model://meshes/thumb_3.obj</uri></mesh>
                 </geometry>
 	        </collision>-->
         </link>
@@ -208,13 +208,13 @@
             <visual name="visual">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/proximal.obj</uri></mesh>
+                    <mesh><uri>model://meshes/proximal.obj</uri></mesh>
                 </geometry>
             </visual>
             <collision name="collision">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/proximal_col.dae</uri></mesh>
+                    <mesh><uri>model://meshes/proximal_col.dae</uri></mesh>
                 </geometry>
                 <surface>
                     <friction>
@@ -242,13 +242,13 @@
             <visual name="visual">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/middle.obj</uri></mesh>
+                    <mesh><uri>model://meshes/middle.obj</uri></mesh>
                 </geometry>
             </visual>
             <collision name="collision">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/middle_col.dae</uri></mesh>
+                    <mesh><uri>model://meshes/middle_col.dae</uri></mesh>
                 </geometry>
                 <surface>
                     <friction>
@@ -276,13 +276,13 @@
             <visual name="visual">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/distal.obj</uri></mesh>
+                    <mesh><uri>model://meshes/distal.obj</uri></mesh>
                 </geometry>
             </visual>
             <collision name="collision">
                 <pose>0 0 0 0 -0 0</pose>
                 <geometry>
-                    <mesh><uri>model://demo_human_col/meshes/distal.obj</uri></mesh>
+                    <mesh><uri>model://meshes/distal.obj</uri></mesh>
                 </geometry>
                 <surface>
                     <friction>

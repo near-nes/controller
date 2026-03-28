@@ -13,6 +13,7 @@ REFERENCE_DATA_DIR = COMPLETE_CONTROL / "reference_data"
 
 CONFIG = COMPLETE_CONTROL / "config"
 ARTIFACTS = ROOT / "artifacts"
+EMBODIMENT_ASSETS = ROOT / "embodiment_assets"
 
 TRAJECTORY = CONFIG / "trajectory.txt"
 MOTOR_COMMANDS = CONFIG / "motor_commands.txt"

@@ -1,17 +1,12 @@
 import math
-import os
 from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
 import structlog
+from config.paths import EMBODIMENT_ASSETS
 from config.plant_config import PlantConfig
 from plant.plant_models import JointState, JointStates
-
-_DEFAULT_SDF_MODELS_DIR = Path(__file__).resolve().parent / "sdf_models"
-_SDF_SEARCH_PATH = str(
-    Path(os.environ.get("SDF_MODELS_DIR", str(_DEFAULT_SDF_MODELS_DIR))) / "arm_1dof"
-)
 
 
 class RoboticPlant:
@@ -29,8 +24,8 @@ class RoboticPlant:
     HAND_LINK_ID = 3
 
     # URDF model filenames (relative to SDF search path)
-    _URDF_MODEL_FILENAME = "demo_human_col/skeleton.urdf"
-    _PLANE_MODEL_FILENAME = "demo_human_col/plane.urdf"
+    _URDF_MODEL_FILENAME = "skeleton.urdf"
+    _PLANE_MODEL_FILENAME = "plane.urdf"
 
     def __init__(self, config: PlantConfig, pybullet_instance):
         """
@@ -88,7 +83,7 @@ class RoboticPlant:
         self._server_id = self.p.connect(bullet_connect)
         self.p.setGravity(0, 0, 0, physicsClientId=self._server_id)
         self.p.setAdditionalSearchPath(
-            path=_SDF_SEARCH_PATH, physicsClientId=self._server_id
+            path=str(EMBODIMENT_ASSETS), physicsClientId=self._server_id
         )
         self.p.setPhysicsEngineParameter(
             fixedTimeStep=self.config.RESOLUTION_S,
