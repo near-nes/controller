@@ -223,7 +223,8 @@ RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-b
 ####################### CEREBELLUM+MODELS #######################
 RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
-    && git checkout bbe4ccf49a1b01974434c77404f00688f6beb1fc\
+    && pip install --no-deps . \
+    && git checkout 4a3d93a594dcc616d3bfa5729fb8a2a6a87d45f0 \
     && cd custom_stdp \
     && cmake . \
     && make \
@@ -273,8 +274,8 @@ ENV OMPI_MCA_plm=^rsh
 ENV PYNEST_QUIET=1
 
 # cerebellum
-ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5.gz
-ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5
+ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/mouse_abstract_only.hdf5.gz
+ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/mouse_abstract_only.hdf5
 
 ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 
@@ -319,6 +320,10 @@ RUN echo 'if [ -d /etc/bashrc.d ]; then for f in /etc/bashrc.d/*; do [ -f "$f" ]
     >> /etc/bash.bashrc
 # (everything else is unsupported)
 RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc
+
+# >>>>>> temp fix https://github.com/dbbs-lab/cerebellar-models/issues/68
+RUN pip install "bsb-core @ git+https://github.com/dbbs-lab/bsb.git@fix/labelled_ps#subdirectory=packages/bsb-core" "bsb-hdf5 @ git+https://github.com/dbbs-lab/bsb.git@fix/labelled_ps#subdirectory=packages/bsb-hdf5"
+# <<<<<<
 
 # FROM nrp-runtime AS dev
 FROM runtime AS dev
