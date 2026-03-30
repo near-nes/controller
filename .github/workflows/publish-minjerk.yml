@@ -1,0 +1,80 @@
+name: Publish minjerk-dynamics to PyPI
+
+on:
+  push:
+    paths:
+      - "complete_control/shared/minjerk/**"
+      - ".github/workflows/publish-minjerk.yml"
+
+jobs:
+  build:
+    name: Build minjerk-dynamics
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history is required so setuptools-scm can compute the version
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install build tools
+        run: pip install build
+
+      - name: Build wheel and sdist
+        working-directory: complete_control/shared/minjerk
+        run: python -m build
+
+      - name: Show built package info
+        working-directory: complete_control/shared/minjerk/dist
+        run: |
+          echo "=== Built artifacts ==="
+          for f in *; do
+            echo "File   : $f"
+            # name and version are the first two dash-separated fields of the stem
+            stem="${f%.*}"           # strip last extension
+            stem="${stem%.tar}"      # strip .tar for sdist (.tar.gz)
+            name="${stem%%-[0-9]*}"  # everything before the first -<digit>
+            version="${stem#${name}-}"
+            version="${version%%[-+.][a-zA-Z]*}"  # strip extra suffixes for display
+            echo "Name   : $name"
+            echo "Version: ${stem#${name}-}"
+            echo "---"
+          done
+
+      - name: Upload dist as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: minjerk-dist
+          path: complete_control/shared/minjerk/dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    # Only publish from main
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Required for OIDC Trusted Publishing (alternative to API token)
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: minjerk-dist
+          path: dist/
+
+      # Configure on PyPI: https://pypi.org/manage/account/publishing/
+      # Publisher settings: owner=<org>, repo=controller,
+      #   workflow=publish-minjerk.yml, env=(leave blank)
+      - name: Publish to PyPI (Trusted Publisher)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+
