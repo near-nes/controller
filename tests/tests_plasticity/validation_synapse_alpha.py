@@ -45,13 +45,17 @@ def plot_synaptic_weight(
         IO_times = [t for t, e in zip(corrected_cf_tms, cf_evs) if e == IO_sender]
         # print("IO spikes: ", IO_times)
 
-        total_MLI_times = [t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id]
+        total_MLI_times = [
+            t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id
+        ]
         complex_MLI_times = [t for t in total_MLI_times if t - 1.0 in IO_times]
         simple_MLI_times = [t for t in total_MLI_times if t not in complex_MLI_times]
         # print("MLI simple spikes: ", simple_MLI_times)
         # print("MLI complex spikes: ", complex_MLI_times)
 
-        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
+        total_Gr_times = [
+            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
+        ]
         # complex_Gr_times = [t for t in total_Gr_times if t in complex_MLI_times]
         simple_Gr_times = [t for t in total_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -65,14 +69,18 @@ def plot_synaptic_weight(
         ax[0].set_ylabel("Synaptic weight")
 
         ax[1].scatter(IO_times, IO_sender * np.ones(len(IO_times)), label="IO")
-        ax[1].scatter(simple_MLI_times, target_id * np.ones(len(simple_MLI_times)), label="MLI")
+        ax[1].scatter(
+            simple_MLI_times, target_id * np.ones(len(simple_MLI_times)), label="MLI"
+        )
         ax[1].scatter(
             complex_MLI_times,
             target_id * np.ones(len(complex_MLI_times)),
             color="red",
             label="Complex spikes",
         )
-        ax[1].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
+        ax[1].scatter(
+            simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
+        )
         # ax[1].scatter(complex_MLI_times, source_id*np.ones(len(complex_MLI_times)), color = "white")
         ax[1].legend(fontsize="small")
         ax[1].set_ylim(0, 20)
@@ -128,7 +136,9 @@ def plot_synaptic_weight(
                 color="red",
                 label="Complex spikes",
             )
-            ax[1].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
+            ax[1].scatter(
+                simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
+            )
 
             ax[1].set_ylim(0, 5)
             ax[1].set_xlabel("Time [ms]", fontsize=12)
@@ -140,7 +150,9 @@ def plot_synaptic_weight(
             LTP_mask = diffs > 0
 
             # Define a Δt window from -200 ms to 0 ms
-            spike_time_diffs = np.linspace(-200, 0, len(diffs))  # Assuming uniform mapping
+            spike_time_diffs = np.linspace(
+                -200, 0, len(diffs)
+            )  # Assuming uniform mapping
             LTP_values = diffs[LTP_mask]  # Make LTP amounts positive
             LTP_times = spike_time_diffs[LTP_mask]
 
@@ -214,7 +226,9 @@ def plot_LTP(
         IO_times = [t for t, e in zip(corrected_cf_tms, cf_evs) if e == IO_sender]
         # print("IO spikes: ", IO_times)
 
-        total_MLI_times = [t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id]
+        total_MLI_times = [
+            t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id
+        ]
         complex_MLI_times = [t for t in total_MLI_times if t - 1.0 in IO_times]
         simple_MLI_times = [t for t in total_MLI_times if t not in complex_MLI_times]
         # print("MLI simple spikes: ", simple_MLI_times)
@@ -224,7 +238,9 @@ def plot_LTP(
         print(first_complex_spike)
         first_complex_step = int(first_complex_spike / 0.1)
         print(first_complex_step)
-        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
+        total_Gr_times = [
+            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
+        ]
         complex_Gr_times = [t for t in total_Gr_times if t in complex_MLI_times]
         simple_Gr_times = [t for t in total_Gr_times if t not in complex_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -340,7 +356,9 @@ def plot_LTP(
                 color="red",
                 label="Complex spikes",
             )
-            ax[1].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
+            ax[1].scatter(
+                simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
+            )
             # ax[1].scatter(complex_MLI_times, source_id*np.ones(len(complex_MLI_times)), color = "white")
             ax[2].legend(fontsize="small")
             ax[1].set_ylim(0, 5)
@@ -412,17 +430,23 @@ def plot_LTD(
         IO_times_tot = [t for t, e in zip(corrected_cf_tms, cf_evs) if e == IO_sender]
         # print("IO spikes: ", IO_times)
 
-        total_MLI_times = [t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id]
+        total_MLI_times = [
+            t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id
+        ]
         complex_MLI_times_tot = [t for t in total_MLI_times if t - 1.0 in IO_times_tot]
         print("complex times: ", complex_MLI_times_tot)
-        simple_MLI_times_tot = [t for t in total_MLI_times if t not in complex_MLI_times_tot]
+        simple_MLI_times_tot = [
+            t for t in total_MLI_times if t not in complex_MLI_times_tot
+        ]
         # print("MLI simple spikes: ", simple_MLI_times)
         # print("MLI complex spikes: ", complex_MLI_times)
 
         first_complex_spike = complex_MLI_times_tot[0]
         first_complex_step = int(first_complex_spike / 0.1)
 
-        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
+        total_Gr_times = [
+            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
+        ]
         complex_Gr_times = [t for t in total_Gr_times if t in complex_MLI_times_tot]
         simple_Gr_times_tot = [t for t in total_Gr_times if t not in complex_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -455,27 +479,32 @@ def plot_LTD(
             # print('IO_times prima array: ', IO_times)
             IO_times = np.array(IO_times_tot)
             # print('IO_times dopo array: ', IO_times)
-            IO_indices = np.where((IO_times >= time_window[0]) & (IO_times <= time_window[-1]))
+            IO_indices = np.where(
+                (IO_times >= time_window[0]) & (IO_times <= time_window[-1])
+            )
             IO_times = IO_times[IO_indices]
             print("IO_times: ", IO_times)
 
             simple_MLI_times = np.array(simple_MLI_times_tot)
             simple_MLI_indices = np.where(
-                (simple_MLI_times >= time_window[0]) & (simple_MLI_times <= time_window[-1])
+                (simple_MLI_times >= time_window[0])
+                & (simple_MLI_times <= time_window[-1])
             )
             simple_MLI_times = simple_MLI_times[simple_MLI_indices]
             print("simple MLI times: ", simple_MLI_times)
 
             complex_MLI_times = np.array(complex_MLI_times_tot)
             complex_MLI_indices = np.where(
-                (complex_MLI_times >= time_window[0]) & (complex_MLI_times <= time_window[-1])
+                (complex_MLI_times >= time_window[0])
+                & (complex_MLI_times <= time_window[-1])
             )
             complex_MLI_times = complex_MLI_times[complex_MLI_indices]
             print("complex MLI times: ", complex_MLI_times)
 
             simple_Gr_times = np.array(simple_Gr_times_tot)
             simple_Gr_indices = np.where(
-                (simple_Gr_times >= time_window[0]) & (simple_Gr_times <= time_window[-1])
+                (simple_Gr_times >= time_window[0])
+                & (simple_Gr_times <= time_window[-1])
             )
             simple_Gr_times = simple_Gr_times[simple_Gr_indices]
             print("Gr times: ", simple_Gr_times)
@@ -502,7 +531,9 @@ def plot_LTD(
                 color="red",
                 label="Complex spikes",
             )
-            ax[0].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
+            ax[0].scatter(
+                simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
+            )
             ax[0].set_ylim(0, 8)
             # ax[1].set_xlim(start, end)
             ax[0].set_xlabel("Time [ms]")
@@ -605,13 +636,17 @@ def plot_synaptic_matrix(
         IO_times = [t for t, e in zip(corrected_cf_tms, cf_evs) if e == IO_sender]
         # print("IO spikes: ", IO_times)
 
-        total_MLI_times = [t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id]
+        total_MLI_times = [
+            t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id
+        ]
         complex_MLI_times = [t for t in total_MLI_times if t - 1.0 in IO_times]
         simple_MLI_times = [t for t in total_MLI_times if t not in complex_MLI_times]
         # print("MLI simple spikes: ", simple_MLI_times)
         # print("MLI complex spikes: ", complex_MLI_times)
 
-        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
+        total_Gr_times = [
+            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
+        ]
         complex_Gr_times = [t for t in total_Gr_times if t in complex_MLI_times]
         simple_Gr_times = [t for t in total_Gr_times if t not in complex_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -635,7 +670,9 @@ def plot_synaptic_matrix(
                 color="red",
                 label="Complex spikes",
             )
-            ax[1].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
+            ax[1].scatter(
+                simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
+            )
             ax[1].scatter(
                 complex_MLI_times,
                 source_id * np.ones(len(complex_MLI_times)),
@@ -686,7 +723,9 @@ def plot_synaptic_matrix(
                 color="red",
                 label="Complex spikes",
             )
-            ax[2].scatter(simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs")
+            ax[2].scatter(
+                simple_Gr_times, source_id * np.ones(len(simple_Gr_times)), label="GrCs"
+            )
             # ax[2].scatter(complex_MLI_times, source_id*np.ones(len(complex_MLI_times)), color = "white")
             ax[2].legend(fontsize="small")
             ax[2].set_ylim(0, 20)
@@ -757,13 +796,17 @@ def plot_simple_spike(
         IO_times = [t for t, e in zip(corrected_cf_tms, cf_evs) if e == IO_sender]
         # print("IO spikes: ", IO_times)
 
-        total_MLI_times = [t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id]
+        total_MLI_times = [
+            t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id
+        ]
         complex_MLI_times = [t for t in total_MLI_times if t - 1.0 in IO_times]
         simple_MLI_times = [t for t in total_MLI_times if t not in complex_MLI_times]
         # print("MLI simple spikes: ", simple_MLI_times)
         # print("MLI complex spikes: ", complex_MLI_times)
 
-        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
+        total_Gr_times = [
+            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
+        ]
         complex_Gr_times = [t for t in total_Gr_times if t in complex_MLI_times]
         simple_Gr_times = [t for t in total_Gr_times if t not in complex_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -774,7 +817,9 @@ def plot_simple_spike(
         ax[0].plot(np.arange(1000), result_weights, "--")
         ax[0].set_ylabel("Synaptic weight")
         ax[1].scatter(IO_times, IO_sender * np.ones(len(IO_times)), label="IO")
-        ax[1].scatter(simple_MLI_times, target_id * np.ones(len(simple_MLI_times)), label="MLI")
+        ax[1].scatter(
+            simple_MLI_times, target_id * np.ones(len(simple_MLI_times)), label="MLI"
+        )
         ax[1].scatter(
             complex_MLI_times,
             target_id * np.ones(len(complex_MLI_times)),
@@ -856,13 +901,17 @@ def plot_complex_spike(
         IO_times = [t for t, e in zip(corrected_cf_tms, cf_evs) if e == IO_sender]
         # print("IO spikes: ", IO_times)
 
-        total_MLI_times = [t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id]
+        total_MLI_times = [
+            t for t, e in zip(corrected_MLI_tms, MLI_evs) if e == target_id
+        ]
         complex_MLI_times = [t for t in total_MLI_times if t - 1.0 in IO_times]
         simple_MLI_times = [t for t in total_MLI_times if t not in complex_MLI_times]
         # print("MLI simple spikes: ", simple_MLI_times)
         # print("MLI complex spikes: ", complex_MLI_times)
 
-        total_Gr_times = [t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id]
+        total_Gr_times = [
+            t for t, e in zip(corrected_gr_spikes, Gr_evs) if e == source_id
+        ]
         complex_Gr_times = [t for t in total_Gr_times if t in complex_MLI_times]
         simple_Gr_times = [t for t in total_Gr_times if t not in complex_Gr_times]
         # print("Simple Gr spikes: ", simple_Gr_times)
@@ -946,9 +995,13 @@ def correct_spike_times(cf_recorder, MLI_recorder, Gr_recorder):
     corrected_MLI_tms = [round(t, 1) for t in corrected_MLI_tms]
     # print('MLI spikes: (', corrected_MLI_tms, '), (', MLI_evs, ')\n')
 
-    MLI_complex_tms = [spike for spike in corrected_MLI_tms if (spike - 1.0) in corrected_cf_tms]
+    MLI_complex_tms = [
+        spike for spike in corrected_MLI_tms if (spike - 1.0) in corrected_cf_tms
+    ]
     MLI_complex_evs = [
-        ev for (spike, ev) in zip(corrected_MLI_tms, MLI_evs) if spike in MLI_complex_tms
+        ev
+        for (spike, ev) in zip(corrected_MLI_tms, MLI_evs)
+        if spike in MLI_complex_tms
     ]
     # print('Complex MLI spikes: (', MLI_complex_tms, '), (', MLI_complex_evs, ')\n')
 

@@ -20,7 +20,9 @@ class GLETrajGeneratorConfig(BaseModel):
 class PlannerModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
     trajgen_type: TrajGeneratorType = Field(default=TrajGeneratorType.GLE)
-    gle_config: GLETrajGeneratorConfig = Field(default_factory=lambda: GLETrajGeneratorConfig())
+    gle_config: GLETrajGeneratorConfig = Field(
+        default_factory=lambda: GLETrajGeneratorConfig()
+    )
     kp: float = 100.0
     kpl: float = 0.32504265346581107
     base_rate: float = 5.0
@@ -81,7 +83,9 @@ class StateSEModuleConfig(BaseModel):
 class ModuleContainerConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
     planner: PlannerModuleConfig = Field(default_factory=lambda: PlannerModuleConfig())
-    motor_cortex: MotorCortexModuleConfig = Field(default_factory=lambda: MotorCortexModuleConfig())
+    motor_cortex: MotorCortexModuleConfig = Field(
+        default_factory=lambda: MotorCortexModuleConfig()
+    )
     spine: SpineModuleConfig = Field(default_factory=lambda: SpineModuleConfig())
     state: StateModuleConfig = Field(default_factory=lambda: StateModuleConfig())
     state_se: StateSEModuleConfig = Field(default_factory=lambda: StateSEModuleConfig())

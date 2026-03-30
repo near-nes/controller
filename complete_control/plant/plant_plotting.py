@@ -184,7 +184,9 @@ def plot_joint_space_animated(
     ax.set_title("Joint Space Position")
     ax.set_xlim(x.min(), x.max())
     ax.set_ylim(0, np.degrees(2.8))
-    ax.secondary_yaxis("right", functions=(np.radians, np.degrees)).set_ylabel("Joint Angle (rad)")
+    ax.secondary_yaxis("right", functions=(np.radians, np.degrees)).set_ylabel(
+        "Joint Angle (rad)"
+    )
 
     legend_elements = [
         Line2D(
@@ -235,7 +237,9 @@ def plot_joint_space_animated(
             line2.set_data(x[:end], y2[:end])
             return (line1, line2)
 
-        ani = FuncAnimation(fig, update, frames=n_frames, interval=1000 / fps, blit=True)
+        ani = FuncAnimation(
+            fig, update, frames=n_frames, interval=1000 / fps, blit=True
+        )
 
     if save_fig:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -302,7 +306,9 @@ def plot_rmse(
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filepath = None
 
-    elbow_rmse = [np.sqrt(np.mean(np.square(a - d))) for a, d in zip(pos_j_actual, des_rad)]
+    elbow_rmse = [
+        np.sqrt(np.mean(np.square(a - d))) for a, d in zip(pos_j_actual, des_rad)
+    ]
 
     fig, ax = plt.subplots()
     ax.plot(np.arange(1, len(metas) + 1), elbow_rmse, "-o")
@@ -353,7 +359,10 @@ def plot_plant_outputs(
             ref_plant_config,
             plant_data,
         )
-        if ref_mp.plotting.CAPTURE_VIDEO is None or len(ref_mp.plotting.CAPTURE_VIDEO) == 0:
+        if (
+            ref_mp.plotting.CAPTURE_VIDEO is None
+            or len(ref_mp.plotting.CAPTURE_VIDEO) == 0
+        ):
             log.warning(
                 "Asked to generate task video but no frames were generated during run. Animated plots will use default time."
             )
@@ -439,7 +448,10 @@ def generate_video_from_existing_result_single_trial(
     end = (trial + 1) * steps_single_trial
     steps = start - end
     len_max_frame_name = len(str(steps))
-    [(images_path / axis).mkdir(parents=True, exist_ok=True) for axis in AXES_TO_CAPTURE]
+    [
+        (images_path / axis).mkdir(parents=True, exist_ok=True)
+        for axis in AXES_TO_CAPTURE
+    ]
     for step in tqdm.tqdm(
         range(
             start,
@@ -456,7 +468,9 @@ def generate_video_from_existing_result_single_trial(
         plant._set_pos_all_joints(state)
 
         for axis in AXES_TO_CAPTURE:
-            image_path: Path = images_path / axis / f"<{step:0{len_max_frame_name}d}>.jpg"
+            image_path: Path = (
+                images_path / axis / f"<{step:0{len_max_frame_name}d}>.jpg"
+            )
             plant._capture_state_and_save(image_path, axis)
         if (step % start) > plant_config.master_config.simulation.neural_control_steps:
             plant.update_ball_position()
@@ -486,4 +500,6 @@ def generate_video_from_existing_result_single_trial(
             format="concat",
             safe=0,
             loglevel="quiet",
-        ).output(str((images_path / complete_video_filename).absolute()), c="copy").run()
+        ).output(
+            str((images_path / complete_video_filename).absolute()), c="copy"
+        ).run()

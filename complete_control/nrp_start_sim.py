@@ -45,7 +45,9 @@ def run_trial(parent_id: str = "", label: str = "") -> str:
     simconfig_path = str(run_paths.params_json).replace(".json", "_simconfig.json")
     with open(simconfig_path, "w") as f:
         f.write(SimConfig.model_dump_json(indent=2))
-    client_log.debug(f"SimulationConfig loaded and dumped successfully. in {simconfig_path}")
+    client_log.debug(
+        f"SimulationConfig loaded and dumped successfully. in {simconfig_path}"
+    )
 
     nrp = NrpCore(
         "0.0.0.0:5679",

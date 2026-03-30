@@ -242,7 +242,9 @@ def connect_mm(fbk_smooth_p, pred_p, state_p, sn_p, dcn_p):
             ]
         },
     )
-    mm_fbk_sm = nest.Create("multimeter", {"record_from": ["in_rate", "lambda_poisson"]})
+    mm_fbk_sm = nest.Create(
+        "multimeter", {"record_from": ["in_rate", "lambda_poisson"]}
+    )
     mm_pred = nest.Create("multimeter", {"record_from": ["in_rate", "lambda_poisson"]})
 
     nest.Connect(mm_state, state_p)
@@ -439,7 +441,9 @@ def connect_generators_from_file(sn, sn_data, N200=None):
     for gid in use_gids:
         neuron_spike_times = times[senders == gid]
         neuron_spike_times = np.unique(np.sort(neuron_spike_times))
-        sg = nest.Create("spike_generator", 1, params={"spike_times": neuron_spike_times})
+        sg = nest.Create(
+            "spike_generator", 1, params={"spike_times": neuron_spike_times}
+        )
         spike_gen.append(sg.global_id)
 
     nest.Connect(spike_gen, sn, "one_to_one")
@@ -517,7 +521,9 @@ def generate_param_plot(data, pop_name, param_name, plots_path, plot_one_n=True)
     else:
         for gid in np.unique(senders):
             mask = senders == gid
-            plt.plot(times[mask], param[mask], color=(0, 0, 0, 0.05), label=f"Neuron {gid}")
+            plt.plot(
+                times[mask], param[mask], color=(0, 0, 0, 0.05), label=f"Neuron {gid}"
+            )
         plt.title(f"{pop_name} - {param_name} - all neurons")
         # plt.legend()
 
@@ -747,7 +753,9 @@ if __name__ == "__main__":
             spike_cereb_error_n,
             spike_cereb_fbk_p,
             spike_cereb_fbk_n,
-        ) = set_cereb_error(N, N_trials, t_trial, sn_p, sn_n, dcn_p, dcn_n, state_p, state_n)
+        ) = set_cereb_error(
+            N, N_trials, t_trial, sn_p, sn_n, dcn_p, dcn_n, state_p, state_n
+        )
 
     # CONNECT GENERATORS
     # load spikes for sn (only sn_p spikes) --> !! CAMBIA SE USI DIVERSO N
@@ -761,10 +769,16 @@ if __name__ == "__main__":
 
     if postlearning:
         dcn_pg_p = connect_generators_from_file(dcn_p, sn_data_p, N200=65)
-        dcn_pg_n = connect_poiss_generators(dcn_n, rate_mean_post, sdev_post, condition=None)
+        dcn_pg_n = connect_poiss_generators(
+            dcn_n, rate_mean_post, sdev_post, condition=None
+        )
     else:
-        dcn_pg_p = connect_poiss_generators(dcn_p, rate_mean_pre, sdev_pre, condition="learning")
-        dcn_pg_n = connect_poiss_generators(dcn_n, rate_mean_pre, sdev_pre, condition="learning")
+        dcn_pg_p = connect_poiss_generators(
+            dcn_p, rate_mean_pre, sdev_pre, condition="learning"
+        )
+        dcn_pg_n = connect_poiss_generators(
+            dcn_n, rate_mean_pre, sdev_pre, condition="learning"
+        )
 
     print("Spike generators connected to sensory neurons and dcn")
 

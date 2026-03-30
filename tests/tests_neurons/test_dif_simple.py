@@ -104,16 +104,26 @@ def test_diff():
             parrot = nest.Create("parrot_neuron")
 
             # Connect generators to parrot
-            nest.Connect(exc_gen, parrot, syn_spec={"weight": 1.0, "delay": parrot_delay})
-            nest.Connect(inh_gen, parrot, syn_spec={"weight": -1.0, "delay": parrot_delay})
+            nest.Connect(
+                exc_gen, parrot, syn_spec={"weight": 1.0, "delay": parrot_delay}
+            )
+            nest.Connect(
+                inh_gen, parrot, syn_spec={"weight": -1.0, "delay": parrot_delay}
+            )
 
             # Connect parrot to diff neuron
-            nest.Connect(parrot, diff_neuron, syn_spec={"weight": 1.0, "delay": diff_delay})
+            nest.Connect(
+                parrot, diff_neuron, syn_spec={"weight": 1.0, "delay": diff_delay}
+            )
 
         else:
             # Direct connections with specified delays
-            nest.Connect(exc_gen, diff_neuron, syn_spec={"weight": 1.0, "delay": exc_delay})
-            nest.Connect(inh_gen, diff_neuron, syn_spec={"weight": -1.0, "delay": inh_delay})
+            nest.Connect(
+                exc_gen, diff_neuron, syn_spec={"weight": 1.0, "delay": exc_delay}
+            )
+            nest.Connect(
+                inh_gen, diff_neuron, syn_spec={"weight": -1.0, "delay": inh_delay}
+            )
 
         # Connect diff neuron to recorder
         nest.Connect(diff_neuron, spike_rec)
@@ -136,8 +146,12 @@ def test_diff():
             "spike_times": spike_times,
             "input_exc": exc_spikes,
             "input_inh": inh_spikes,
-            "total_delay_exc": (exc_delay if not use_parrot else parrot_delay + diff_delay),
-            "total_delay_inh": (inh_delay if not use_parrot else parrot_delay + diff_delay),
+            "total_delay_exc": (
+                exc_delay if not use_parrot else parrot_delay + diff_delay
+            ),
+            "total_delay_inh": (
+                inh_delay if not use_parrot else parrot_delay + diff_delay
+            ),
         }
 
     def analyze_results(results):
@@ -172,7 +186,9 @@ def test_diff():
                 if len(spikes) > 0:
                     actual_first_response = spikes[0]
                     delay_error = actual_first_response - expected_first_response
-                    print(f"  Expected first response: {expected_first_response:.1f} ms")
+                    print(
+                        f"  Expected first response: {expected_first_response:.1f} ms"
+                    )
                     print(f"  Actual first response: {actual_first_response:.1f} ms")
                     print(f"  Timing error: {delay_error:.1f} ms")
 
@@ -220,14 +236,18 @@ def test_diff():
 
             if len(candidate_indices) > 0:
                 # Pick the closest one among candidates
-                closest_candidate_idx = candidate_indices[np.argmin(diffs[candidate_indices])]
+                closest_candidate_idx = candidate_indices[
+                    np.argmin(diffs[candidate_indices])
+                ]
                 p_spike = parrot_spikes[closest_candidate_idx]
 
                 if np.abs(d_spike - p_spike) < max_timing_diff:
                     matched_pairs.append((d_spike, p_spike))
                     matched_parrot_indices[closest_candidate_idx] = True
                 else:
-                    unmatched_direct.append(d_spike)  # Direct spike found a close one but too far
+                    unmatched_direct.append(
+                        d_spike
+                    )  # Direct spike found a close one but too far
             else:
                 unmatched_direct.append(d_spike)  # No close parrot spike found
 
@@ -250,10 +270,14 @@ def test_diff():
         for d, p in matched_pairs:
             if np.abs(d - p) >= max_timing_diff:
                 is_pass = False
-                print(f"✗ FAIL: Matched pair {d:.1f} vs {p:.1f} exceeds max timing diff.")
+                print(
+                    f"✗ FAIL: Matched pair {d:.1f} vs {p:.1f} exceeds max timing diff."
+                )
                 # break # Only need one failure to fail the test
         if is_pass:
-            print("✓ PASS: All significant spikes matched with acceptable timing differences.")
+            print(
+                "✓ PASS: All significant spikes matched with acceptable timing differences."
+            )
         else:
             print("✗ FAIL: Significant discrepancies found.")
 
@@ -340,7 +364,9 @@ def test_diff():
         plt.tight_layout()
         directory = f"figures_neurons"
         os.makedirs(directory, exist_ok=True)
-        plt.savefig(f"{directory}/diff_neuron_delay_test.png", dpi=150, bbox_inches="tight")
+        plt.savefig(
+            f"{directory}/diff_neuron_delay_test.png", dpi=150, bbox_inches="tight"
+        )
 
         # plt.show()
 
@@ -493,13 +519,17 @@ def test_diff():
         direct_spikes = direct_delay["spike_times"]
         parrot_spikes = parrot_delay["spike_times"]
 
-        if len(direct_spikes) > 0 or len(parrot_spikes) > 0:  # Check if there are any spikes at all
+        if (
+            len(direct_spikes) > 0 or len(parrot_spikes) > 0
+        ):  # Check if there are any spikes at all
 
-            is_test_pass, matched, unmatched_d, unmatched_p = compare_delayed_spikes_by_matching(
-                direct_spikes,
-                parrot_spikes,
-                max_timing_diff=0.5,
-                proximity_threshold=20.0,
+            is_test_pass, matched, unmatched_d, unmatched_p = (
+                compare_delayed_spikes_by_matching(
+                    direct_spikes,
+                    parrot_spikes,
+                    max_timing_diff=0.5,
+                    proximity_threshold=20.0,
+                )
             )
 
             print(f"\nConclusion:")
@@ -518,15 +548,21 @@ def test_diff():
                     )
                     assert len(unmatched_p) > 0
         else:
-            print("No spikes generated by either mechanism. Cannot perform timing comparison.")
+            print(
+                "No spikes generated by either mechanism. Cannot perform timing comparison."
+            )
             if len(direct_spikes) == 0 and len(parrot_spikes) == 0:
                 print("✓ PASS: No spikes in either, implying equivalent empty output.")
                 assert len(direct_spikes) == 0
             else:
-                print("✗ FAIL: One has spikes, the other doesn't (or partial generation).")
+                print(
+                    "✗ FAIL: One has spikes, the other doesn't (or partial generation)."
+                )
         print(f"\nOverall Result:")
         if is_test_pass:
             print("✓ TEST PASSED: Delay mechanisms produce equivalent spike outputs.")
         else:
-            print("✗ TEST FAILED: Delay mechanisms produce non-equivalent spike outputs.")
+            print(
+                "✗ TEST FAILED: Delay mechanisms produce non-equivalent spike outputs."
+            )
             assert False, "Delay mechanisms produce non-equivalent spike outputs."

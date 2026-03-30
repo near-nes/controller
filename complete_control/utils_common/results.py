@@ -25,7 +25,9 @@ def make_trial_id(
 ):
     """Return a readable, time-sortable trial ID."""
     timestamp_str = timestamp_str or datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=suffix_len))
+    suffix = "".join(
+        random.choices(string.ascii_lowercase + string.digits, k=suffix_len)
+    )
     return f"{timestamp_str}_{suffix}-{label}"
 
 
@@ -70,7 +72,9 @@ def extract_time_move_trajectories(ms: list[ResultMeta]):
     time_move_desired_shoulder_trajs = []
     for d, des, p in zip(data, desired, params):
         start = int(p.simulation.time_prep / p.simulation.resolution)
-        end = int((p.simulation.time_prep + p.simulation.time_move) / p.simulation.resolution)
+        end = int(
+            (p.simulation.time_prep + p.simulation.time_move) / p.simulation.resolution
+        )
         time_move_effective_shoulder_trajs.append(d.joint_data[1].pos_rad[start:end])
         time_move_desired_shoulder_trajs.append(des[start:end])
 
@@ -89,7 +93,9 @@ def extract_and_merge_plant_results(results: list[ResultMeta]):
             JointData(
                 pos_rad=np.concatenate([d.joint_data[i].pos_rad for d in data]),
                 vel_rad_s=np.concatenate([d.joint_data[i].vel_rad_s for d in data]),
-                input_cmd_torque=np.concatenate([d.joint_data[i].input_cmd_torque for d in data]),
+                input_cmd_torque=np.concatenate(
+                    [d.joint_data[i].input_cmd_torque for d in data]
+                ),
             )
             for i in range(len(data[0].joint_data))
         ],
@@ -201,7 +207,9 @@ def concatenate_neural_results(
         raise ValueError("Cannot concatenate empty list of ResultMeta")
 
     neural_results = [meta.load_neural() for meta in result_metas]
-    trial_durations_ms = [meta.load_params().simulation.duration_ms for meta in result_metas]
+    trial_durations_ms = [
+        meta.load_params().simulation.duration_ms for meta in result_metas
+    ]
 
     use_cerebellum_values = [nr.use_cerebellum for nr in neural_results]
     if len(set(use_cerebellum_values)) > 1:

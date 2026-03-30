@@ -12,7 +12,9 @@ def load_and_display_plant_data(filepath: Path):
         print(
             "Please ensure you have a generated plant result file (e.g., joint_0.json) in a 'data' directory."
         )
-        print("You would typically generate this by running a simulation that records plant data.")
+        print(
+            "You would typically generate this by running a simulation that records plant data."
+        )
         return
 
     try:
@@ -28,7 +30,9 @@ def load_and_display_plant_data(filepath: Path):
         print(f"Spike Rate Negative (Hz) shape: {joint_data.spk_rate_neg_hz.shape}")
         print(f"Spike Rate Net (Hz) shape: {joint_data.spk_rate_net_hz.shape}")
         print(f"Input Command Torque shape: {joint_data.input_cmd_torque.shape}")
-        print(f"Input Command Total Torque shape: {joint_data.input_cmd_total_torque.shape}")
+        print(
+            f"Input Command Total Torque shape: {joint_data.input_cmd_total_torque.shape}"
+        )
 
         print("\nSample Data (first 5 elements):")
         print(f"Pos (rad): {joint_data.pos_rad[:5]}")

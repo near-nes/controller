@@ -23,7 +23,9 @@ def get_current_section(curr_time_ms: float, mp: MasterParams):
     elif curr_time_ms <= (mp.simulation.time_move + mp.simulation.time_prep):
         return TrialSection.TIME_MOVE
     elif curr_time_ms <= (
-        mp.simulation.time_move + mp.simulation.time_prep + mp.simulation.time_locked_with_feedback
+        mp.simulation.time_move
+        + mp.simulation.time_prep
+        + mp.simulation.time_locked_with_feedback
     ):
         return TrialSection.TIME_LOCKED_WITH_FEEDBACK
     elif curr_time_ms <= (

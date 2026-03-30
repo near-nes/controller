@@ -80,11 +80,19 @@ def test_sinexp_kernel():
         4200.0,
     ]
 
-    simple_spike_gen = nest.Create("spike_generator", {"spike_times": simple_spike_times})
-    complex_spike_gen = nest.Create("spike_generator", {"spike_times": complex_spike_times})
+    simple_spike_gen = nest.Create(
+        "spike_generator", {"spike_times": simple_spike_times}
+    )
+    complex_spike_gen = nest.Create(
+        "spike_generator", {"spike_times": complex_spike_times}
+    )
 
-    nest.Connect(simple_spike_gen, Gr, "all_to_all", {"weight": 1000, "receptor_type": 1})
-    nest.Connect(complex_spike_gen, IO, "all_to_all", {"weight": 1000, "receptor_type": 1})
+    nest.Connect(
+        simple_spike_gen, Gr, "all_to_all", {"weight": 1000, "receptor_type": 1}
+    )
+    nest.Connect(
+        complex_spike_gen, IO, "all_to_all", {"weight": 1000, "receptor_type": 1}
+    )
 
     # Set thresholds of IOs and GrCs to 0.0 to avoid autonomous firing
 

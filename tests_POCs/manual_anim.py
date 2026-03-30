@@ -58,7 +58,8 @@ if __name__ == "__main__":
     log = structlog.get_logger("")
 
     images_path = (
-        Path(".") / f"{exec_key}-{COLOR.name}-{DURATION}s-{'grasp' if GRASP_OCCURS else 'fail'}"
+        Path(".")
+        / f"{exec_key}-{COLOR.name}-{DURATION}s-{'grasp' if GRASP_OCCURS else 'fail'}"
     )
     for axis in AXES_TO_CAPTURE:
         (images_path / axis).mkdir(exist_ok=True, parents=True)

@@ -17,7 +17,9 @@ from utils_common.profile import Profile
 class Script(GrpcEngineScript):
     def __init__(self):
         super().__init__()
-        self.log: structlog.stdlib.BoundLogger = structlog.get_logger("nrp_neural_engine")
+        self.log: structlog.stdlib.BoundLogger = structlog.get_logger(
+            "nrp_neural_engine"
+        )
 
     def initialize(self):
         self.log.info("PyBullet Engine Server is initializing.")
@@ -40,7 +42,9 @@ class Script(GrpcEngineScript):
         # joint_pos_rad (datapack<Double>)
         self._registerDataPack("joint_pos_rad", wrappers_pb2.DoubleValue)
         proto_wrapper = wrappers_pb2.DoubleValue()
-        proto_wrapper.value = self.config.master_config.simulation.oracle.init_joint_angle
+        proto_wrapper.value = (
+            self.config.master_config.simulation.oracle.init_joint_angle
+        )
         self._setDataPack("joint_pos_rad", proto_wrapper)
         # control_cmd (datapack<Double[]>)
         self._registerDataPack("control_cmd", nrpgenericproto_pb2.ArrayDouble)

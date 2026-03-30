@@ -32,7 +32,9 @@ def generate_trajectory_minjerk(sim: SimulationParams):
     time_prep = sim.time_prep
     time_post = sim.time_grasp + sim.time_post
 
-    time_sim_vec = np.linspace(0, time_move, num=int(np.round(time_move / res)), endpoint=True)
+    time_sim_vec = np.linspace(
+        0, time_move, num=int(np.round(time_move / res)), endpoint=True
+    )
 
     # Joint space
     init_pos = np.array([sim.oracle.init_pos_angle_rad])
@@ -41,7 +43,9 @@ def generate_trajectory_minjerk(sim: SimulationParams):
     trj, pol = minimumJerk(init_pos, tgt_pos, time_sim_vec)  # Joint space (angle)
 
     trj_prep = trj[0] * np.ones(int(time_prep / res))
-    trj_locked_with_feedback = trj[-1] * np.ones(int(sim.time_locked_with_feedback / res))
+    trj_locked_with_feedback = trj[-1] * np.ones(
+        int(sim.time_locked_with_feedback / res)
+    )
     trj_post = 0 * np.ones(int(time_post / res))
     trj = np.concatenate((trj_prep, trj.flatten(), trj_locked_with_feedback, trj_post))
 
@@ -59,7 +63,9 @@ def generate_motor_commands_minjerk(sim: SimulationParams):
     time_zeroed_prep = sim.time_prep
     time_zeroed_post = sim.time_locked_with_feedback + sim.time_grasp + sim.time_post
 
-    time_sim_vec = np.linspace(0, time_move, num=int(np.round(time_move / res)), endpoint=True)
+    time_sim_vec = np.linspace(
+        0, time_move, num=int(np.round(time_move / res)), endpoint=True
+    )
 
     dynSys = Robot1J(robot=sim.oracle.robot_spec)
     njt = dynSys.numVariables()
@@ -79,7 +85,9 @@ def generate_motor_commands_minjerk(sim: SimulationParams):
         d = np.zeros(x_init.shape)
 
         pol = np.array([a, b, c, d])
-        pp = a * np.power(tmspn, 3) + b * np.power(tmspn, 2) + c * np.power(tmspn, 1) + d
+        pp = (
+            a * np.power(tmspn, 3) + b * np.power(tmspn, 2) + c * np.power(tmspn, 1) + d
+        )
         return pp, pol
 
     # Time and value of the minimum jerk curve

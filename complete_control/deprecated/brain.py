@@ -62,7 +62,9 @@ n_trials = sim.n_trials
 time_vect = np.linspace(0, time_span, num=int(np.round(time_span / res)), endpoint=True)
 
 total_time = time_span * n_trials
-total_time_vect = np.linspace(0, total_time, num=int(np.round(total_time / res)), endpoint=True)
+total_time_vect = np.linspace(
+    0, total_time, num=int(np.round(total_time / res)), endpoint=True
+)
 assert len(trj) == len(total_time_vect)
 njt = exp.dynSys.numVariables()
 # nest.ResetKernel()
@@ -556,7 +558,9 @@ nest.SetStatus(
         "simulation_steps": len(total_time_vect),
     },
 )
-motor_commands_p = [PopView(tmp_p, total_time_vect, to_file=True, label="motor_commands_p")]
+motor_commands_p = [
+    PopView(tmp_p, total_time_vect, to_file=True, label="motor_commands_p")
+]
 
 tmp_n = nest.Create("basic_neuron_nestml", N_mossy_forw)
 nest.SetStatus(
@@ -569,7 +573,9 @@ nest.SetStatus(
         "simulation_steps": len(total_time_vect),
     },
 )
-motor_commands_n = [PopView(tmp_n, total_time_vect, to_file=True, label="motor_commands_n")]
+motor_commands_n = [
+    PopView(tmp_n, total_time_vect, to_file=True, label="motor_commands_n")
+]
 
 # Error signal toward IO neurons ############
 
@@ -616,7 +622,9 @@ nest.SetStatus(
         "simulation_steps": len(total_time_vect),
     },
 )
-plan_to_inv_p.append(PopView(tmp_p, total_time_vect, to_file=True, label="plan_to_inv_p"))
+plan_to_inv_p.append(
+    PopView(tmp_p, total_time_vect, to_file=True, label="plan_to_inv_p")
+)
 
 plan_to_inv_n = []
 tmp_n = nest.Create("basic_neuron_nestml", N_mossy_inv)
@@ -630,7 +638,9 @@ nest.SetStatus(
         "simulation_steps": len(total_time_vect),
     },
 )
-plan_to_inv_n.append(PopView(tmp_n, total_time_vect, to_file=True, label="plan_to_inv_n"))
+plan_to_inv_n.append(
+    PopView(tmp_n, total_time_vect, to_file=True, label="plan_to_inv_n")
+)
 
 state_to_inv_p = []
 tmp_p = nest.Create("basic_neuron_nestml", N_mossy_inv)
@@ -644,7 +654,9 @@ nest.SetStatus(
         "simulation_steps": len(total_time_vect),
     },
 )
-state_to_inv_p.append(PopView(tmp_p, total_time_vect, to_file=True, label="state_to_inv_p"))
+state_to_inv_p.append(
+    PopView(tmp_p, total_time_vect, to_file=True, label="state_to_inv_p")
+)
 
 state_to_inv_n = []
 tmp_n = nest.Create("basic_neuron_nestml", N_mossy_inv)
@@ -658,7 +670,9 @@ nest.SetStatus(
         "simulation_steps": len(total_time_vect),
     },
 )
-state_to_inv_n.append(PopView(tmp_n, total_time_vect, to_file=True, label="state_to_inv_n"))
+state_to_inv_n.append(
+    PopView(tmp_n, total_time_vect, to_file=True, label="state_to_inv_n")
+)
 
 
 nest.Connect(
@@ -693,7 +707,9 @@ nest.SetStatus(
         "simulation_steps": len(total_time_vect),
     },
 )
-motor_prediction_p.append(PopView(tmp_p, total_time_vect, to_file=True, label="motor_prediction_p"))
+motor_prediction_p.append(
+    PopView(tmp_p, total_time_vect, to_file=True, label="motor_prediction_p")
+)
 
 motor_prediction_n = []
 tmp_n = nest.Create("diff_neuron_nestml", N)
@@ -707,7 +723,9 @@ nest.SetStatus(
         "simulation_steps": len(total_time_vect),
     },
 )
-motor_prediction_n.append(PopView(tmp_n, total_time_vect, to_file=True, label="motor_prediction_n"))
+motor_prediction_n.append(
+    PopView(tmp_n, total_time_vect, to_file=True, label="motor_prediction_n")
+)
 
 # feedback from sensory
 feedback_inv_p = []
@@ -722,7 +740,9 @@ nest.SetStatus(
         "simulation_steps": len(total_time_vect),
     },
 )
-feedback_inv_p.append(PopView(tmp_p, total_time_vect, to_file=True, label="feedback_inv_p"))
+feedback_inv_p.append(
+    PopView(tmp_p, total_time_vect, to_file=True, label="feedback_inv_p")
+)
 
 feedback_inv_n = []
 tmp_n = nest.Create("diff_neuron_nestml", N)
@@ -736,7 +756,9 @@ nest.SetStatus(
         "simulation_steps": len(total_time_vect),
     },
 )
-feedback_inv_n.append(PopView(tmp_n, total_time_vect, to_file=True, label="feedback_inv_n"))
+feedback_inv_n.append(
+    PopView(tmp_n, total_time_vect, to_file=True, label="feedback_inv_n")
+)
 
 error_inv_p = []
 tmp_p = nest.Create("diff_neuron_nestml", N)
@@ -893,7 +915,9 @@ wgt_plnr_mtxFbk = conn_params["planner_mc_fbk"]["weight"]
 # Delay between planner and motor cortex feedback.
 # It needs to compensate for the delay introduced by the state estimator
 # delay_plnr_mtxFbk = brain.stEst_param["buf_sz"] # USE THIS WITH REAL STATE ESTIMATOR
-delay_plnr_mtxFbk = conn_params["planner_mc_fbk"]["delay"]  # USE THIS WITH "FAKE" STATE ESTIMATOR
+delay_plnr_mtxFbk = conn_params["planner_mc_fbk"][
+    "delay"
+]  # USE THIS WITH "FAKE" STATE ESTIMATOR
 
 for j in range(njt):
     planner.pops_p[j].connect(
@@ -1065,7 +1089,9 @@ for j in range(njt):
             "simulation_steps": len(total_time_vect),
         },
     )
-    brain_stem_new_p.append(PopView(tmp_p, time_vect, to_file=True, label="brainstem_p"))
+    brain_stem_new_p.append(
+        PopView(tmp_p, time_vect, to_file=True, label="brainstem_p")
+    )
     # Negative neurons
     tmp_n = nest.Create("basic_neuron_nestml", N)
     nest.SetStatus(
@@ -1078,7 +1104,9 @@ for j in range(njt):
             "simulation_steps": len(total_time_vect),
         },
     )
-    brain_stem_new_n.append(PopView(tmp_n, time_vect, to_file=True, label="brainstem_n"))
+    brain_stem_new_n.append(
+        PopView(tmp_n, time_vect, to_file=True, label="brainstem_n")
+    )
 
 
 nest.Connect(
@@ -1577,8 +1605,12 @@ if mpi4py.MPI.COMM_WORLD.rank == 0:
 
     bins_p, count_p, rate_p = planner.pops_p[0].computePSTH(time_vect_paused, 15)
     bins_n, count_n, rate_n = planner.pops_n[0].computePSTH(time_vect_paused, 15)
-    bins_stEst_p, count_stEst_p, rate_stEst_p = stEst.pops_p[0].computePSTH(time_vect_paused, 15)
-    bins_stEst_n, count_stEst_n, rate_stEst_n = stEst.pops_n[0].computePSTH(time_vect_paused, 15)
+    bins_stEst_p, count_stEst_p, rate_stEst_p = stEst.pops_p[0].computePSTH(
+        time_vect_paused, 15
+    )
+    bins_stEst_n, count_stEst_n, rate_stEst_n = stEst.pops_n[0].computePSTH(
+        time_vect_paused, 15
+    )
 
     print("mc fbk")
     reference_plus = [rate_p, rate_n]
@@ -1650,8 +1682,12 @@ if mpi4py.MPI.COMM_WORLD.rank == 0:
 
     bins_p, count_p, rate_p = mc.out_p[0].computePSTH(time_vect_paused, 15)
     bins_n, count_n, rate_n = mc.out_n[0].computePSTH(time_vect_paused, 15)
-    bins_p_inv, count_p_inv, rate_p_inv = motor_prediction_p[0].computePSTH(time_vect_paused, 15)
-    bins_n_inv, count_n_inv, rate_n_inv = motor_prediction_n[0].computePSTH(time_vect_paused, 15)
+    bins_p_inv, count_p_inv, rate_p_inv = motor_prediction_p[0].computePSTH(
+        time_vect_paused, 15
+    )
+    bins_n_inv, count_n_inv, rate_n_inv = motor_prediction_n[0].computePSTH(
+        time_vect_paused, 15
+    )
 
     reference = [rate_p, rate_n, rate_p_inv, rate_n_inv]
     time_vecs = [bins_p[:-1], bins_n[:-1], bins_p_inv[:-1], bins_n_inv[:-1]]
@@ -1699,8 +1735,12 @@ if mpi4py.MPI.COMM_WORLD.rank == 0:
 
     bins_p, count_p, rate_p = sn_p[0].computePSTH(time_vect_paused, 15)
     bins_n, count_n, rate_n = sn_n[0].computePSTH(time_vect_paused, 15)
-    bins_pred_p, count_pred_p, rate_pred_p = prediction_p[0].computePSTH(time_vect_paused, 15)
-    bins_pred_n, count_pred_n, rate_pred_n = prediction_n[0].computePSTH(time_vect_paused, 15)
+    bins_pred_p, count_pred_p, rate_pred_p = prediction_p[0].computePSTH(
+        time_vect_paused, 15
+    )
+    bins_pred_n, count_pred_n, rate_pred_n = prediction_n[0].computePSTH(
+        time_vect_paused, 15
+    )
 
     reference = [rate_p - rate_n, rate_pred_p - rate_pred_n]
     time_vecs = [bins_p[:-1], bins_n[:-1]]
@@ -1881,8 +1921,12 @@ if mpi4py.MPI.COMM_WORLD.rank == 0:
     bins_p, count_p, rate_p = feedback_p[0].computePSTH(time_vect_paused, 15)
     bins_n, count_n, rate_n = feedback_n[0].computePSTH(time_vect_paused, 15)
 
-    bins_p_DCN, count_p_DCN, rate_p_DCN = forw_DCNp_plus[0].computePSTH(time_vect_paused, 15)
-    bins_n_DCN, count_n_DCN, rate_n_DCN = forw_DCNp_minus[0].computePSTH(time_vect_paused, 15)
+    bins_p_DCN, count_p_DCN, rate_p_DCN = forw_DCNp_plus[0].computePSTH(
+        time_vect_paused, 15
+    )
+    bins_n_DCN, count_n_DCN, rate_n_DCN = forw_DCNp_minus[0].computePSTH(
+        time_vect_paused, 15
+    )
 
     reference_plus = [rate_p, rate_n]
     reference_minus = [rate_p_DCN, rate_n_DCN]
@@ -1930,8 +1974,12 @@ if mpi4py.MPI.COMM_WORLD.rank == 0:
     bins_p, count_p, rate_p = plan_to_inv_p[0].computePSTH(time_vect_paused, 15)
     bins_n, count_n, rate_n = plan_to_inv_n[0].computePSTH(time_vect_paused, 15)
 
-    bins_stEst_p, count_stEst_p, rate_stEst_p = state_to_inv_p[0].computePSTH(time_vect_paused, 15)
-    bins_stEst_n, count_stEst_n, rate_stEst_n = state_to_inv_n[0].computePSTH(time_vect_paused, 15)
+    bins_stEst_p, count_stEst_p, rate_stEst_p = state_to_inv_p[0].computePSTH(
+        time_vect_paused, 15
+    )
+    bins_stEst_n, count_stEst_n, rate_stEst_n = state_to_inv_n[0].computePSTH(
+        time_vect_paused, 15
+    )
 
     reference_plus = [rate_p, rate_n]
     reference_minus = [rate_stEst_p, rate_stEst_n]

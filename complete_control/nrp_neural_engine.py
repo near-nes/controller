@@ -42,7 +42,9 @@ class Script(GrpcEngineScript):
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger("nrp_neural")
         self.log.info(f"Engine Log Path: {self.run_paths.logs}")
 
-        self.master_config = MasterParams.from_runpaths(self.run_paths, parent_id=parent_id)
+        self.master_config = MasterParams.from_runpaths(
+            self.run_paths, parent_id=parent_id
+        )
         with open(self.run_paths.params_json, "w") as f:
             f.write(self.master_config.model_dump_json(indent=2))
         self.log.info("MasterParams loaded and dumped successfully.")
@@ -86,7 +88,9 @@ class Script(GrpcEngineScript):
         sim_time_s = self._time_ns * NANO_SEC
 
         with self.sensory_profile.time():
-            self.controller.update_sensory_info_from_NRP(joint_pos_rad, sim_time_s * 1000)
+            self.controller.update_sensory_info_from_NRP(
+                joint_pos_rad, sim_time_s * 1000
+            )
 
         if self.step % 50 == 0:
             self.log.debug("[neural] updated sensory info")

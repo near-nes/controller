@@ -24,7 +24,8 @@ def parse_slice_notation(slice_str: str) -> slice:
     parts = slice_str.split(":")
     if len(parts) > 3:
         raise ValueError(
-            f"Invalid slice notation '{slice_str}'. " "Expected format: [start]:[stop]:[step]"
+            f"Invalid slice notation '{slice_str}'. "
+            "Expected format: [start]:[stop]:[step]"
         )
     parts += [None] * (3 - len(parts))
     start = int(parts[0]) if parts[0] and parts[0].strip() else None

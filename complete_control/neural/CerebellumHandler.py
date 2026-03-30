@@ -124,7 +124,9 @@ class CerebellumHandler:
         # Get N_mossy counts from the Cerebellum object
         self.N_mossy_forw = len(self.cerebellum.populations.forw_mf.pop)
         self.N_mossy_inv = len(self.cerebellum.populations.inv_mf.pop)
-        self.log.info("Mossy fiber counts", N_forw=self.N_mossy_forw, N_inv=self.N_mossy_inv)
+        self.log.info(
+            "Mossy fiber counts", N_forw=self.N_mossy_forw, N_inv=self.N_mossy_inv
+        )
 
         # --- Create Interface Populations ---
         self.log.info("Creating interface populations")
@@ -155,7 +157,9 @@ class CerebellumHandler:
             "simulation_steps": len(self.total_time_vect),
             "sdev": params.sdev,
         }
-        signal_sensibility = np.linspace(-params.freq_max, params.freq_max, self.N_mossy_inv)
+        signal_sensibility = np.linspace(
+            -params.freq_max, params.freq_max, self.N_mossy_inv
+        )
         nest.SetStatus(motor_commands, pop_params)
         for i, neuron in enumerate(motor_commands):
             nest.SetStatus(neuron, {"desired": signal_sensibility[i]})
@@ -254,7 +258,9 @@ class CerebellumHandler:
             self.interface_pops.motor_commands.pop,
             self.cerebellum.populations.forw_mf.pop,
             "one_to_one",
-            syn_spec=self.conn_params.motor_commands_mossy_forw.model_dump(exclude_none=True),
+            syn_spec=self.conn_params.motor_commands_mossy_forw.model_dump(
+                exclude_none=True
+            ),
         )
 
         # Fwd Error -> Fwd Inferior Olive
@@ -347,10 +353,12 @@ class CerebellumHandler:
         # Connect Feedback -> Error
         fb_err_spec = self.conn_params.sensory_delayed_error
         syn_spec_p = fb_err_spec.model_dump(exclude_none=True)
-        syn_spec_n = fb_err_spec.model_copy(update={"weight": -fb_err_spec.weight}).model_dump(
-            exclude_none=True
+        syn_spec_n = fb_err_spec.model_copy(
+            update={"weight": -fb_err_spec.weight}
+        ).model_dump(exclude_none=True)
+        self.log.debug(
+            "Connecting feedback -> error", syn_spec_p=syn_spec_p, syn_spec_n=syn_spec_n
         )
-        self.log.debug("Connecting feedback -> error", syn_spec_p=syn_spec_p, syn_spec_n=syn_spec_n)
         nest.Connect(
             self.controller_pops.sensory_delayed_p.pop,
             self.interface_pops.error_fwd_p.pop,
@@ -479,7 +487,9 @@ class CerebellumHandler:
 
     def connect_to_main_controller_populations(self):
         if not self.controller_pops:
-            self.log.error("ControllerPopulations not provided, cannot connect to main controller.")
+            self.log.error(
+                "ControllerPopulations not provided, cannot connect to main controller."
+            )
             raise ValueError(
                 "ControllerPopulations not provided, cannot connect to main controller."
             )
@@ -569,9 +579,9 @@ class CerebellumHandler:
         # Planner -> Cereb Plan To Inv Input
         plan_pti_spec = self.conn_params.planner_plan_to_inv
         syn_spec_p = plan_pti_spec.model_dump(exclude_none=True)
-        syn_spec_n = plan_pti_spec.model_copy(update={"weight": -plan_pti_spec.weight}).model_dump(
-            exclude_none=True
-        )
+        syn_spec_n = plan_pti_spec.model_copy(
+            update={"weight": -plan_pti_spec.weight}
+        ).model_dump(exclude_none=True)
         self.log.debug(
             "Connecting Controller Planner -> Cereb PlanToInv",
             syn_spec_p=syn_spec_p,

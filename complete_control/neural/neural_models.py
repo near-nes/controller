@@ -7,7 +7,9 @@ from utils_common.custom_types import NdArray
 T = TypeVar("T")
 
 
-def convert_to_recording(source: object, target_class: type[T], path: Path, comm=None) -> T:
+def convert_to_recording(
+    source: object, target_class: type[T], path: Path, comm=None
+) -> T:
     from neural.population_view import PopView
 
     """Convert a population object to its recording equivalent."""

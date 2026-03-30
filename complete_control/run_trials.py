@@ -64,7 +64,9 @@ def main():
 
     for i in range(args.num_trials):
         try:
-            run_id = run_trial_nrp(i + 1, args.num_trials, current_parent_id, args.label)
+            run_id = run_trial_nrp(
+                i + 1, args.num_trials, current_parent_id, args.label
+            )
 
             current_parent_id = run_id
         except RuntimeError:

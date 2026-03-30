@@ -61,7 +61,9 @@ class PopView:
         if comm is None or nest.Rank() == 0:
             name = self.label
             file_list = [
-                i for i in dir.iterdir() if i.name.startswith(name) and i.suffix != ".json"
+                i
+                for i in dir.iterdir()
+                if i.name.startswith(name) and i.suffix != ".json"
             ]
             senders = []
             times = []
@@ -124,7 +126,9 @@ class PopView:
         elif metadata.get("record_to") == "ascii":
             if not self.filepath:
                 # assume collapse hasn't been called yet
-                raise NotImplementedError("not ready to handle non-collapsed objects...")
+                raise NotImplementedError(
+                    "not ready to handle non-collapsed objects..."
+                )
                 # if not metadata.get("filenames"):
                 #     return [], []
                 # filepath = Path(metadata.get("filenames")[0])
@@ -154,4 +158,6 @@ class PopView:
             return evs, ts
 
         else:
-            raise NotImplementedError(f"Unknown recording backend: {metadata.get('record_to')}")
+            raise NotImplementedError(
+                f"Unknown recording backend: {metadata.get('record_to')}"
+            )

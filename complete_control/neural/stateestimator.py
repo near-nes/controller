@@ -100,7 +100,9 @@ class StateEstimator:
             "wgt_scale": (
                 1.0
             ),  # Scale of connection weight from input to output populations (must be positive)
-            "buf_sz": (10.0),  # Size of the buffer to compute spike rate in basic_neurons (ms)
+            "buf_sz": (
+                10.0  # Size of the buffer to compute spike rate in basic_neurons (ms)
+            ),
         }
         self.param_neurons.update(kwargs)
 
@@ -111,7 +113,9 @@ class StateEstimator:
 
         # Initialize network
         nJt = plant.numVariables()
-        self.init_neurons(self.numNeuronsPop, self.param_neurons, nJt, time_vect, pathData)
+        self.init_neurons(
+            self.numNeuronsPop, self.param_neurons, nJt, time_vect, pathData
+        )
 
     # Compute connection weigths from input to output populations
     def computeWeights(self, kpred, ksens):

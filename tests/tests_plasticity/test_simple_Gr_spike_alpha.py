@@ -35,7 +35,9 @@ def test_simple_Gr_spike_alpha():
     # nest.SetStatus(Gr, GR_params) # If used, Gr does not spike
 
     simple_spike = nest.Create("spike_generator", M, {"spike_times": [998.0]})
-    nest.Connect(simple_spike, Gr, "one_to_one", syn_spec={"receptor_type": 1, "weight": 1000.0})
+    nest.Connect(
+        simple_spike, Gr, "one_to_one", syn_spec={"receptor_type": 1, "weight": 1000.0}
+    )
 
     # Set threshold of GrCs to 0.0 mV to avoid autonomous firing
     nest.SetStatus(Gr, {"V_th": 0.0})

@@ -47,7 +47,9 @@ def test_offset_encoding_alpha():
         nest.Connect(IO, MLI, "one_to_one", syn_spec={"receptor_type": 3})
 
         wr = nest.Create("weight_recorder")
-        nest.CopyModel("stdp_synapse_alpha", "my_stdp_synapse_rec", {"weight_recorder": wr})
+        nest.CopyModel(
+            "stdp_synapse_alpha", "my_stdp_synapse_rec", {"weight_recorder": wr}
+        )
 
         conn_spec_dict = {"rule": "fixed_indegree", "indegree": 4}
         syn_spec_dict = {"synapse_model": "my_stdp_synapse_rec", "receptor_type": 1}
@@ -114,4 +116,6 @@ def test_offset_encoding_alpha():
 
         for idx, connection in enumerate(pf_mli_conns):
             if connection not in plastic_connections:
-                assert np.all(np.diff(weight_matrix[idx, :]) <= 0)  # Make sure LTP is not happening
+                assert np.all(
+                    np.diff(weight_matrix[idx, :]) <= 0
+                )  # Make sure LTP is not happening

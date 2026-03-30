@@ -107,7 +107,9 @@ class Robot1J(Body):
         # elif acc.shape!=self._angles.shape:
         #     raise Exception("Wrong value format")
         # torques = acc * self.robot["links"]**2
-        torques = self.I * acc + g * self.robot["mass"] * self.robot["links"] / 2 * np.sin(pos)
+        torques = self.I * acc + g * self.robot["mass"] * self.robot[
+            "links"
+        ] / 2 * np.sin(pos)
         return torques
 
     # Definition of the forward dynamics (from torques to kin)
@@ -125,7 +127,9 @@ class Robot1J(Body):
 # TEST
 if __name__ == "__main__":
 
-    robot_spec = dict(mass=np.array([1.89]), links=np.array([0.42]), I=np.array([0.00189]))
+    robot_spec = dict(
+        mass=np.array([1.89]), links=np.array([0.42]), I=np.array([0.00189])
+    )
     # ICp = np.array([2.0, 2.0, 3.0])
     # ICv = np.array([3.0, 3.0, 4.0])
     ICp = np.array([0.0])

@@ -36,7 +36,9 @@ class Cerebellum:
         weights: list[Path] | None,
     ):
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
-        options.verbosity = 0  # TODO how to we handle this verbosity? keep 0 for now but...
+        options.verbosity = (
+            0  # TODO how to we handle this verbosity? keep 0 for now but...
+        )
         self.total_time_vect = total_time_vect
         self.conn_params = conn_params
         self.label_prefix = label_prefix
@@ -54,15 +56,15 @@ class Cerebellum:
         )
 
         self.forward_model = from_storage(str(paths.cerebellum_hdf5), self.comm)
-        self.forward_model.simulations[SIMULATION_NAME_IN_YAML] = conf_forward.simulations[
-            SIMULATION_NAME_IN_YAML
-        ]
+        self.forward_model.simulations[SIMULATION_NAME_IN_YAML] = (
+            conf_forward.simulations[SIMULATION_NAME_IN_YAML]
+        )
         self.log.debug("loaded forward model and its configuration")
 
         self.inverse_model = from_storage(str(paths.cerebellum_hdf5), self.comm)
-        self.inverse_model.simulations[SIMULATION_NAME_IN_YAML] = conf_inverse.simulations[
-            SIMULATION_NAME_IN_YAML
-        ]
+        self.inverse_model.simulations[SIMULATION_NAME_IN_YAML] = (
+            conf_inverse.simulations[SIMULATION_NAME_IN_YAML]
+        )
         self.log.debug("loaded inverse model and its configuration")
 
         simulation_forw = self.forward_model.get_simulation(SIMULATION_NAME_IN_YAML)
@@ -82,7 +84,9 @@ class Cerebellum:
         # adapter.set_settings(simulation_forw)
         # adapter.set_settings(simulation_inv)
 
-        self.log.debug(f"duration: FWD:{simulation_forw.duration}; INV{simulation_inv.duration}")
+        self.log.debug(
+            f"duration: FWD:{simulation_forw.duration}; INV{simulation_inv.duration}"
+        )
         self.log.debug(
             f"resolution: FWD:{simulation_forw.resolution}; INV{simulation_inv.resolution}"
         )
@@ -160,7 +164,9 @@ class Cerebellum:
             conns[(pre_pop.label, post_pop.label)] = c
             tot_syn += len(c)
 
-        self.log.debug(f"total number of synapses (per process): {tot_syn}", log_all_ranks=True)
+        self.log.debug(
+            f"total number of synapses (per process): {tot_syn}", log_all_ranks=True
+        )
         return conns
 
     def _pop_this_id_is_in(self, id):
@@ -177,7 +183,9 @@ class Cerebellum:
             add_kwargs = {"local_only": True}
         with create_plastic.time():
             loc_nodes = set(nest.GetNodes(**add_kwargs).get("global_id"))
-            curr_proc_recordings: defaultdict[str, list[SynapseRecording]] = defaultdict(list)
+            curr_proc_recordings: defaultdict[str, list[SynapseRecording]] = (
+                defaultdict(list)
+            )
             self.log.debug(f"loading all connections, split by synapse model...")
             # load all connections, split by synapse model
             for path in weights:
@@ -233,7 +241,9 @@ class Cerebellum:
                     synapse_model,
                     port,
                 ):
-                    weights_sorted.append(recordings.pop((source, target, model, port)).weight)
+                    weights_sorted.append(
+                        recordings.pop((source, target, model, port)).weight
+                    )
 
                 # apply sorted weights according to the existing SynapseCollection
                 nest.SetStatus(conn_nest, [{"weight": w} for w in weights_sorted])

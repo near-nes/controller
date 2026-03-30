@@ -26,7 +26,9 @@ def plotPopulation_sd(
         ax[0].scatter(neg_ts, y_n, marker=".", s=1, c="b", label="neg")
         ax[0].legend()
         ax[0].set_ylabel("raster")
-        rate_p = plot_rate_sd(time_v, N, pos_ts, pos_sds, buffer_size, ax=ax[1], color="r")
+        rate_p = plot_rate_sd(
+            time_v, N, pos_ts, pos_sds, buffer_size, ax=ax[1], color="r"
+        )
         rate_n = plot_rate_sd(
             time_v,
             N,
@@ -87,7 +89,9 @@ def plotPopulation_sd(
     return fig, ax, rate_p, rate_n
 
 
-def plot_rate_sd(time, N, times, senders, buffer_sz=10, title="", ax=None, bar=True, **kwargs):
+def plot_rate_sd(
+    time, N, times, senders, buffer_sz=10, title="", ax=None, bar=True, **kwargs
+):
     t_init = time[0]
     t_end = time[-1]
 

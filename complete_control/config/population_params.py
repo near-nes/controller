@@ -18,7 +18,9 @@ class RBFPopParams(SinglePopParams):
 class PopulationsParams(BaseModel):
     model_config: ClassVar = {"frozen": True}
     prediction: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=100.0, base_rate=5.0)  # 50
+        default_factory=lambda: SinglePopParams(
+            kp=1.0, buffer_size=100.0, base_rate=5.0
+        )  # 50
     )
     motor_commands: RBFPopParams = Field(
         default_factory=lambda: RBFPopParams(
@@ -26,16 +28,24 @@ class PopulationsParams(BaseModel):
         )
     )
     brain_stem: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=10.0, base_rate=0.0)  # kp=0.2
+        default_factory=lambda: SinglePopParams(
+            kp=1.0, buffer_size=10.0, base_rate=0.0
+        )  # kp=0.2
     )
     sensory_delayed: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=100.0, base_rate=5.0)
+        default_factory=lambda: SinglePopParams(
+            kp=1.0, buffer_size=100.0, base_rate=5.0
+        )
     )
     state: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=150.0, base_rate=5.0)
+        default_factory=lambda: SinglePopParams(
+            kp=1.0, buffer_size=150.0, base_rate=5.0
+        )
     )
     error: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=30.0, base_rate=0.0)  # 20.0
+        default_factory=lambda: SinglePopParams(
+            kp=1.0, buffer_size=30.0, base_rate=0.0  # 20.0
+        )
     )
     plan_to_inv: RBFPopParams = Field(
         default_factory=lambda: RBFPopParams(
@@ -46,7 +56,9 @@ class PopulationsParams(BaseModel):
         default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=10.0, base_rate=0.0)
     )
     motor_pred: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(kp=0.05, buffer_size=20.0, base_rate=5.0)
+        default_factory=lambda: SinglePopParams(
+            kp=0.05, buffer_size=20.0, base_rate=5.0
+        )
     )
     feedback_inv: SinglePopParams = Field(
         default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=10.0, base_rate=0.0)

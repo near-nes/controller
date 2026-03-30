@@ -65,7 +65,9 @@ class CerebellumPopulationsRecordings(CerebellumPopulationsGeneric[PopulationSpi
 
 class CerebellumPopulations(CerebellumPopulationsGeneric[PopView]):
     def to_recording(self, *args, **kwargs) -> CerebellumPopulationsRecordings:
-        return convert_to_recording(self, CerebellumPopulationsRecordings, *args, **kwargs)
+        return convert_to_recording(
+            self, CerebellumPopulationsRecordings, *args, **kwargs
+        )
 
     def __setattr__(self, name, value):
         # Auto-label PopView instances when assigned
