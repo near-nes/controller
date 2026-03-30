@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       publish_to_pypi:
-        description: "Publish built artifacts to PyPI (main branch only)"
+        description: "Publish built artifacts to PyPI"
         required: true
         type: boolean
         default: false
@@ -63,8 +63,8 @@ jobs:
   publish:
     name: Publish to PyPI
     needs: build
-    # Auto-publish on push to main; manual publish requires explicit opt-in.
-    if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_to_pypi)) }}
+    # Auto-publish on push to main; allow manual publish from any branch.
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.publish_to_pypi) }}
     runs-on: ubuntu-latest
     # Required for OIDC Trusted Publishing (alternative to API token)
     permissions:
