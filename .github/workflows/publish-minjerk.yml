@@ -5,6 +5,13 @@ on:
     paths:
       - "complete_control/shared/minjerk/**"
       - ".github/workflows/publish-minjerk.yml"
+  workflow_dispatch:
+    inputs:
+      publish_to_pypi:
+        description: "Publish built artifacts to PyPI (main branch only)"
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -56,8 +63,8 @@ jobs:
   publish:
     name: Publish to PyPI
     needs: build
-    # Only publish from main
-    if: github.ref == 'refs/heads/main'
+    # Auto-publish on push to main; manual publish requires explicit opt-in.
+    if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_to_pypi)) }}
     runs-on: ubuntu-latest
     # Required for OIDC Trusted Publishing (alternative to API token)
     permissions:
