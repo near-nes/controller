@@ -1,0 +1,17 @@
+# Include data directories at the root level
+recursive-include artifacts *
+recursive-include cerebellum_configurations *
+
+# Include README and license files
+include README.md
+include LICENSE
+include INSTALL.md
+
+# Include docker configuration files (for reference)
+recursive-include docker *.txt
+
+# Exclude unnecessary files
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude .pytest_cache
+global-exclude *.egg-info

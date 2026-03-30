@@ -2,9 +2,43 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-ROOT = Path(os.getenv("CONTROLLER_DIR"))
+
+def _get_root_path() -> Path:
+    """
+    Determine the ROOT path for the controller.
+    
+    Priority:
+    1. CONTROLLER_DIR environment variable (for Docker/HPC compatibility)
+    2. Parent directory of installed package (for pip install)
+    3. Falls back to relative path based on current file location
+    """
+    # Check environment variable first (Docker/HPC usage)
+    if "CONTROLLER_DIR" in os.environ:
+        root = Path(os.environ["CONTROLLER_DIR"])
+        if root.exists():
+            return root
+    
+    # Fall back to package installation location
+    # This file is at: <package>/complete_control/config/paths.py
+    # We want to go up to: <package>/ which is the root
+    this_file = Path(__file__).resolve()
+    package_root = this_file.parent.parent.parent  # go up 3 levels to controller/
+    
+    if (package_root / "complete_control").exists():
+        return package_root
+    
+    # Last resort: raise an error with helpful message
+    raise RuntimeError(
+        "Could not determine ROOT path. Either:\n"
+        "1. Set CONTROLLER_DIR environment variable to the controller root directory\n"
+        "2. Install this package properly with pip install\n"
+        f"Expected package structure not found. Package root would be: {package_root}"
+    )
+
+
+ROOT = _get_root_path()
 COMPLETE_CONTROL = ROOT / "complete_control"
-RUNS_DIR = Path(os.getenv("RUNS_PATH", ROOT / "runs"))  # Base directory for all runs
+RUNS_DIR = Path(os.getenv("RUNS_PATH")) if os.getenv("RUNS_PATH") else (ROOT / "runs")  # Base directory for all runs
 
 FOLDER_NAME_NEURAL_FIGS = "figs_neural"
 FOLDER_NAME_ROBOTIC_FIGS = "figs_robotic"
@@ -23,7 +57,14 @@ CEREBELLUM_CONFIGS = ROOT / "cerebellum_configurations"
 FORWARD = CEREBELLUM_CONFIGS / "forward.yaml"
 INVERSE = CEREBELLUM_CONFIGS / "inverse.yaml"
 BASE = CEREBELLUM_CONFIGS / "microzones_complete_nest.yaml"
-PATH_HDF5 = os.environ.get("BSB_NETWORK_FILE")
+
+# BSB network file path: check environment variable first, then fall back to artifacts
+if "BSB_NETWORK_FILE" in os.environ:
+    PATH_HDF5 = os.environ["BSB_NETWORK_FILE"]
+else:
+    # Fall back to decompressed file in artifacts
+    _hdf5_path = ARTIFACTS / "cerebellum_plastic_base.hdf5"
+    PATH_HDF5 = str(_hdf5_path) if _hdf5_path.exists() else None
 
 SUBMODULES = ROOT / "submodules"
 
