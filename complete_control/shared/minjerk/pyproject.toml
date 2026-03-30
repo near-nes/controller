@@ -1,10 +1,20 @@
 [build-system]
-requires = ["setuptools>=64"]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "minjerk-dynamics"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Minimum-jerk trajectory and 1-DOF inverse dynamics"
 requires-python = ">=3.10"
 dependencies = ["numpy"]
+
+[tool.setuptools_scm]
+# path to the git root relative to this pyproject.toml
+root = "../../.."
+# write version into a module so it is importable at runtime
+version_file = "minjerk_dynamics/_version.py"
+# drop the +gABCDEF local identifier so the version is accepted by PyPI
+local_scheme = "no-local-version"
+# used when git history is unavailable (e.g. a tarball download)
+fallback_version = "0.1.0"
