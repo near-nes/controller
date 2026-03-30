@@ -1,0 +1,238 @@
+<?xml version="1.0" ?>
+<robot name="skeleton">
+  <joint name="skeleton__shoulder_joint" type="revolute">
+    <parent link="skeleton__skeleton"/>
+    <child link="skeleton__upper_arm"/>
+    <origin xyz="-0.01754 -0.17     1.793" rpy="1.59151 1.57079 0.02072"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1" upper="0.7853981852531433" effort="0.0" velocity="0.0"/>
+  </joint>
+  <joint name="skeleton__elbow_joint" type="revolute">
+    <parent link="skeleton__upper_arm"/>
+    <child link="skeleton__forearm"/>
+    <origin xyz="0.29099  0.0061  -0.0123" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="2.617993878" effort="0.0" velocity="0.0"/>
+  </joint>
+  <joint name="skeleton__hand_joint_1" type="fixed">
+    <parent link="skeleton__forearm"/>
+    <child link="skeleton__hand"/>
+    <origin xyz="0.23921 0.00788 0.06428" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="1.5707963705062866" effort="0.0" velocity="0.0"/>
+  </joint>
+  <joint name="skeleton__proximal_joint" type="fixed">
+    <parent link="skeleton__hand"/>
+    <child link="skeleton__proximal"/>
+    <origin xyz="0.0941  0.002   0.00495" rpy="0.1847  -0.15172  0.24123"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="2.0" effort="0.0" velocity="0.0"/>
+  </joint>
+  <joint name="skeleton__thumb_joint_01" type="fixed">
+    <parent link="skeleton__hand"/>
+    <child link="skeleton__thumb_1"/>
+    <origin xyz="0.02952 0.01191 0.02036" rpy="-2.39208 -0.67942  0.5854"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.7853981852531433" upper="0.7853981852531433" effort="0.0" velocity="0.0"/>
+  </joint>
+  <joint name="skeleton__thumb_joint_12" type="fixed">
+    <parent link="skeleton__thumb_1"/>
+    <child link="skeleton__thumb_2"/>
+    <origin xyz="0.04365 0.00098 0.00148" rpy="0.61859 -0.06067  0.08498"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="1.5707963705062866" effort="0.0" velocity="0.0"/>
+  </joint>
+  <joint name="skeleton__thumb_joint_23" type="fixed">
+    <parent link="skeleton__thumb_2"/>
+    <child link="skeleton__thumb_3"/>
+    <origin xyz="0.03175  0.0012  -0.00069" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="1.5707963705062866" effort="0.0" velocity="0.0"/>
+  </joint>
+  <joint name="skeleton__middle_joint" type="fixed">
+    <parent link="skeleton__proximal"/>
+    <child link="skeleton__middle"/>
+    <origin xyz="0.04285 0      0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="1.5707963705062866" effort="0.0" velocity="0.0"/>
+  </joint>
+  <joint name="skeleton__distal_joint" type="fixed">
+    <parent link="skeleton__middle"/>
+    <child link="skeleton__distal"/>
+    <origin xyz="0.02734  0.00572 -0.00241" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="1.5707963705062866" effort="0.0" velocity="0.0"/>
+  </joint>
+  <link name="skeleton__skeleton">
+    <inertial>
+      <mass value="1.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+    <collision name="skeleton__collision">
+      <origin xyz="-0.02371 -0.00647  1.74557" rpy="-0.0049  0      0"/>
+      <geometry>
+        <mesh filename="package://meshes/skeleton.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </collision>
+    <visual name="skeleton__visual">
+      <origin xyz="-0.02371 -0.00647  1.74557" rpy="-0.0049  0      0"/>
+      <geometry>
+        <mesh filename="package://meshes/skeleton.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="skeleton__upper_arm">
+    <inertial>
+      <mass value="2.4375"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.00243" ixy="0" ixz="0" iyy="0.00243" iyz="0" izz="0.00243"/>
+    </inertial>
+    <collision name="skeleton__collision">
+      <origin xyz="0.13823  0.00026 -0.00341" rpy="0      0      1.57079"/>
+      <geometry>
+        <mesh filename="package://meshes/upper_arm.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </collision>
+    <visual name="skeleton__visual">
+      <origin xyz="0.13823  0.00026 -0.00341" rpy="0      0      1.57079"/>
+      <geometry>
+        <mesh filename="package://meshes/upper_arm.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="skeleton__forearm">
+    <inertial>
+      <mass value="1.89"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.00189" ixy="0" ixz="0" iyy="0.00189" iyz="0" izz="0.00189"/>
+    </inertial>
+    <collision name="skeleton__collision">
+      <origin xyz="0.11655 -0.0037   0.03579" rpy="0      0      1.57079"/>
+      <geometry>
+        <mesh filename="package://meshes/forearm.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </collision>
+    <visual name="skeleton__visual">
+      <origin xyz="0.11655 -0.0037   0.03579" rpy="0      0      1.57079"/>
+      <geometry>
+        <mesh filename="package://meshes/forearm.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="skeleton__hand">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
+    <collision name="skeleton__collision">
+      <origin xyz="0.04303 0.00372 0.00215" rpy="0      0      1.57079"/>
+      <geometry>
+        <mesh filename="package://meshes/hand_col.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </collision>
+    <visual name="skeleton__visual">
+      <origin xyz="0.04303 0.00372 0.00215" rpy="0      0      1.57079"/>
+      <geometry>
+        <mesh filename="package://meshes/hand.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="skeleton__thumb_1">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
+    <visual name="skeleton__visual">
+      <origin xyz="0.0254  -0.00053 -0.00079" rpy="-3.1294  -0.96488 -0.71552"/>
+      <geometry>
+        <mesh filename="package://meshes/thumb_1.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="skeleton__thumb_2">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
+    <visual name="skeleton__visual">
+      <origin xyz="0.01794  0.00023 -0.00055" rpy="1.91061 -1.08836  0.28141"/>
+      <geometry>
+        <mesh filename="package://meshes/thumb_2.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="skeleton__thumb_3">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
+    <visual name="skeleton__visual">
+      <origin xyz="0.00932 -0.00015  0.00029" rpy="1.91527 -1.09474  0.23923"/>
+      <geometry>
+        <mesh filename="package://meshes/thumb_3.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="skeleton__proximal">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
+    <collision name="skeleton__collision">
+      <origin xyz="0.01919 0.0022  0.00295" rpy="0.09206 0.2203  1.27627"/>
+      <geometry>
+        <mesh filename="package://meshes/proximal_col.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </collision>
+    <visual name="skeleton__visual">
+      <origin xyz="0.01919 0.0022  0.00295" rpy="0.09206 0.2203  1.27627"/>
+      <geometry>
+        <mesh filename="package://meshes/proximal.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="skeleton__middle">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
+    <collision name="skeleton__collision">
+      <origin xyz="0.00925  0.00417 -0.0002" rpy="0.13008 0.20044 1.45783"/>
+      <geometry>
+        <mesh filename="package://meshes/middle_col.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </collision>
+    <visual name="skeleton__visual">
+      <origin xyz="0.00925  0.00417 -0.0002" rpy="0.13008 0.20044 1.45783"/>
+      <geometry>
+        <mesh filename="package://meshes/middle.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="skeleton__distal">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
+    <collision name="skeleton__collision">
+      <origin xyz="0.00163 0.00281 0.00012" rpy="0.1341  0.1978  1.47817"/>
+      <geometry>
+        <mesh filename="package://meshes/distal.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </collision>
+    <visual name="skeleton__visual">
+      <origin xyz="0.00163 0.00281 0.00012" rpy="0.1341  0.1978  1.47817"/>
+      <geometry>
+        <mesh filename="package://meshes/distal.obj" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+</robot>

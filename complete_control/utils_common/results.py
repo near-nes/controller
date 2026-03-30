@@ -15,6 +15,7 @@ from neural.neural_models import PopulationSpikes
 from neural.result_models import NeuralResultManifest
 from plant.plant_models import EEData, JointData, PlantPlotData
 from pydantic import BaseModel
+from utils_common.custom_types import NdArray
 from utils_common.generate_signals import PlannerData
 
 
@@ -63,13 +64,14 @@ def gather_metas(id: str):
 def extract_time_move_trajectories(ms: list[ResultMeta]):
     data = [r.load_robotic() for r in ms]
     params = [r.load_params() for r in ms]
-    desired = []
+    desired: list[NdArray] = []
     for rp in [p.run_paths for p in params]:
         with open(rp.trajectory, "r") as f:
             planner_data: PlannerData = PlannerData.model_validate_json(f.read())
             desired.append(planner_data.trajectory)
     time_move_effective_shoulder_trajs = []
     time_move_desired_shoulder_trajs = []
+    time_move_desired_shoulder_trajs_shifted = []
     for d, des, p in zip(data, desired, params):
         start = int(p.simulation.time_prep / p.simulation.resolution)
         end = int(
@@ -77,10 +79,15 @@ def extract_time_move_trajectories(ms: list[ResultMeta]):
         )
         time_move_effective_shoulder_trajs.append(d.joint_data[1].pos_rad[start:end])
         time_move_desired_shoulder_trajs.append(des[start:end])
+        delay_steps = int(p.connections.m1_delay / p.simulation.resolution)
+        time_move_desired_shoulder_trajs_shifted.append(
+            np.concatenate([np.full(delay_steps, des[0]), des])[start:end]
+        )
 
     return (
         time_move_effective_shoulder_trajs,
         time_move_desired_shoulder_trajs,
+        time_move_desired_shoulder_trajs_shifted,
     )
 
 

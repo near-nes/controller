@@ -315,14 +315,11 @@ FROM runtime AS dev
 # In dev, the controller directory is mounted from the host and the user is the same as the host user.
 ENV SIMULATION_MODE=dev
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
-ENV SDF_MODELS_DIR=${SUBMODULES_PATH}/embodiment_sdf_models
-# Package is auto-installed in editable mode by entrypoint (after mount), PYTHONPATH includes submodules
 ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
 FROM runtime AS prod
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
-ENV SDF_MODELS_DIR=${SUBMODULES_PATH}/embodiment_sdf_models
 ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 ENV SIMULATION_MODE=prod

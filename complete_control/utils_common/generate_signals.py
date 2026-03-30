@@ -22,6 +22,7 @@ def generate_traj(
     sim: SimulationParams,
     input_image_path: Path,
     traj_out_path: Path,
+    m1_delay: float = 0.0,
 ):
     log = structlog.get_logger("main.generate_signals")
 
@@ -34,7 +35,7 @@ def generate_traj(
             generate_trajectory_minjerk,
         )
 
-        traj = generate_trajectory_minjerk(sim)
+        traj = generate_trajectory_minjerk(sim, m1_delay)
         choice = sim.oracle.target_color.value
     elif traj_gen_type == TrajGeneratorType.GLE:
         from complete_control.utils_common.generate_signals_gle import (
@@ -42,7 +43,7 @@ def generate_traj(
         )
 
         traj, idx_choice = generate_trajectory_gle(
-            input_image_path, sim, params.gle_config
+            input_image_path, sim, params.gle_config, m1_delay
         )
         choice = TargetColor.BLUE_LEFT if idx_choice == 0 else TargetColor.RED_RIGHT
     else:
@@ -53,16 +54,3 @@ def generate_traj(
         f.write(data.model_dump_json(indent=2))
 
     return traj
-
-
-def generate_mock_motor_commands(
-    sim: SimulationParams,
-):
-    from complete_control.utils_common.generate_signals_minjerk import (
-        generate_motor_commands_minjerk,
-    )
-
-    log = structlog.get_logger("main.generate_signals")
-    log.info(f"Generating motor commands...")
-
-    return generate_motor_commands_minjerk(sim)

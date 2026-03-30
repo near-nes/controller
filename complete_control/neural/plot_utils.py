@@ -5,18 +5,26 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import structlog
+from config.core_models import SimulationParams
 from config.ResultMeta import ResultMeta
 from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 from mpi4py import MPI
 from neural.neural_models import SynapseBlock
 from PIL import Image, ImageDraw
+from utils_common.utils import draw_trial_phases
 
 from complete_control.config.MasterParams import MasterParams
 from complete_control.utils_common.results import concatenate_neural_results
 
 from .neural_models import PopulationSpikes
-from .population_utils import POPS, POPS_PAIRED, POPS_SINGLE, POPS_TREE
+from .population_utils import (
+    POPS,
+    POPS_PAIRED,
+    POPS_PAIRED_NO_CEREB,
+    POPS_SINGLE,
+    POPS_SINGLE_NO_CEREB,
+)
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
 FIGURE_EXT = "png"
@@ -168,7 +176,7 @@ def generate_plot_fig(
                 ha="right",
             )
             cnt_ax += 1
-        axs.grid(True, which="both", linestyle="--", linewidth=0.5)
+        # axs.grid(True, which="both", linestyle="--", linewidth=0.5)
 
     # set specific spines
     ax[0].spines["bottom"].set_visible(False)
@@ -196,8 +204,6 @@ def generate_plot_fig(
         label="Negative",
         normalize=False,
     )
-    ax[2].legend(fontsize=16)
-
     # scale PSTH plot
     max_y = max(max_p, max_n)
     ax[2].set_ylim(bottom=0, top=max_y + 1)
@@ -208,6 +214,8 @@ def generate_plot_fig(
         axs.set_xlim(left=0, right=time_end)
     ax[1].tick_params(labelbottom=True)
     ax[2].tick_params(labelbottom=True)
+
+    ax[2].legend(fontsize=16)
 
     return fig, ax
 
@@ -258,9 +266,8 @@ def plot_population_single(
     pop_data: Path | PopulationSpikes,
     title="",
     buffer_size=15,
-    filepath=None,
 ):
-    """Plots raster and PSTH for a population pair from data files."""
+    """Plots raster and PSTH for a single population."""
     if isinstance(pop_data, Path):
         pop_data = load_spike_data_from_file(pop_data)
 
@@ -290,7 +297,7 @@ def plot_population_single(
             va="top",
             ha="right",
         )
-        axs.grid(True, which="both", linestyle="--", linewidth=0.5)
+        # axs.grid(True, which="both", linestyle="--", linewidth=0.5)
 
     max_y = plot_rate(
         time_v,
@@ -303,14 +310,10 @@ def plot_population_single(
         normalize=False,
     )
     ax[1].set_ylim(bottom=0, top=max_y + 1)
+
     fig.tight_layout()
 
-    if filepath:
-        fig.savefig(filepath)
-        _log.debug(f"Saved plot at {filepath}")
-        plt.close(fig)
-
-    return fig, ax, filepath
+    return fig, ax
 
 
 def list_depth(lst):
@@ -327,6 +330,7 @@ def plot_populations_per_trial(
     single_trial_time_vect_concat,
     single_trial_duration,
     path_fig="",
+    sim_params: SimulationParams | None = None,
 ):
 
     all_trials_imgs = {}
@@ -366,6 +370,8 @@ def plot_populations_per_trial(
                 title=f"{plot_name_t.replace('_', ' ').title()} {lgd} Trial {nt}",
                 buffer_size=15,
             )
+            if sim_params is not None:
+                draw_trial_phases(ax_ipop, sim_params, num_trials=1)
 
             if path_fig:
                 trial_plot_path = path_fig / "Trials" / f"{plot_name_t}_{i}"
@@ -480,6 +486,8 @@ def plot_overlay(
     ax.set_ylabel("Normalized rate" if normalize else "Rate (Hz)")
     ax.set_title("Overlayed populations (PSTH)")
 
+    draw_trial_phases([ax], ref_mc.simulation, num_trials=len(metas))
+
     fig_overl.tight_layout()
 
     if path_fig:
@@ -510,36 +518,43 @@ def merge_and_plot(
 ):
     neural_concat, ref_mc, time_vect = extract_neural_and_merge(metas)
     path_fig = path_fig or ref_mc.run_paths.figures
+    if not ref_mc.USE_CEREBELLUM:
+        pops_single = POPS_SINGLE_NO_CEREB
+        pops_paired = POPS_PAIRED_NO_CEREB
 
     plotted = {}
     for pair in pops_paired:
-        fig_pop, ax_pop = plot_population_paired(
+        fig, ax = plot_population_paired(
             time_vect,
             neural_concat.get_pop(pair[0]),
             neural_concat.get_pop(pair[1]),
             title=f"{pair[0].replace('_', ' ').title()}",
             buffer_size=15,
         )
+        draw_trial_phases(ax, ref_mc.simulation, num_trials=len(metas))
 
-        filepath = path_fig / f"{pair[0]}.{FIGURE_EXT}"
-        if filepath:
-            fig_pop.savefig(filepath)
-            _log.debug(f"Saved plot at {filepath}")
-            plt.close(fig_pop)
-        plotted[pair] = (fig_pop, ax_pop, filepath)
+        fig.savefig(filepath := path_fig / f"{pair[0]}.{FIGURE_EXT}")
+        _log.debug(f"Saved plot at {filepath}")
+        plt.close(fig)
+
+        plotted[pair] = (fig, ax, filepath)
 
     for pop in pops_single:
         plot_name = pop
         _log.debug(f"Plotting for {plot_name}...")
 
-        filepath = path_fig / f"{plot_name}.{FIGURE_EXT}"
-        fig, ax, filepath = plot_population_single(
+        fig, ax = plot_population_single(
             time_vect,
             neural_concat.get_pop(pop),
             title=f"{plot_name.replace('_', ' ').title()}",
             buffer_size=15,
-            filepath=filepath,
         )
+        draw_trial_phases(list(ax), ref_mc.simulation, num_trials=len(metas))
+
+        fig.savefig(filepath := path_fig / f"{plot_name}.{FIGURE_EXT}")
+        _log.debug(f"Saved plot at {filepath}")
+        plt.close(fig)
+
         plotted[pop] = (fig, ax, filepath)
     return plotted
 

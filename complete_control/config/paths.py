@@ -47,6 +47,7 @@ REFERENCE_DATA_DIR = COMPLETE_CONTROL / "reference_data"
 
 CONFIG = COMPLETE_CONTROL / "config"
 ARTIFACTS = ROOT / "artifacts"
+EMBODIMENT_ASSETS = ROOT / "embodiment_assets"
 
 TRAJECTORY = CONFIG / "trajectory.txt"
 MOTOR_COMMANDS = CONFIG / "motor_commands.txt"
@@ -67,11 +68,9 @@ else:
 
 SUBMODULES = ROOT / "submodules"
 
-M1 = SUBMODULES / "motor_cortex" / "eprop-motor-control"
-M1_CONFIG = M1 / "config" / "config.yaml"
-M1_WEIGHTS = (
-    M1 / "sim_results" / "default_plastic_False_manualRBF_False" / "trained_weights.npz"
-)
+M1 = SUBMODULES / "motor_cortex_eprop"
+MOTOR_MODEL = M1 / "motor_controller_model"
+ARTIFACTS_M1 = ARTIFACTS / "m1"
 
 PFC_PLANNER = SUBMODULES / "pfc_planner"
 ARTIFACTS_PLANNER = ARTIFACTS / "pfc_planner"
