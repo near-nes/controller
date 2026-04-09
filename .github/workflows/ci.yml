@@ -22,7 +22,7 @@ jobs:
       with:
         python-version: "3.10"
     - run: pip install black
-    - run: black --check --exclude '/(submodules|nrp-core)/' .
+    - run: black --check --exclude '/(submodules|nrp-core|deprecated)/' .
 
   build:
     name: Docker Build
