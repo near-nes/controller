@@ -87,9 +87,10 @@ else
 fi
 
 # --- Install shared packages (editable) ---
-pip install --quiet -e "${CONTROLLER_DIR}/complete_control/shared/minjerk"
-pip install --quiet -e "${CONTROLLER_DIR}/submodules/motor_cortex_eprop"
-pip install --quiet -e "${CONTROLLER_DIR}/submodules/pfc_planner"
+echo "Installing packages..."
+pip install -e "${CONTROLLER_DIR}/complete_control/shared/minjerk"
+pip install -e "${CONTROLLER_DIR}/submodules/motor_cortex_eprop"
+pip install -e "${CONTROLLER_DIR}/submodules/pfc_planner"
 
 # --- Environment Summary ---
 echo "Final LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
