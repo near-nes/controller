@@ -89,12 +89,10 @@ complete_control = [
 ]
 
 [tool.black]
-line-length = 100
 target-version = ["py310"]
 
 [tool.isort]
 profile = "black"
-line_length = 100
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -6,7 +6,7 @@ from pathlib import Path
 def _get_root_path() -> Path:
     """
     Determine the ROOT path for the controller.
-    
+
     Priority:
     1. CONTROLLER_DIR environment variable (for Docker/HPC compatibility)
     2. Parent directory of installed package (for pip install)
@@ -17,16 +17,16 @@ def _get_root_path() -> Path:
         root = Path(os.environ["CONTROLLER_DIR"])
         if root.exists():
             return root
-    
+
     # Fall back to package installation location
     # This file is at: <package>/complete_control/config/paths.py
     # We want to go up to: <package>/ which is the root
     this_file = Path(__file__).resolve()
     package_root = this_file.parent.parent.parent  # go up 3 levels to controller/
-    
+
     if (package_root / "complete_control").exists():
         return package_root
-    
+
     # Last resort: raise an error with helpful message
     raise RuntimeError(
         "Could not determine ROOT path. Either:\n"
@@ -38,7 +38,9 @@ def _get_root_path() -> Path:
 
 ROOT = _get_root_path()
 COMPLETE_CONTROL = ROOT / "complete_control"
-RUNS_DIR = Path(os.getenv("RUNS_PATH")) if os.getenv("RUNS_PATH") else (ROOT / "runs")  # Base directory for all runs
+RUNS_DIR = (
+    Path(os.getenv("RUNS_PATH")) if os.getenv("RUNS_PATH") else (ROOT / "runs")
+)  # Base directory for all runs
 
 FOLDER_NAME_NEURAL_FIGS = "figs_neural"
 FOLDER_NAME_ROBOTIC_FIGS = "figs_robotic"
