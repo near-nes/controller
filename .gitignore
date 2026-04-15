@@ -22,3 +22,4 @@ tests_POCs/PLV_Emiliano.py
 tests_POCs/test_receptor_paolo.py
 
 *.egg-info
+*.whl
