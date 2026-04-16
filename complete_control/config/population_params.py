@@ -43,7 +43,7 @@ class PopulationsParams(BaseModel):
     )
     plan_to_inv: RBFPopParams = Field(
         default_factory=lambda: RBFPopParams(
-            kp=3.0, buffer_size=5.0, base_rate=5.0, sdev=2.0, freq_max=40
+            kp=4.0, buffer_size=5.0, base_rate=5.0, sdev=4.0, freq_max=60
         )
     )
     state_to_inv: SinglePopParams = Field(
