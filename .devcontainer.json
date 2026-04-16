@@ -29,6 +29,8 @@
                 }
             }
         }
-    }
+    },
+    "postCreateCommand": "uv pip install -e . --no-build-isolation --no-deps",
+    "waitFor": "postCreateCommand"
     // "overrideCommand": true
 }
