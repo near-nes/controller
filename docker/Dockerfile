@@ -6,7 +6,9 @@ FROM ubuntu:jammy AS base
 ARG PYTHON_MAJOR
 ARG PYTHON_MINOR
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     git \
     ffmpeg \
@@ -30,19 +32,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tigervnc-common \
     tigervnc-tools \
     fluxbox \
-    xterm \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    xterm
 
 # nrp-core dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
     gnupg2 \
     software-properties-common \
-    sudo \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    sudo
 RUN add-apt-repository ppa:pistache+team/unstable
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
     libboost-filesystem1.74.0 \
     libboost-python1.74.0 \
     libboost-numpy1.74.0 \
@@ -52,9 +54,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpistache0 \
     libprotobuf23 \
     libzip-dev \
-    nlohmann-json3-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    nlohmann-json3-dev
 
 ENV BUILD_UID=1000
 ENV BUILD_GID=1000
@@ -98,7 +98,9 @@ RUN mkdir -p $INSTALL_DIR $DEPS_DIR $NEST_INSTALL_DIR
 # openmpi and nest
 FROM base AS builder
 
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     libtool \
@@ -106,12 +108,12 @@ RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     libgsl-dev \
     libltdl-dev \
     libreadline-dev \
-    python3-dev \
-    && sudo apt-get clean \
-    && sudo rm -rf /var/lib/apt/lists/*
+    python3-dev
 
 # nrp-core dependencies
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     doxygen \
     libboost-filesystem-dev \
     libboost-numpy-dev \
@@ -124,9 +126,7 @@ RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     llvm \
     libprotobuf-dev \
     protobuf-compiler-grpc \
-    libpistache-dev \
-    && sudo apt-get clean \
-    && sudo rm -rf /var/lib/apt/lists/*
+    libpistache-dev
 
 ENV PATH="${VIRTUAL_ENV}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${LD_LIBRARY_PATH}"
@@ -181,12 +181,16 @@ ENV NRP_INSTALL_DIR=${INSTALL_DIR}/nrp
 ENV NRP_DEPS_INSTALL_DIR=${INSTALL_DIR}/nrp_deps
 
 # nrp-core tests dependencies
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     cppcheck \
     libgmock-dev \
     xvfb
 # unclear nrp-core dependencies
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     pkg-config
 
 # Install MQTT (to NRP_DEPS_INSTALL_DIR)
