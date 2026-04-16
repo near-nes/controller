@@ -3,14 +3,14 @@ set -euo pipefail # Exit on error, unset var, pipe failure
 
 # --- Configuration & Validation ---
 # Check CONTROLLER_DIR is set and cerebellum subdir exists
-CEREBELLUM_DIR="${CONTROLLER_DIR:?Error: CONTROLLER_DIR environment variable is not set}/cerebellum"
+CEREBELLUM_DIR="/sim/cerebellum"
 if [ ! -d "${CEREBELLUM_DIR}" ]; then
    echo "Error: Directory ${CEREBELLUM_DIR} not found." >&2
    exit 1
 fi
 
 # paths (relative for bsb input, absolute for check/output/log)
-BSB_INPUT_YAML_RELATIVE="configurations/mouse/dcn-io/microzones_complete.yaml"
+BSB_INPUT_YAML_RELATIVE="circuit.yaml"
 TARGET_HDF5_CHECK="${CEREBELLUM_DIR}/mouse_cereb_microzones_complete.hdf5"
 OUTPUT_DIR_BASE="/sim/controller/built_models"
 LOG_DIR_BASE="/sim/controller/logs"
@@ -60,14 +60,14 @@ echo "---------------------------------------------------------------------"
 
 # --- Execute Compilation ---
 # Run bsb compile, redirecting stdout & stderr through tee to terminal and log file
-bsb compile -v4 -o "${OUTPUT_HDF5_PATH}" "${BSB_INPUT_YAML_RELATIVE}" 2>&1 | tee -a "${LOG_FILE_PATH}"
+bsb compile -o "${OUTPUT_HDF5_PATH}" "${BSB_INPUT_YAML_RELATIVE}" 2>&1 | tee -a "${LOG_FILE_PATH}"
 
 # Script exits here if bsb fails (due to set -eo pipefail)
 
 # --- Completion Message ---
 echo "---------------------------------------------------------------------"
 echo "Compilation command finished successfully."
-echo "Output *should* written to: ${OUTPUT_HDF5_PATH} but is likely at /sim/controller/cerebellum/mouse_cereb_microzones_complete_nest.hdf5"
+echo "Output *should* written to: ${OUTPUT_HDF5_PATH}"
 echo "Full log available at: ${LOG_FILE_PATH}"
 echo "---------------------------------------------------------------------"
 
