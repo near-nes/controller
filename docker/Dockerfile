@@ -79,6 +79,8 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 COPY ./docker/constraints.txt /tmp/constraints.txt
 RUN pip install --upgrade pip setuptools wheel packaging -c /tmp/constraints.txt
+COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /uvx /bin/
+ENV UV_PYTHON="$VIRTUAL_ENV/bin/python"
 
 ENV INSTALL_DIR=/sim/install
 ENV DEPS_DIR=/sim/dependencies
@@ -146,6 +148,8 @@ RUN tar xfz $OMPI_GZ \
 
 ENV CFLAGS=-O2
 # ^ for https://github.com/mpi4py/mpi4py/issues/652
+
+# i think uv might work fine here as well, but i don't want to risk future breakages :)
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install cython mpilock mpi4py -c /tmp/constraints.txt
 ENV CFLAGS=
@@ -204,8 +208,8 @@ RUN git clone https://github.com/eclipse/paho.mqtt.cpp \
     && sudo ldconfig && cd .. && rm -rf paho.mqtt.cpp
 
 COPY ./docker/requirements_nrp.txt .
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements_nrp.txt -c /tmp/constraints.txt
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install -r requirements_nrp.txt -c /tmp/constraints.txt --no-build-isolation
 
 ENV NRP_SRC_DIR=/tmp/nrp-core-src
 RUN mkdir -p /tmp/nrp-core-src
@@ -236,10 +240,12 @@ RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
 RUN git config --global --add safe.directory $CEREBELLUM_PATH 
 
 FROM builder AS package_install
-WORKDIR ${CONTROLLER_DIR}
-COPY . ${CONTROLLER_DIR}
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install . --no-build-isolation -c /tmp/constraints.txt
+WORKDIR /tmp/pkg
+# Copy only files needed for dependency resolution.
+COPY pyproject.toml README.md ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install -r pyproject.toml -c /tmp/constraints.txt --no-build-isolation \
+    --extra-index-url https://download.pytorch.org/whl/cpu
 
 # final runtime image
 FROM base AS runtime
@@ -320,20 +326,30 @@ FROM runtime AS dev
 ENV SIMULATION_MODE=dev
 
 FROM runtime AS prod
+ENV UV_COMPILE_BYTECODE=1
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
 ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 ENV SIMULATION_MODE=prod
 
-# In prod, the package is already installed (via package_install stage).
-# Only runtime data and submodules (on PYTHONPATH) need to be copied.
+# In prod, dependencies are already installed (via package_install stage).
+# The package itself and submodules are installed here from the copied source.
 # Do not mount anything on top of artifacts folder, so that the archive is not overwritten.
 ENV BSB_NETWORK_FILE=/tmp/cerebellum_plastic_base.hdf5
 COPY --chown=${USERNAME} artifacts ${CONTROLLER_DIR}/artifacts
 COPY --chown=${USERNAME} cerebellum_configurations ${CONTROLLER_DIR}/cerebellum_configurations
 COPY --chown=${USERNAME} submodules ${CONTROLLER_DIR}/submodules
+COPY --chown=${USERNAME} . ${CONTROLLER_DIR}
 WORKDIR ${CONTROLLER_DIR}
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install . --no-deps --no-build-isolation
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --no-deps --no-build-isolation \
+    ./complete_control/shared/minjerk \
+    ./submodules/motor_cortex_eprop \
+    ./submodules/pfc_planner
 
 # HPC compatibility target (same image content as prod, different mode flag)
 FROM prod AS hpc
+ENV UV_COMPILE_BYTECODE=1
 ENV SIMULATION_MODE=hpc
