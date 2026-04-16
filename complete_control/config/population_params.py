@@ -28,19 +28,13 @@ class PopulationsParams(BaseModel):
         )
     )
     brain_stem: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(
-            kp=1.0, buffer_size=10.0, base_rate=0.0
-        )  # kp=0.2
+        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=10.0, base_rate=0.0)
     )
     sensory_delayed: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(
-            kp=1.0, buffer_size=50.0, base_rate=5.0
-        )
+        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=50.0, base_rate=5.0)
     )
     state: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(
-            kp=1.1, buffer_size=50.0, base_rate=5.0
-        )
+        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=50.0, base_rate=5.0)
     )
     error: SinglePopParams = Field(
         default_factory=lambda: SinglePopParams(

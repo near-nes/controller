@@ -456,7 +456,7 @@ class CerebellumHandler:
             syn_spec=syn_spec_n,
         )
 
-        state_err_inv_spec = self.conn_params.state_to_inv_error_inv
+        state_err_inv_spec = self.conn_params.state_error_inv
         syn_spec_p = state_err_inv_spec.model_dump(exclude_none=True)
         syn_spec_n = state_err_inv_spec.model_copy(
             update={"weight": -state_err_inv_spec.weight}
@@ -467,25 +467,25 @@ class CerebellumHandler:
             syn_spec_n=syn_spec_n,
         )
         nest.Connect(
-            self.interface_pops.state_to_inv_p.pop,
+            self.controller_pops.state_p.pop,
             self.interface_pops.error_inv_p.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
-            self.interface_pops.state_to_inv_p.pop,
+            self.controller_pops.state_p.pop,
             self.interface_pops.error_inv_n.pop,
             "all_to_all",
             syn_spec=syn_spec_p,
         )
         nest.Connect(
-            self.interface_pops.state_to_inv_n.pop,
+            self.controller_pops.state_n.pop,
             self.interface_pops.error_inv_p.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
         )
         nest.Connect(
-            self.interface_pops.state_to_inv_n.pop,
+            self.controller_pops.state_n.pop,
             self.interface_pops.error_inv_n.pop,
             "all_to_all",
             syn_spec=syn_spec_n,
@@ -605,35 +605,6 @@ class CerebellumHandler:
             "all_to_all",
             syn_spec=syn_spec_n,
         )
-
-        state_sti_spec = (
-            self.conn_params.state_state_to_inv
-        )  # Using planner_plan_to_inv as per existing code
-        syn_spec_p = state_sti_spec.model_dump(exclude_none=True)
-        syn_spec_n = state_sti_spec.model_copy(
-            update={"weight": -state_sti_spec.weight}
-        ).model_dump(exclude_none=True)
-
-        self.log.debug(
-            "Connecting Controller StateEst -> Cereb StateToInv",
-            syn_spec_p=syn_spec_p,
-            syn_spec_n=syn_spec_n,
-        )
-        # TODO what is this if for?
-        if self.controller_pops.state_p and self.interface_pops.state_to_inv_p:
-            nest.Connect(
-                self.controller_pops.state_p.pop,
-                self.interface_pops.state_to_inv_p.pop,
-                "all_to_all",
-                syn_spec=syn_spec_p,
-            )
-        if self.controller_pops.state_n and self.interface_pops.state_to_inv_n:
-            nest.Connect(
-                self.controller_pops.state_n.pop,
-                self.interface_pops.state_to_inv_n.pop,
-                "all_to_all",
-                syn_spec=syn_spec_n,
-            )
 
         # --- Connections FROM Cerebellum Controller Interfaces (motor_prediction) TO controller_pops.brainstem ---
         conn_spec_mp_bs = self.conn_params.motor_pre_brain_stem

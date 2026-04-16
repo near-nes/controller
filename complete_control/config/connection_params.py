@@ -90,21 +90,15 @@ class ConnectionsParams(BaseModel):
             delay=min_delay,
         )
     )
-    state_state_to_inv: SingleSynapseParams = Field(
+    state_error_inv: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.005,  # 0.020,
+            weight=-0.005,
             delay=min_delay,
         )
     )
     planner_error_inv: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=0.005,  # 0.00166667,
-            delay=min_delay,
-        )
-    )
-    state_to_inv_error_inv: SingleSynapseParams = Field(
-        default_factory=lambda: SingleSynapseParams(
-            weight=-0.005,
             delay=min_delay,
         )
     )
@@ -138,12 +132,7 @@ class ConnectionsParams(BaseModel):
             delay=min_delay,
         )
     )
-    state_error_inv: SingleSynapseParams = Field(
-        default_factory=lambda: SingleSynapseParams(
-            weight=0.5,
-            delay=min_delay,
-        )
-    )
+
     plan_to_inv_error_inv: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=1.0,
