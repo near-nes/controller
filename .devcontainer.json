@@ -7,7 +7,9 @@
     // "remoteUser": "${localEnv:USER}",
     "workspaceFolder": "/sim/controller",
     "service": "development",
-    "runServices": ["development"],
+    "runServices": [
+        "development"
+    ],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -25,8 +27,13 @@
                 ],
                 "editor.formatOnSave": true,
                 "[python]": {
-                    "editor.defaultFormatter": "ms-python.black-formatter"
-                }
+                    "editor.defaultFormatter": "ms-python.black-formatter",
+                    "editor.codeActionsOnSave": {
+                        "source.organizeImports": "explicit"
+                    }
+                },
+                "isort.importStrategy": "fromEnvironment",
+                "black-formatter.importStrategy": "fromEnvironment"
             }
         }
     },

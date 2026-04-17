@@ -326,6 +326,11 @@ FROM runtime AS dev
 # In dev, the controller directory is mounted from the host and the user is the same as the host user.
 ENV SIMULATION_MODE=dev
 
+# dev deps
+COPY pyproject.toml /tmp/pyproject.toml
+RUN --mount=type=cache,target=/home/simuser/.cache/uv \
+    cd /tmp && uv pip install --group dev -c /tmp/constraints.txt
+
 FROM runtime AS prod
 ENV UV_COMPILE_BYTECODE=1
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
@@ -342,9 +347,9 @@ COPY --chown=${USERNAME} cerebellum_configurations ${CONTROLLER_DIR}/cerebellum_
 COPY --chown=${USERNAME} submodules ${CONTROLLER_DIR}/submodules
 COPY --chown=${USERNAME} . ${CONTROLLER_DIR}
 WORKDIR ${CONTROLLER_DIR}
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,target=/home/simuser/.cache/uv \
     uv pip install . --no-deps --no-build-isolation
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,target=/home/simuser/.cache/uv \
     uv pip install --no-deps --no-build-isolation \
     ./complete_control/shared/minjerk \
     ./submodules/motor_cortex_eprop \

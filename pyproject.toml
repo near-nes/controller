@@ -64,6 +64,12 @@ pytorch = [
     "torchaudio @ https://download.pytorch.org/whl/cpu/torchaudio-2.6.0%2Bcpu-cp310-cp310-linux_x86_64.whl",
 ]
 
+[dependency-groups]
+dev = [
+    "black==26.3.1",
+    "isort>=6.0.0",
+]
+
 [project.urls]
 Homepage = "https://wiki.ebrains.eu/bin/view/Collabs/closed-loop-motor-t3-4/"
 Repository = "https://github.com/near-nes/controller"

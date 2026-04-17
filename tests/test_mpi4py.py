@@ -44,9 +44,7 @@ def test_mpi4py_extension_links_against_custom_ompi():
 @pytest.mark.skipif(shutil.which("mpirun") is None, reason="mpirun not on PATH")
 def test_mpi4py_multi_rank_collectives(tmp_path):
     script = tmp_path / "mpi_job.py"
-    script.write_text(
-        dedent(
-            """
+    script.write_text(dedent("""
         from mpi4py import MPI
 
         comm = MPI.COMM_WORLD
@@ -59,9 +57,7 @@ def test_mpi4py_multi_rank_collectives(tmp_path):
         assert total == size * (size - 1) // 2, (total, size)
 
         print(f"OK rank={rank}/{size}")
-    """
-        )
-    )
+    """))
 
     env = os.environ.copy()
     # Harmless for non-root; required if someone runs tests as root.

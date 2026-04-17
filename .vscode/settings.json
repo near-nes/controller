@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./complete_control/shared/minjerk"
+        // pylance sometimes has trouble with editable install
+    ]
+}

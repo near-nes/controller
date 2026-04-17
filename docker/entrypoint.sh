@@ -104,6 +104,7 @@ if [ "$SIMULATION_MODE" = "dev" ]; then
     uv pip install -e "${CONTROLLER_DIR}/complete_control/shared/minjerk" --no-deps
     uv pip install -e "${CONTROLLER_DIR}/submodules/motor_cortex_eprop" --no-deps
     uv pip install -e "${CONTROLLER_DIR}/submodules/pfc_planner" --no-deps
+    (cd "${CONTROLLER_DIR}" && uv pip install --group dev) || true
 
     if [ -f "${CONTROLLER_DIR}/pyproject.toml" ]; then
         echo "Refreshing near-nes-controller package in editable mode as user $USERNAME..."
