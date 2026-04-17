@@ -6,7 +6,9 @@ FROM ubuntu:jammy AS base
 ARG PYTHON_MAJOR
 ARG PYTHON_MINOR
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     git \
     ffmpeg \
@@ -30,19 +32,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tigervnc-common \
     tigervnc-tools \
     fluxbox \
-    xterm \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    xterm
 
 # nrp-core dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
     gnupg2 \
     software-properties-common \
-    sudo \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    sudo
 RUN add-apt-repository ppa:pistache+team/unstable
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
     libboost-filesystem1.74.0 \
     libboost-python1.74.0 \
     libboost-numpy1.74.0 \
@@ -52,9 +54,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpistache0 \
     libprotobuf23 \
     libzip-dev \
-    nlohmann-json3-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    nlohmann-json3-dev
 
 ENV BUILD_UID=1000
 ENV BUILD_GID=1000
@@ -78,7 +78,11 @@ RUN python -m venv --system-site-packages $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 COPY ./docker/constraints.txt /tmp/constraints.txt
-RUN pip install --upgrade pip setuptools wheel packaging -c /tmp/constraints.txt
+COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /uvx /bin/
+ENV UV_PYTHON="$VIRTUAL_ENV/bin/python"
+# pip is installed: nrp-core's CMake build uses it
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --upgrade pip setuptools wheel packaging -c /tmp/constraints.txt
 
 ENV INSTALL_DIR=/sim/install
 ENV DEPS_DIR=/sim/dependencies
@@ -98,7 +102,9 @@ RUN mkdir -p $INSTALL_DIR $DEPS_DIR $NEST_INSTALL_DIR
 # openmpi and nest
 FROM base AS builder
 
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     libtool \
@@ -106,12 +112,12 @@ RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     libgsl-dev \
     libltdl-dev \
     libreadline-dev \
-    python3-dev \
-    && sudo apt-get clean \
-    && sudo rm -rf /var/lib/apt/lists/*
+    python3-dev
 
 # nrp-core dependencies
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     doxygen \
     libboost-filesystem-dev \
     libboost-numpy-dev \
@@ -124,9 +130,7 @@ RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     llvm \
     libprotobuf-dev \
     protobuf-compiler-grpc \
-    libpistache-dev \
-    && sudo apt-get clean \
-    && sudo rm -rf /var/lib/apt/lists/*
+    libpistache-dev
 
 ENV PATH="${VIRTUAL_ENV}/bin:${NEST_INSTALL_DIR}/bin:${OMPI_INSTALL_DIR}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${LD_LIBRARY_PATH}"
@@ -146,8 +150,9 @@ RUN tar xfz $OMPI_GZ \
 
 ENV CFLAGS=-O2
 # ^ for https://github.com/mpi4py/mpi4py/issues/652
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install cython mpilock mpi4py -c /tmp/constraints.txt
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install cython mpilock mpi4py -c /tmp/constraints.txt
 ENV CFLAGS=
 
 WORKDIR $DEPS_DIR
@@ -181,12 +186,16 @@ ENV NRP_INSTALL_DIR=${INSTALL_DIR}/nrp
 ENV NRP_DEPS_INSTALL_DIR=${INSTALL_DIR}/nrp_deps
 
 # nrp-core tests dependencies
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     cppcheck \
     libgmock-dev \
     xvfb
 # unclear nrp-core dependencies
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     pkg-config
 
 # Install MQTT (to NRP_DEPS_INSTALL_DIR)
@@ -200,8 +209,8 @@ RUN git clone https://github.com/eclipse/paho.mqtt.cpp \
     && sudo ldconfig && cd .. && rm -rf paho.mqtt.cpp
 
 COPY ./docker/requirements_nrp.txt .
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements_nrp.txt -c /tmp/constraints.txt
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install -r requirements_nrp.txt -c /tmp/constraints.txt --no-build-isolation
 
 ENV NRP_SRC_DIR=/tmp/nrp-core-src
 RUN mkdir -p /tmp/nrp-core-src
@@ -231,20 +240,13 @@ RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
 # allow all users to run git commands here
 RUN git config --global --add safe.directory $CEREBELLUM_PATH 
 
-# parallelize slow pip installs    
-FROM base AS core_reqs
-WORKDIR ${DEPS_DIR}
-COPY ./docker/requirements.txt .
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt -c /tmp/constraints.txt
-
-FROM base AS planner_reqs
-WORKDIR ${DEPS_DIR}
-# split from reqs to download CPU only
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install gle-code -c /tmp/constraints.txt
+FROM builder AS package_install
+WORKDIR /tmp/pkg
+# Copy only files needed for dependency resolution.
+COPY pyproject.toml README.md ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install -r pyproject.toml -c /tmp/constraints.txt --no-build-isolation \
+    --extra-index-url https://download.pytorch.org/whl/cpu
 
 # final runtime image
 FROM base AS runtime
@@ -258,8 +260,7 @@ ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib64:${NRP_INSTALL_DIR}/lib:${NRP_DEPS
 COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=builder ${CEREBELLUM_PATH} ${CEREBELLUM_PATH}
-COPY --from=core_reqs ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-COPY --from=planner_reqs ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY --from=package_install ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 # install dirs world-readable (venv writable so users can pip install)
 USER 0
 RUN chmod -R a+rX ${INSTALL_DIR} ${CEREBELLUM_PATH} \
@@ -280,8 +281,8 @@ ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 
 # point nest to nest installation
 RUN echo ${NEST_INSTALL_DIR}/lib/${PYTHON_MAJOR_MINOR}/site-packages >> ${VIRTUAL_ENV}/lib/${PYTHON_MAJOR_MINOR}/site-packages/nest.pth
-# pythonpath construction
-ENV PYTHONPATH="${NRP_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages:${CONTROLLER_DIR}:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
+# pythonpath construction (note: CONTROLLER_DIR no longer needed as package is installed via pip)
+ENV PYTHONPATH="${NRP_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
 WORKDIR /sim
@@ -324,21 +325,37 @@ RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc
 FROM runtime AS dev
 # In dev, the controller directory is mounted from the host and the user is the same as the host user.
 ENV SIMULATION_MODE=dev
+
+# dev deps
+COPY pyproject.toml /tmp/pyproject.toml
+RUN --mount=type=cache,target=/home/simuser/.cache/uv \
+    cd /tmp && uv pip install --group dev -c /tmp/constraints.txt
+
+FROM runtime AS prod
+ENV UV_COMPILE_BYTECODE=1
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
 ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
+ENV SIMULATION_MODE=prod
 
-FROM runtime AS hpc
-# >>>>>>>tmp, move to git-installable packages asap TODO
-ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
-ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
-RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
-# <<<<<<<
-
-# In HPC, the controller directory is copied into the image and the user is the default simuser.
-ENV SIMULATION_MODE=hpc
-# On HPC do not mount anythin on top of artifacts folder, so that the archive is not overwritten
+# In prod, dependencies are already installed (via package_install stage).
+# The package itself and submodules are installed here from the copied source.
+# Do not mount anything on top of artifacts folder, so that the archive is not overwritten.
 ENV BSB_NETWORK_FILE=/tmp/cerebellum_plastic_base.hdf5
-COPY . /sim/controller
-RUN chown -R $USERNAME /sim/controller
-# RUN chmod -R a+rwX /sim
+COPY --chown=${USERNAME} artifacts ${CONTROLLER_DIR}/artifacts
+COPY --chown=${USERNAME} cerebellum_configurations ${CONTROLLER_DIR}/cerebellum_configurations
+COPY --chown=${USERNAME} submodules ${CONTROLLER_DIR}/submodules
+COPY --chown=${USERNAME} . ${CONTROLLER_DIR}
+WORKDIR ${CONTROLLER_DIR}
+RUN --mount=type=cache,target=/home/simuser/.cache/uv \
+    uv pip install . --no-deps --no-build-isolation
+RUN --mount=type=cache,target=/home/simuser/.cache/uv \
+    uv pip install --no-deps --no-build-isolation \
+    ./complete_control/shared/minjerk \
+    ./submodules/motor_cortex_eprop \
+    ./submodules/pfc_planner
+
+# HPC compatibility target (same image content as prod, different mode flag)
+FROM prod AS hpc
+ENV UV_COMPILE_BYTECODE=1
+ENV SIMULATION_MODE=hpc

@@ -21,5 +21,6 @@ target/state_MAD_neuron.h
 tests_POCs/PLV_Emiliano.py
 tests_POCs/test_receptor_paolo.py
 
+*.egg-info
 *.whl
-complete_control/shared/minjerk/minjerk_dynamics/_version.py
+_version.py

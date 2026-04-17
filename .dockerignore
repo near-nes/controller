@@ -10,7 +10,6 @@ logs/
 .git
 .gitignore
 *.md
+!README.md
 nearnes*.tar
 nearnes*.tar.gz
-
-*.md

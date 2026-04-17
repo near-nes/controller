@@ -68,7 +68,7 @@ if [ "$SIMULATION_MODE" = "dev" ]; then
     USER_ID_TO_USE=$TARGET_UID
     GROUP_ID_TO_USE=$TARGET_GID
 else
-    echo "Running in 'hpc' mode. Skipping UID/GID synchronization."
+    echo "Running in '${SIMULATION_MODE}' mode. Skipping UID/GID synchronization."
     USER_ID_TO_USE=$(id -u "$USERNAME")
     GROUP_ID_TO_USE=$(id -g "$USERNAME")
 fi
@@ -92,16 +92,33 @@ if command -v git > /dev/null 2>&1; then
     git config --global --add safe.directory "${CONTROLLER_DIR}" || true
 fi
 
-# --- Install shared packages (editable) ---
-pip install --quiet -e "${CONTROLLER_DIR}/complete_control/shared/minjerk"
-
 # --- Environment Summary ---
 echo "Final LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 echo "Final PATH: $PATH"
 echo "Final PYTHONPATH: $PYTHONPATH"
 
-# --- Execute the command directly if in HPC mode ---
-if [ "$SIMULATION_MODE" = "hpc" ]; then
+# --- Install shared packages and near-nes-controller in editable mode (dev mode only) ---
+# In prod/hpc these are already baked into the image; deps are guaranteed in the image.
+if [ "$SIMULATION_MODE" = "dev" ]; then
+    echo "Installing packages (dev mode)..."
+    uv pip install -e "${CONTROLLER_DIR}/complete_control/shared/minjerk" --no-deps
+    uv pip install -e "${CONTROLLER_DIR}/submodules/motor_cortex_eprop" --no-deps
+    uv pip install -e "${CONTROLLER_DIR}/submodules/pfc_planner" --no-deps
+    (cd "${CONTROLLER_DIR}" && uv pip install --group dev) || true
+
+    if [ -f "${CONTROLLER_DIR}/pyproject.toml" ]; then
+        echo "Refreshing near-nes-controller package in editable mode as user $USERNAME..."
+        # Install with --no-build-isolation and --no-deps: deps are guaranteed in the image.
+        gosu "$USERNAME" bash -c "cd ${CONTROLLER_DIR} && uv pip install -e . --no-build-isolation --no-deps" 2>&1 | tail -5 || true
+        echo "Package installation completed."
+    else
+        echo "Warning: pyproject.toml not found in ${CONTROLLER_DIR}. Skipping package installation."
+        exit 1
+    fi
+fi
+
+# --- Execute the command directly if in HPC or prod mode ---
+if [ "$SIMULATION_MODE" = "hpc" ] || [ "$SIMULATION_MODE" = "prod" ]; then
     exec "$@"
 fi
 

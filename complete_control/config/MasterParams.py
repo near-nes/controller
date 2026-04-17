@@ -72,5 +72,5 @@ class MasterParams(BaseModel):
             run_paths=run_paths,
             run_id=run_paths.run.name,
             parent_id=parent_id,
-            **kwargs
+            **kwargs,
         )
