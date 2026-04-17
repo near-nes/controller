@@ -78,9 +78,11 @@ RUN python -m venv --system-site-packages $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 COPY ./docker/constraints.txt /tmp/constraints.txt
-RUN pip install --upgrade pip setuptools wheel packaging -c /tmp/constraints.txt
 COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /uvx /bin/
 ENV UV_PYTHON="$VIRTUAL_ENV/bin/python"
+# pip is installed: nrp-core's CMake build uses it
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --upgrade pip setuptools wheel packaging -c /tmp/constraints.txt
 
 ENV INSTALL_DIR=/sim/install
 ENV DEPS_DIR=/sim/dependencies
@@ -149,9 +151,8 @@ RUN tar xfz $OMPI_GZ \
 ENV CFLAGS=-O2
 # ^ for https://github.com/mpi4py/mpi4py/issues/652
 
-# i think uv might work fine here as well, but i don't want to risk future breakages :)
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install cython mpilock mpi4py -c /tmp/constraints.txt
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install cython mpilock mpi4py -c /tmp/constraints.txt
 ENV CFLAGS=
 
 WORKDIR $DEPS_DIR
