@@ -23,7 +23,7 @@ jobs:
         python-version: "3.10"
     - run: uv venv
     - run: uv pip install --group dev
-    - run: uv run -- black --check --exclude '/(submodules|nrp-core|deprecated)/' .
+    - run: black --check --exclude '/(submodules|nrp-core|deprecated)/' .
 
   build:
     name: Docker Build
