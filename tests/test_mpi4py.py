@@ -8,6 +8,7 @@ library paths; these tests catch the common breakage modes:
   3. A real multi-rank job runs end-to-end (mpirun spawns ranks, they exchange
      data via collectives, all exit 0)
 """
+
 import os
 import shutil
 import subprocess
@@ -35,15 +36,17 @@ def test_mpi4py_extension_links_against_custom_ompi():
     libmpi_lines = [line for line in ldd.splitlines() if "libmpi.so" in line]
     assert libmpi_lines, f"libmpi.so missing from ldd output:\n{ldd}"
     for line in libmpi_lines:
-        assert ompi_install in line, (
-            f"mpi4py links to an MPI outside {ompi_install}:\n{line}"
-        )
+        assert (
+            ompi_install in line
+        ), f"mpi4py links to an MPI outside {ompi_install}:\n{line}"
 
 
 @pytest.mark.skipif(shutil.which("mpirun") is None, reason="mpirun not on PATH")
 def test_mpi4py_multi_rank_collectives(tmp_path):
     script = tmp_path / "mpi_job.py"
-    script.write_text(dedent("""
+    script.write_text(
+        dedent(
+            """
         from mpi4py import MPI
 
         comm = MPI.COMM_WORLD
@@ -56,7 +59,9 @@ def test_mpi4py_multi_rank_collectives(tmp_path):
         assert total == size * (size - 1) // 2, (total, size)
 
         print(f"OK rank={rank}/{size}")
-    """))
+    """
+        )
+    )
 
     env = os.environ.copy()
     # Harmless for non-root; required if someone runs tests as root.
@@ -65,13 +70,16 @@ def test_mpi4py_multi_rank_collectives(tmp_path):
 
     result = subprocess.run(
         ["mpirun", "-np", "2", sys.executable, str(script)],
-        capture_output=True, text=True, timeout=60, env=env,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        env=env,
     )
     assert result.returncode == 0, (
         f"mpirun failed (rc={result.returncode})\n"
         f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
     )
     ok_lines = [l for l in result.stdout.splitlines() if l.startswith("OK rank=")]
-    assert len(ok_lines) == 2, (
-        f"expected 2 OK lines, got {len(ok_lines)}:\n{result.stdout}"
-    )
+    assert (
+        len(ok_lines) == 2
+    ), f"expected 2 OK lines, got {len(ok_lines)}:\n{result.stdout}"
