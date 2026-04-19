@@ -20,7 +20,6 @@ class PlantConfig:
         self.master_config = master_params
 
         self.run_paths: paths.RunPaths = master_params.run_paths
-        self.trajectory_path = paths.TRAJECTORY
 
         self.SEED = SimulationParams.get_default_seed()
         np.random.seed(self.SEED)

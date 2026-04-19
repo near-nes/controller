@@ -51,9 +51,6 @@ CONFIG = COMPLETE_CONTROL / "config"
 ARTIFACTS = ROOT / "artifacts"
 EMBODIMENT_ASSETS = ROOT / "embodiment_assets"
 
-TRAJECTORY = CONFIG / "trajectory.txt"
-MOTOR_COMMANDS = CONFIG / "motor_commands.txt"
-NESTML_BUILD_DIR = ROOT / "nestml" / "target"
 CEREBELLUM = ROOT.parent / "cerebellum"
 CEREBELLUM_CONFIGS = ROOT / "cerebellum_configurations"
 FORWARD = CEREBELLUM_CONFIGS / "forward.yaml"
@@ -68,13 +65,7 @@ else:
     _hdf5_path = ARTIFACTS / "cerebellum_plastic_base.hdf5"
     PATH_HDF5 = str(_hdf5_path) if _hdf5_path.exists() else None
 
-SUBMODULES = ROOT / "submodules"
-
-M1 = SUBMODULES / "motor_cortex_eprop"
-MOTOR_MODEL = M1 / "motor_controller_model"
 ARTIFACTS_M1 = ARTIFACTS / "m1"
-
-PFC_PLANNER = SUBMODULES / "pfc_planner"
 ARTIFACTS_PLANNER = ARTIFACTS / "pfc_planner"
 
 
