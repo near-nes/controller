@@ -7,7 +7,7 @@ __license__ = "GPL"
 __version__ = "1.0.1"
 
 import numpy as np
-from config.core_models import SimulationParams
+from complete_control.config.core_models import SimulationParams
 
 SEED = SimulationParams.get_default_seed()
 np.random.seed(SEED)

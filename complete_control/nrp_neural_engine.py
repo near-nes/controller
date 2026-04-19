@@ -3,10 +3,10 @@
 import os
 
 import structlog
-from config.MasterParams import MasterParams
-from config.paths import COMPLETE_CONTROL, RunPaths
-from config.ResultMeta import extract_id
-from neural.nest_adapter import initialize_nest, nest
+from complete_control.config.MasterParams import MasterParams
+from complete_control.config.paths import COMPLETE_CONTROL, RunPaths
+from complete_control.config.ResultMeta import extract_id
+from complete_control.neural.nest_adapter import initialize_nest, nest
 from neural_simulation_lib import (
     create_controller,
     setup_environment,
@@ -14,7 +14,7 @@ from neural_simulation_lib import (
 )
 from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
-from utils_common.profile import Profile
+from complete_control.utils_common.profile import Profile
 
 NANO_SEC = 1e-9
 

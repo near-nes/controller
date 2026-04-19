@@ -7,7 +7,7 @@ __license__ = "GPL"
 __version__ = "1.0.1"
 
 import structlog
-from neural.nest_adapter import nest
+from complete_control.neural.nest_adapter import nest
 
 from .population_view import PopView
 

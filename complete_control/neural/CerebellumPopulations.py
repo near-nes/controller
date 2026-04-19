@@ -1,6 +1,6 @@
 from typing import Generic, Optional, TypeVar
 
-from neural.neural_models import PopulationSpikes, convert_to_recording
+from complete_control.neural.neural_models import PopulationSpikes, convert_to_recording
 from pydantic import BaseModel
 
 from .population_view import PopView

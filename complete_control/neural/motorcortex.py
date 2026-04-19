@@ -1,14 +1,14 @@
 from typing import Protocol, Tuple
 
 import structlog
-from config.core_models import SimulationParams
-from config.module_params import (
+from complete_control.config.core_models import SimulationParams
+from complete_control.config.module_params import (
     M1MockConfig,
     M1Type,
     MotorCortexModuleConfig,
     PlannerModuleConfig,
 )
-from neural.nest_adapter import nest
+from complete_control.neural.nest_adapter import nest
 
 from .population_view import PopView
 

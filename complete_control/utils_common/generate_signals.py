@@ -1,10 +1,10 @@
 from pathlib import Path
 
 import structlog
-from config.core_models import SimulationParams, TargetColor
-from config.module_params import PlannerModuleConfig, TrajGeneratorType
+from complete_control.config.core_models import SimulationParams, TargetColor
+from complete_control.config.module_params import PlannerModuleConfig, TrajGeneratorType
 from pydantic import BaseModel
-from utils_common.custom_types import NdArray
+from complete_control.utils_common.custom_types import NdArray
 
 
 class PlannerData(BaseModel):

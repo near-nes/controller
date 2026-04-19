@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List, TypeVar
 
 from pydantic import BaseModel
-from utils_common.custom_types import NdArray
+from complete_control.utils_common.custom_types import NdArray
 
 T = TypeVar("T")
 

@@ -3,10 +3,10 @@ from typing import List
 
 import structlog
 from mpi4py.MPI import Comm
-from neural.result_models import NeuralResultManifest
-from neural.Controller import PopulationBlocks
-from neural.nest_adapter import nest
-from neural.neural_models import (
+from complete_control.neural.result_models import NeuralResultManifest
+from complete_control.neural.Controller import PopulationBlocks
+from complete_control.neural.nest_adapter import nest
+from complete_control.neural.neural_models import (
     SynapseBlock,
     SynapseRecording,
 )

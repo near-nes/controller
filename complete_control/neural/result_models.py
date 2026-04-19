@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from neural.CerebellumHandlerPopulations import CerebellumHandlerPopulationsRecordings
-from neural.CerebellumPopulations import CerebellumPopulationsRecordings
-from neural.ControllerPopulations import ControllerPopulationsRecordings
-from neural.neural_models import PopulationSpikes
+from complete_control.neural.CerebellumHandlerPopulations import CerebellumHandlerPopulationsRecordings
+from complete_control.neural.CerebellumPopulations import CerebellumPopulationsRecordings
+from complete_control.neural.ControllerPopulations import ControllerPopulationsRecordings
+from complete_control.neural.neural_models import PopulationSpikes
 from pydantic import BaseModel
 
 

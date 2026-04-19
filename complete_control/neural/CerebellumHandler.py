@@ -4,12 +4,12 @@ from typing import Optional
 
 import numpy as np
 import structlog
-from config.bsb_models import BSBConfigPaths
-from config.connection_params import ConnectionsParams
-from config.core_models import SimulationParams
-from config.population_params import PopulationsParams, RBFPopParams
-from neural.nest_adapter import nest
-from utils_common.utils import TrialSection
+from complete_control.config.bsb_models import BSBConfigPaths
+from complete_control.config.connection_params import ConnectionsParams
+from complete_control.config.core_models import SimulationParams
+from complete_control.config.population_params import PopulationsParams, RBFPopParams
+from complete_control.neural.nest_adapter import nest
+from complete_control.utils_common.utils import TrialSection
 
 from .Cerebellum import Cerebellum
 from .CerebellumHandlerPopulations import CerebellumHandlerPopulations

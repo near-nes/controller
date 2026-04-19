@@ -5,7 +5,7 @@ from typing import ClassVar, Iterator, List
 import numpy as np
 import structlog
 from pydantic import BaseModel
-from utils_common.custom_types import NdArray
+from complete_control.utils_common.custom_types import NdArray
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
 

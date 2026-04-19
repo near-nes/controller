@@ -6,11 +6,11 @@ from pathlib import Path
 
 import numpy as np
 import structlog
-from config.core_models import SimulationParams
-from config.MasterParams import MasterParams
-from config.module_params import TrajGeneratorType
-from neural.Controller import Controller
-from neural.nest_adapter import nest
+from complete_control.config.core_models import SimulationParams
+from complete_control.config.MasterParams import MasterParams
+from complete_control.config.module_params import TrajGeneratorType
+from complete_control.neural.Controller import Controller
+from complete_control.neural.nest_adapter import nest
 
 
 # --- Configuration and Setup ---

@@ -5,14 +5,14 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import structlog
-from config.core_models import SimulationParams
-from config.ResultMeta import ResultMeta
+from complete_control.config.core_models import SimulationParams
+from complete_control.config.ResultMeta import ResultMeta
 from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 from mpi4py import MPI
-from neural.neural_models import SynapseBlock
+from complete_control.neural.neural_models import SynapseBlock
 from PIL import Image, ImageDraw
-from utils_common.utils import draw_trial_phases
+from complete_control.utils_common.utils import draw_trial_phases
 
 from complete_control.config.MasterParams import MasterParams
 from complete_control.utils_common.results import concatenate_neural_results

@@ -4,25 +4,25 @@ from typing import Optional
 
 import numpy as np
 import structlog
-from config.bsb_models import BSBConfigPaths
-from config.connection_params import ConnectionsParams
-from config.core_models import SimulationParams
-from config.MasterParams import MasterParams
-from config.module_params import (
+from complete_control.config.bsb_models import BSBConfigPaths
+from complete_control.config.connection_params import ConnectionsParams
+from complete_control.config.core_models import SimulationParams
+from complete_control.config.MasterParams import MasterParams
+from complete_control.config.module_params import (
     MotorCortexModuleConfig,
     PlannerModuleConfig,
     SpineModuleConfig,
     StateModuleConfig,
 )
-from config.population_params import PopulationsParams
-from neural.CerebellumHandlerPopulations import CerebellumHandlerPopulations
-from neural.CerebellumPopulations import CerebellumPopulations
-from neural.nest_adapter import nest
-from neural.neural_models import Synapse, SynapseBlock, SynapseRecording
-from plant.sensoryneuron import SensoryNeuron
-from utils_common.generate_signals import generate_traj
-from utils_common.results import read_weights
-from utils_common.utils import TrialSection, get_current_section
+from complete_control.config.population_params import PopulationsParams
+from complete_control.neural.CerebellumHandlerPopulations import CerebellumHandlerPopulations
+from complete_control.neural.CerebellumPopulations import CerebellumPopulations
+from complete_control.neural.nest_adapter import nest
+from complete_control.neural.neural_models import Synapse, SynapseBlock, SynapseRecording
+from complete_control.plant.sensoryneuron import SensoryNeuron
+from complete_control.utils_common.generate_signals import generate_traj
+from complete_control.utils_common.results import read_weights
+from complete_control.utils_common.utils import TrialSection, get_current_section
 
 from .ControllerPopulations import ControllerPopulations
 from .motorcortex import MotorCortex

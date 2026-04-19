@@ -3,15 +3,15 @@ import os
 from timeit import default_timer as timer
 
 import structlog
-from config.MasterParams import MasterParams
-from config.nrp_sim_config import SimulationConfig
-from config.paths import RunPaths
-from config.ResultMeta import ResultMeta, extract_id
+from complete_control.config.MasterParams import MasterParams
+from complete_control.config.nrp_sim_config import SimulationConfig
+from complete_control.config.paths import RunPaths
+from complete_control.config.ResultMeta import ResultMeta, extract_id
 from nrp_client import NrpCore
-from plant.plant_plotting import plot_plant_outputs
+from complete_control.plant.plant_plotting import plot_plant_outputs
 from tqdm import tqdm
-from utils_common.draw_schema_svg import draw_schema
-from utils_common.results import make_trial_id
+from complete_control.utils_common.draw_schema_svg import draw_schema
+from complete_control.utils_common.results import make_trial_id
 
 
 def _dump_logs(run_paths: RunPaths):

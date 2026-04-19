@@ -78,8 +78,11 @@ Repository = "https://github.com/near-nes/controller"
 run-trials = "complete_control.run_trials:main"
 
 [tool.setuptools]
-packages = ["complete_control"]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["complete_control*"]
+exclude = ["complete_control.deprecated*", "tests*"]
 
 [tool.setuptools.package-data]
 complete_control = [

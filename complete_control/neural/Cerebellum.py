@@ -6,12 +6,12 @@ import structlog
 import tqdm
 from bsb import SimulationData, config, from_storage, get_simulation_adapter, options
 from bsb_nest.adapter import NestAdapter, NestResult
-from config.bsb_models import BSBConfigPaths
-from config.connection_params import ConnectionsParams
+from complete_control.config.bsb_models import BSBConfigPaths
+from complete_control.config.connection_params import ConnectionsParams
 from mpi4py import MPI
-from neural.nest_adapter import nest
-from neural.neural_models import SynapseBlock, SynapseRecording
-from utils_common.profile import Profile
+from complete_control.neural.nest_adapter import nest
+from complete_control.neural.neural_models import SynapseBlock, SynapseRecording
+from complete_control.utils_common.profile import Profile
 
 from .CerebellumPopulations import CerebellumPopulations
 from .population_view import PopView

@@ -1,8 +1,8 @@
 from enum import Enum
 
 import numpy as np
-from config.core_models import SimulationParams
-from config.MasterParams import MasterParams
+from complete_control.config.core_models import SimulationParams
+from complete_control.config.MasterParams import MasterParams
 
 
 class TrialSection(Enum):

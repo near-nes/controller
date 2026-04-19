@@ -4,9 +4,9 @@ from typing import List, Tuple
 
 import numpy as np
 import structlog
-from config.paths import EMBODIMENT_ASSETS
-from config.plant_config import PlantConfig
-from plant.plant_models import JointState, JointStates
+from complete_control.config.paths import EMBODIMENT_ASSETS
+from complete_control.config.plant_config import PlantConfig
+from complete_control.plant.plant_models import JointState, JointStates
 
 
 class RoboticPlant:

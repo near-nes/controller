@@ -6,18 +6,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import structlog
 import tqdm
-from config.core_models import SimulationParams
-from config.paths import RunPaths
-from config.plant_config import PlantConfig
-from config.ResultMeta import ResultMeta
+from complete_control.config.core_models import SimulationParams
+from complete_control.config.paths import RunPaths
+from complete_control.config.plant_config import PlantConfig
+from complete_control.config.ResultMeta import ResultMeta
 from matplotlib.animation import FuncAnimation
 from matplotlib.lines import Line2D
-from utils_common.generate_signals import PlannerData
-from utils_common.results import (
+from complete_control.utils_common.generate_signals import PlannerData
+from complete_control.utils_common.results import (
     extract_and_merge_plant_results,
     extract_time_move_trajectories,
 )
-from utils_common.utils import draw_trial_phases
+from complete_control.utils_common.utils import draw_trial_phases
 
 from .plant_models import JointState, JointStates, PlantPlotData
 

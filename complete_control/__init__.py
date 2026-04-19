@@ -55,4 +55,8 @@ def _decompress_bsb_network():
 
 
 # Auto-decompress on first import
-_decompress_bsb_network()
+# Disabled: the container entrypoint already decompresses and respects the
+# BSB_NETWORK_FILE / COMPRESSED_BSB_NETWORK_FILE env vars. This function hardcodes
+# paths and ignores those vars. To be replaced by a pooch-based fetcher in a
+# follow-up PR; function kept for reference meanwhile.
+# _decompress_bsb_network()
