@@ -71,21 +71,9 @@ class ConnectionsParams(BaseModel):
             receptor_type=1,
         )
     )
-    planner_plan_to_inv: SingleSynapseParams = Field(
-        default_factory=lambda: SingleSynapseParams(
-            weight=0.25,
-            delay=min_delay,
-        )
-    )
     state_error_inv: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=-0.005,
-            delay=min_delay,
-        )
-    )
-    planner_error_inv: SingleSynapseParams = Field(
-        default_factory=lambda: SingleSynapseParams(
-            weight=0.005,
             delay=min_delay,
         )
     )
