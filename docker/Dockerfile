@@ -232,7 +232,8 @@ RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-b
 ####################### CEREBELLUM+MODELS #######################
 RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
-    && git checkout bbe4ccf49a1b01974434c77404f00688f6beb1fc\
+    && pip install --no-deps . \
+    && git checkout 4403f7e6c91063e6737cc410410d342df9598fa9 \
     && cd custom_stdp \
     && cmake . \
     && make \
@@ -274,8 +275,8 @@ ENV OMPI_MCA_plm=^rsh
 ENV PYNEST_QUIET=1
 
 # cerebellum
-ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5.gz
-ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/cerebellum_plastic_base.hdf5
+ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/mouse_abstract_only.hdf5.gz
+ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/mouse_abstract_only.hdf5
 
 ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 

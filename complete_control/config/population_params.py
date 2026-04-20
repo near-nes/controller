@@ -19,7 +19,7 @@ class PopulationsParams(BaseModel):
     model_config: ClassVar = {"frozen": True}
     prediction: SinglePopParams = Field(
         default_factory=lambda: SinglePopParams(
-            kp=1.0, buffer_size=100.0, base_rate=5.0
+            kp=1.0, buffer_size=50.0, base_rate=1.0
         )  # 50
     )
     motor_commands: RBFPopParams = Field(
@@ -28,19 +28,13 @@ class PopulationsParams(BaseModel):
         )
     )
     brain_stem: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(
-            kp=1.0, buffer_size=10.0, base_rate=0.0
-        )  # kp=0.2
+        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=10.0, base_rate=0.0)
     )
     sensory_delayed: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(
-            kp=1.0, buffer_size=100.0, base_rate=5.0
-        )
+        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=50.0, base_rate=5.0)
     )
     state: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(
-            kp=1.0, buffer_size=150.0, base_rate=5.0
-        )
+        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=50.0, base_rate=5.0)
     )
     error: SinglePopParams = Field(
         default_factory=lambda: SinglePopParams(
@@ -49,11 +43,8 @@ class PopulationsParams(BaseModel):
     )
     plan_to_inv: RBFPopParams = Field(
         default_factory=lambda: RBFPopParams(
-            kp=3.0, buffer_size=5.0, base_rate=5.0, sdev=2.0, freq_max=40
+            kp=4.0, buffer_size=5.0, base_rate=5.0, sdev=4.0, freq_max=60
         )
-    )
-    state_to_inv: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=10.0, base_rate=0.0)
     )
     motor_pred: SinglePopParams = Field(
         default_factory=lambda: SinglePopParams(
