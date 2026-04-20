@@ -33,8 +33,8 @@ class RobotSpecParams(BaseModel, frozen=True):
 
 
 class ExperimentParams(BaseModel, frozen=True):
-    enable_gravity: bool = False
-    z_gravity_magnitude: float = 2  # m/s^2
+    enable_gravity: bool = True
+    z_gravity_magnitude: float = 30  # m/s^2
 
 
 class OracleData(BaseModel):
