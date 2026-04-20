@@ -26,7 +26,7 @@ ffmpeg-python~=0.2.0
 typing-extensions==4.15
 
 # parallel
-mpi4py==4.0.3
+mpi4py~=4.1
 mpilock==1.1.0
 
 # nest

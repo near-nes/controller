@@ -19,8 +19,8 @@ license = {text = "MIT"}
 
 dependencies = [
     # Core dependencies from docker/requirements.txt
-    "bsb>=6.0.0",
-    "bsb-nest>=6.0.0",
+    "bsb>=7.0",
+    "bsb-nest>=7.0",
     "pandas>=2.2.3",
     "scipy>=1.15.2",
     "numpy==1.26.0",
@@ -42,7 +42,7 @@ dependencies = [
     "RestrictedPython>=8.0",
     "h5py>=3.14.0",
     # Parallel processing
-    "mpi4py==4.0.3",
+    "mpi4py>=4.1",
     "mpilock==1.1.0",
     # GLE code dependencies
     "pydenticon==0.3.1",
