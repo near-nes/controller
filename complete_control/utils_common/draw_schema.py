@@ -118,7 +118,6 @@ def draw_schema(metas: list[ResultMeta], scale_factor: float = 0.005):
         "plan to inv": "plan_to_inv",
         "error inv": ("error_inv_p", "error_inv_n"),
         "State": ("state_p", "state_n"),
-        "state to inv": ("state_to_inv_p", "state_to_inv_n"),
         "prediction": ("pred_p", "pred_n"),
         "motor prediction": ("motor_prediction_p", "motor_prediction_n"),
         "motor commands": "motor_commands",

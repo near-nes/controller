@@ -204,21 +204,6 @@ class CerebellumHandler:
 
         self.interface_pops.plan_to_inv = self._pop_view(plan_to_inv)
 
-        # State Estimator Relay (Input to Inv Error Calc)
-        params = self.pops_params.state_to_inv
-        pop_params = {
-            "kp": params.kp,
-            "buffer_size": params.buffer_size,
-            "base_rate": params.base_rate,
-            "simulation_steps": len(self.total_time_vect),
-        }
-        state_to_inv_p = nest.Create("basic_neuron_nestml", self.N)
-        nest.SetStatus(state_to_inv_p, {**pop_params, "pos": True})
-        self.interface_pops.state_to_inv_p = self._pop_view(state_to_inv_p)
-        state_to_inv_n = nest.Create("basic_neuron_nestml", self.N)
-        nest.SetStatus(state_to_inv_n, {**pop_params, "pos": False})
-        self.interface_pops.state_to_inv_n = self._pop_view(state_to_inv_n)
-
         # Inverse Error Calculation (Input to Inv IO)
         params = self.pops_params.error_i
         pop_params = {
@@ -462,7 +447,7 @@ class CerebellumHandler:
             update={"weight": -state_err_inv_spec.weight}
         ).model_dump(exclude_none=True)
         self.log.debug(
-            "Connecting state_to_inv -> error_inv (inhibitory?)",
+            "Connecting state -> error_inv (inhibitory?)",
             syn_spec_p=syn_spec_p,
             syn_spec_n=syn_spec_n,
         )

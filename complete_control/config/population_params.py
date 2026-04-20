@@ -46,9 +46,6 @@ class PopulationsParams(BaseModel):
             kp=4.0, buffer_size=5.0, base_rate=5.0, sdev=4.0, freq_max=60
         )
     )
-    state_to_inv: SinglePopParams = Field(
-        default_factory=lambda: SinglePopParams(kp=1.0, buffer_size=10.0, base_rate=0.0)
-    )
     motor_pred: SinglePopParams = Field(
         default_factory=lambda: SinglePopParams(
             kp=0.05, buffer_size=20.0, base_rate=5.0
