@@ -82,7 +82,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /uvx /bin/
 ENV UV_PYTHON="$VIRTUAL_ENV/bin/python"
 # pip is installed: nrp-core's CMake build uses it
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --upgrade pip setuptools wheel packaging -c /tmp/constraints.txt
+    uv pip install --upgrade pip setuptools wheel packaging flit_core -c /tmp/constraints.txt
 
 ENV INSTALL_DIR=/sim/install
 ENV DEPS_DIR=/sim/dependencies
@@ -232,8 +232,8 @@ RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-b
 ####################### CEREBELLUM+MODELS #######################
 RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
-    && pip install --no-deps . \
     && git checkout 4403f7e6c91063e6737cc410410d342df9598fa9 \
+    && pip install --no-deps . \
     && cd custom_stdp \
     && cmake . \
     && make \
@@ -283,7 +283,7 @@ ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 # point nest to nest installation
 RUN echo ${NEST_INSTALL_DIR}/lib/${PYTHON_MAJOR_MINOR}/site-packages >> ${VIRTUAL_ENV}/lib/${PYTHON_MAJOR_MINOR}/site-packages/nest.pth
 # pythonpath construction (note: CONTROLLER_DIR no longer needed as package is installed via pip)
-ENV PYTHONPATH="${NRP_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages:${CEREBELLUM_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
+ENV PYTHONPATH="${NRP_INSTALL_DIR}/lib/python${PYTHON_MAJOR}.${PYTHON_MINOR}/site-packages${PYTHONPATH:+:${PYTHONPATH}}"
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
 WORKDIR /sim
