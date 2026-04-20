@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from complete_control.config import paths
-from complete_control.config.MasterParams import MasterParams
-from complete_control.config.paths import RunPaths
-from complete_control.neural.result_models import NeuralResultManifest
-from complete_control.plant.plant_models import PlantPlotData
+from neurocontroller.config import paths
+from neurocontroller.config.MasterParams import MasterParams
+from neurocontroller.config.paths import RunPaths
+from neurocontroller.neural.result_models import NeuralResultManifest
+from neurocontroller.plant.plant_models import PlantPlotData
 from pydantic import BaseModel
 
 

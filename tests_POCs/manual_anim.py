@@ -7,20 +7,20 @@ import numpy as np
 import pybullet
 import structlog
 
-sys.path.insert(0, "/sim/controller/complete_control")
+sys.path.insert(0, "/sim/controller/src/neurocontroller/")
 os.environ["RUNS_PATH"] = str((Path(__file__).parent / "runs").absolute())
 
 import ffmpeg
 from tqdm import tqdm
 
-from complete_control.config.core_models import (
+from neurocontroller.config.core_models import (
     OracleData,
     SimulationParams,
     TargetColor,
 )
-from complete_control.config.paths import RunPaths
-from complete_control.config.plant_config import PlantConfig
-from complete_control.plant.robotic_plant import RoboticPlant
+from neurocontroller.config.paths import RunPaths
+from neurocontroller.config.plant_config import PlantConfig
+from neurocontroller.plant.robotic_plant import RoboticPlant
 
 AXES_TO_CAPTURE = [
     # "x",

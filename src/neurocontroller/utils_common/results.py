@@ -5,18 +5,18 @@ from pathlib import Path
 from typing import Optional, Type, TypeVar
 
 import numpy as np
-from complete_control.config import paths
-from complete_control.config.MasterParams import MasterParams
-from complete_control.config.ResultMeta import ResultMeta
-from complete_control.neural.CerebellumHandlerPopulations import CerebellumHandlerPopulationsRecordings
-from complete_control.neural.CerebellumPopulations import CerebellumPopulationsRecordings
-from complete_control.neural.ControllerPopulations import ControllerPopulationsRecordings
-from complete_control.neural.neural_models import PopulationSpikes
-from complete_control.neural.result_models import NeuralResultManifest
-from complete_control.plant.plant_models import EEData, JointData, PlantPlotData
+from neurocontroller.config import paths
+from neurocontroller.config.MasterParams import MasterParams
+from neurocontroller.config.ResultMeta import ResultMeta
+from neurocontroller.neural.CerebellumHandlerPopulations import CerebellumHandlerPopulationsRecordings
+from neurocontroller.neural.CerebellumPopulations import CerebellumPopulationsRecordings
+from neurocontroller.neural.ControllerPopulations import ControllerPopulationsRecordings
+from neurocontroller.neural.neural_models import PopulationSpikes
+from neurocontroller.neural.result_models import NeuralResultManifest
+from neurocontroller.plant.plant_models import EEData, JointData, PlantPlotData
 from pydantic import BaseModel
-from complete_control.utils_common.custom_types import NdArray
-from complete_control.utils_common.generate_signals import PlannerData
+from neurocontroller.utils_common.custom_types import NdArray
+from neurocontroller.utils_common.generate_signals import PlannerData
 
 
 def make_trial_id(

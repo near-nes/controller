@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=68", "setuptools-scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "near-nes-controller"
-version = "0.1.0"
+name = "neurocontroller"
+dynamic = ["version"]
 description = "NRP-based neural simulation and cerebellar control experiment"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -75,27 +75,29 @@ Homepage = "https://wiki.ebrains.eu/bin/view/Collabs/closed-loop-motor-t3-4/"
 Repository = "https://github.com/near-nes/controller"
 
 [project.scripts]
-run-trials = "complete_control.run_trials:main"
+run-trials = "neurocontroller.run_trials:main"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["complete_control*"]
-exclude = ["complete_control.deprecated*", "tests*"]
+where = ["src"]
+include = ["neurocontroller*"]
+exclude = ["neurocontroller.deprecated*", "neurocontroller.shared*", "tests*"]
 
 [tool.setuptools.package-data]
-complete_control = [
-    "config/**/*.py",
-    "config/**/*.txt",
-    "config/**/*.json",
-    "neural/**/*",
-    "plant/**/*",
-    "interfaces/**/*",
-    "utils_common/**/*",
-    "reference_data/**/*",
-    "deprecated/**/*",
+neurocontroller = [
+    "cerebellum_configurations/**/*",
+    "*.gz",
 ]
+
+[tool.setuptools_scm]
+# Write version to an importable module
+version_file = "src/neurocontroller/_version.py"
+# Drop the +gABCDEF local identifier so versions are acceptable to PyPI
+local_scheme = "no-local-version"
+# Used when git history is unavailable (e.g. a tarball download)
+fallback_version = "0.1.0"
 
 [tool.black]
 target-version = ["py310"]

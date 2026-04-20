@@ -1,14 +1,10 @@
 import argparse
 import os
 import sys
-from pathlib import Path
 
 import structlog
 
-# Ensure we can import from the current directory
-sys.path.append(str(Path(__file__).parent.resolve()))
-
-from nrp_start_sim import run_trial
+from neurocontroller.nrp_start_sim import run_trial
 
 log = structlog.get_logger()
 

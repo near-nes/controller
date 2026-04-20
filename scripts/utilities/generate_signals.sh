@@ -7,7 +7,7 @@ set -euo pipefail # Exit on error, unset var, pipe failure
 : "${CONTROLLER_DIR:?Error: CONTROLLER_DIR environment variable is not set}"
 
 # Define the target directory where files and the script reside
-TARGET_DIR="${CONTROLLER_DIR}/complete_control"
+TARGET_DIR="${CONTROLLER_DIR}/src/neurocontroller"
 
 # Define the target files to check/generate
 TRAJECTORY_FILE="${TARGET_DIR}/trajectory.txt"

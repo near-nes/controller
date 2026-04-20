@@ -4,9 +4,9 @@ from typing import List, Tuple
 
 import numpy as np
 import structlog
-from complete_control.config.paths import EMBODIMENT_ASSETS
-from complete_control.config.plant_config import PlantConfig
-from complete_control.plant.plant_models import JointState, JointStates
+from neurocontroller.config.paths import EMBODIMENT_ASSETS
+from neurocontroller.config.plant_config import PlantConfig
+from neurocontroller.plant.plant_models import JointState, JointStates
 
 
 class RoboticPlant:

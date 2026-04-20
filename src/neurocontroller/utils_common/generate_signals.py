@@ -1,10 +1,10 @@
 from pathlib import Path
 
 import structlog
-from complete_control.config.core_models import SimulationParams, TargetColor
-from complete_control.config.module_params import PlannerModuleConfig, TrajGeneratorType
+from neurocontroller.config.core_models import SimulationParams, TargetColor
+from neurocontroller.config.module_params import PlannerModuleConfig, TrajGeneratorType
 from pydantic import BaseModel
-from complete_control.utils_common.custom_types import NdArray
+from neurocontroller.utils_common.custom_types import NdArray
 
 
 class PlannerData(BaseModel):
@@ -31,14 +31,14 @@ def generate_traj(
     log.info(f"Generating trajectory using '{traj_gen_type}' planner...")
 
     if traj_gen_type == TrajGeneratorType.MOCKED:
-        from complete_control.utils_common.generate_signals_minjerk import (
+        from neurocontroller.utils_common.generate_signals_minjerk import (
             generate_trajectory_minjerk,
         )
 
         traj = generate_trajectory_minjerk(sim, m1_delay)
         choice = sim.oracle.target_color.value
     elif traj_gen_type == TrajGeneratorType.GLE:
-        from complete_control.utils_common.generate_signals_gle import (
+        from neurocontroller.utils_common.generate_signals_gle import (
             generate_trajectory_gle,
         )
 

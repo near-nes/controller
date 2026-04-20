@@ -8,14 +8,14 @@ from pathlib import Path
 
 import structlog
 
-from complete_control.config import paths
-from complete_control.config.paths import RUNS_DIR, RunPaths
-from complete_control.config.ResultMeta import ResultMeta
-from complete_control.neural.plot_utils import plot_controller_outputs
-from complete_control.plant.plant_plotting import plot_plant_outputs
-from complete_control.utils_common.draw_schema import draw_schema
-from complete_control.utils_common.draw_schema_svg import draw_schema as draw_schema_svg
-from complete_control.utils_common.results import gather_metas
+from neurocontroller.config import paths
+from neurocontroller.config.paths import RUNS_DIR, RunPaths
+from neurocontroller.config.ResultMeta import ResultMeta
+from neurocontroller.neural.plot_utils import plot_controller_outputs
+from neurocontroller.plant.plant_plotting import plot_plant_outputs
+from neurocontroller.utils_common.draw_schema import draw_schema
+from neurocontroller.utils_common.draw_schema_svg import draw_schema as draw_schema_svg
+from neurocontroller.utils_common.results import gather_metas
 
 log = structlog.get_logger()
 

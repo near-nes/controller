@@ -6,17 +6,17 @@ import os
 import nest
 import numpy as np
 import structlog
-from complete_control.config.MasterParams import MasterParams
-from complete_control.config.paths import COMPLETE_CONTROL, RunPaths
-from complete_control.config.ResultMeta import extract_id
-from complete_control.neural.nest_adapter import initialize_nest, nest
-from complete_control.neural.population_view import PopView
-from complete_control.utils_common.profile import Profile
-from neural_simulation_lib import (
+from neurocontroller.config.MasterParams import MasterParams
+from neurocontroller.config.paths import RunPaths
+from neurocontroller.config.ResultMeta import extract_id
+from neurocontroller.neural.nest_adapter import initialize_nest, nest
+from neurocontroller.neural.population_view import PopView
+from neurocontroller.neural_simulation_lib import (
     create_controller,
     setup_environment,
     setup_nest_kernel,
 )
+from neurocontroller.utils_common.profile import Profile
 from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 
@@ -171,7 +171,7 @@ class Script(GrpcEngineScript):
             time_motor=str(self.motor_profile.total_time),
             time_rest=str(self.rest_profile.total_time),
         )
-        from neural.data_handling import collapse_files, save_conn_weights
+        from neurocontroller.neural.data_handling import collapse_files, save_conn_weights
 
         rec_paths = None
         if self.controller.use_cerebellum and self.master_config.SAVE_WEIGHTS_CEREB:

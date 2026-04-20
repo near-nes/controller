@@ -3,7 +3,7 @@ name: Publish minjerk-dynamics to PyPI
 on:
   push:
     paths:
-      - "complete_control/shared/minjerk/**"
+      - "src/neurocontroller/shared/minjerk/**"
       - ".github/workflows/publish-minjerk.yml"
   workflow_dispatch:
     inputs:
@@ -34,11 +34,11 @@ jobs:
         run: pip install build
 
       - name: Build wheel and sdist
-        working-directory: complete_control/shared/minjerk
+        working-directory: src/neurocontroller/shared/minjerk
         run: python -m build
 
       - name: Show built package info
-        working-directory: complete_control/shared/minjerk/dist
+        working-directory: src/neurocontroller/shared/minjerk/dist
         run: |
           echo "=== Built artifacts ==="
           for f in *; do
@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: minjerk-dist
-          path: complete_control/shared/minjerk/dist/
+          path: src/neurocontroller/shared/minjerk/dist/
 
   publish:
     name: Publish to PyPI

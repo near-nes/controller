@@ -1,6 +1,6 @@
 {
     "python.analysis.extraPaths": [
-        "./complete_control/shared/minjerk"
+        "./src/neurocontroller/shared/minjerk"
         // pylance sometimes has trouble with editable install
     ]
 }

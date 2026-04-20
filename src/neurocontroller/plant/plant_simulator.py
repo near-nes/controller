@@ -2,9 +2,9 @@ from typing import List, Tuple
 
 import numpy as np
 import structlog
-from complete_control.config.core_models import TargetColor
-from complete_control.config.plant_config import PlantConfig
-from complete_control.utils_common.utils import TrialSection, get_current_section
+from neurocontroller.config.core_models import TargetColor
+from neurocontroller.config.plant_config import PlantConfig
+from neurocontroller.utils_common.utils import TrialSection, get_current_section
 
 from .plant_models import EEData, JointData, PlantPlotData
 from .robotic_plant import RoboticPlant

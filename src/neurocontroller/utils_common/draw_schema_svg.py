@@ -21,13 +21,13 @@ from xml.etree import ElementTree as ET
 
 import numpy as np
 import structlog
-from complete_control.config.paths import RunPaths
-from complete_control.config.plant_config import PlantConfig
-from complete_control.config.ResultMeta import ResultMeta
-from complete_control.neural.plot_utils import merge_and_plot
-from complete_control.plant.plant_plotting import ELBOW, plot_joint_space_animated
-from complete_control.utils_common.generate_signals import PlannerData
-from complete_control.utils_common.results import extract_and_merge_plant_results
+from neurocontroller.config.paths import RunPaths
+from neurocontroller.config.plant_config import PlantConfig
+from neurocontroller.config.ResultMeta import ResultMeta
+from neurocontroller.neural.plot_utils import merge_and_plot
+from neurocontroller.plant.plant_plotting import ELBOW, plot_joint_space_animated
+from neurocontroller.utils_common.generate_signals import PlannerData
+from neurocontroller.utils_common.results import extract_and_merge_plant_results
 
 log = structlog.get_logger(__name__)
 template_path = Path(__file__).parent / "schema_template.svg"

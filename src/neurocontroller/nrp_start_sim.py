@@ -3,15 +3,16 @@ import os
 from timeit import default_timer as timer
 
 import structlog
-from complete_control.config.MasterParams import MasterParams
-from complete_control.config.nrp_sim_config import SimulationConfig
-from complete_control.config.paths import RunPaths
-from complete_control.config.ResultMeta import ResultMeta, extract_id
 from nrp_client import NrpCore
-from complete_control.plant.plant_plotting import plot_plant_outputs
 from tqdm import tqdm
-from complete_control.utils_common.draw_schema_svg import draw_schema
-from complete_control.utils_common.results import make_trial_id
+
+from neurocontroller.config.MasterParams import MasterParams
+from neurocontroller.config.nrp_sim_config import SimulationConfig
+from neurocontroller.config.paths import RunPaths
+from neurocontroller.config.ResultMeta import ResultMeta, extract_id
+from neurocontroller.plant.plant_plotting import plot_plant_outputs
+from neurocontroller.utils_common.draw_schema_svg import draw_schema
+from neurocontroller.utils_common.results import make_trial_id
 
 
 def _dump_logs(run_paths: RunPaths):

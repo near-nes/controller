@@ -3,10 +3,10 @@ from typing import List
 
 import structlog
 from mpi4py.MPI import Comm
-from complete_control.neural.result_models import NeuralResultManifest
-from complete_control.neural.Controller import PopulationBlocks
-from complete_control.neural.nest_adapter import nest
-from complete_control.neural.neural_models import (
+from neurocontroller.neural.result_models import NeuralResultManifest
+from neurocontroller.neural.Controller import PopulationBlocks
+from neurocontroller.neural.nest_adapter import nest
+from neurocontroller.neural.neural_models import (
     SynapseBlock,
     SynapseRecording,
 )
@@ -82,7 +82,7 @@ def merge_synapse_blocks(blocks: List[SynapseBlock]) -> SynapseBlock:
 
 
 def save_conn_weights(weights: list[SynapseBlock], dir: Path, comm=None) -> list[Path]:
-    from neural.Cerebellum import create_key_plastic_connection
+    from neurocontroller.neural.Cerebellum import create_key_plastic_connection
 
     paths = []
     _log.debug(f"saving weights...")

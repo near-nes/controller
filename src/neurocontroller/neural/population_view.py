@@ -12,8 +12,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import structlog
-from complete_control.neural.nest_adapter import nest
-from complete_control.neural.neural_models import PopulationSpikes, RecordingManifest
+from neurocontroller.neural.nest_adapter import nest
+from neurocontroller.neural.neural_models import PopulationSpikes, RecordingManifest
 
 _log = structlog.get_logger(__name__)
 

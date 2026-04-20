@@ -11,4 +11,4 @@ singularity exec \
     --bind ./tmp:/tmp  \
     --env PYNEST_QUIET=0 \
     --env EXEC_TIMESTAMP=$(date +%Y%m%d_%H%M%S) \
-    sim.sif/ /usr/local/bin/entrypoint.sh python /sim/controller/complete_control/nrp_start_sim.py
+    sim.sif/ /usr/local/bin/entrypoint.sh python -m neurocontroller.nrp_start_sim

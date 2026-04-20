@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List, TypeVar
 
 from pydantic import BaseModel
-from complete_control.utils_common.custom_types import NdArray
+from neurocontroller.utils_common.custom_types import NdArray
 
 T = TypeVar("T")
 
@@ -10,7 +10,7 @@ T = TypeVar("T")
 def convert_to_recording(
     source: object, target_class: type[T], path: Path, comm=None
 ) -> T:
-    from complete_control.neural.population_view import PopView
+    from neurocontroller.neural.population_view import PopView
 
     """Convert a population object to its recording equivalent."""
     dest = target_class()

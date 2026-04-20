@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from complete_control.plant.plant_models import PlantPlotData
+from neurocontroller.plant.plant_models import PlantPlotData
 
 
 def load_and_display_plant_data(filepath: Path):

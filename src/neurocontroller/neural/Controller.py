@@ -4,25 +4,25 @@ from typing import Optional
 
 import numpy as np
 import structlog
-from complete_control.config.bsb_models import BSBConfigPaths
-from complete_control.config.connection_params import ConnectionsParams
-from complete_control.config.core_models import SimulationParams
-from complete_control.config.MasterParams import MasterParams
-from complete_control.config.module_params import (
+from neurocontroller.config.bsb_models import BSBConfigPaths
+from neurocontroller.config.connection_params import ConnectionsParams
+from neurocontroller.config.core_models import SimulationParams
+from neurocontroller.config.MasterParams import MasterParams
+from neurocontroller.config.module_params import (
     MotorCortexModuleConfig,
     PlannerModuleConfig,
     SpineModuleConfig,
     StateModuleConfig,
 )
-from complete_control.config.population_params import PopulationsParams
-from complete_control.neural.CerebellumHandlerPopulations import CerebellumHandlerPopulations
-from complete_control.neural.CerebellumPopulations import CerebellumPopulations
-from complete_control.neural.nest_adapter import nest
-from complete_control.neural.neural_models import Synapse, SynapseBlock, SynapseRecording
-from complete_control.plant.sensoryneuron import SensoryNeuron
-from complete_control.utils_common.generate_signals import generate_traj
-from complete_control.utils_common.results import read_weights
-from complete_control.utils_common.utils import TrialSection, get_current_section
+from neurocontroller.config.population_params import PopulationsParams
+from neurocontroller.neural.CerebellumHandlerPopulations import CerebellumHandlerPopulations
+from neurocontroller.neural.CerebellumPopulations import CerebellumPopulations
+from neurocontroller.neural.nest_adapter import nest
+from neurocontroller.neural.neural_models import Synapse, SynapseBlock, SynapseRecording
+from neurocontroller.plant.sensoryneuron import SensoryNeuron
+from neurocontroller.utils_common.generate_signals import generate_traj
+from neurocontroller.utils_common.results import read_weights
+from neurocontroller.utils_common.utils import TrialSection, get_current_section
 
 from .ControllerPopulations import ControllerPopulations
 from .motorcortex import MotorCortex

@@ -3,8 +3,8 @@ from pathlib import Path
 
 import numpy as np
 import structlog
-from complete_control.config.core_models import SimulationParams
-from complete_control.config.module_params import GLETrajGeneratorConfig, TrajGeneratorType
+from neurocontroller.config.core_models import SimulationParams
+from neurocontroller.config.module_params import GLETrajGeneratorConfig, TrajGeneratorType
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger("traj.generate_gle")
 

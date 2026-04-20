@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import BaseModel, FilePath
+from pydantic import BaseModel, Field, FilePath
 
 from . import paths
 

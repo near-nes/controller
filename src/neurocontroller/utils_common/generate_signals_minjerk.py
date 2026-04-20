@@ -2,7 +2,7 @@
 
 from minjerk_dynamics import generate_motor_commands, generate_trajectory
 
-from complete_control.config.core_models import SimulationParams
+from neurocontroller.config.core_models import SimulationParams
 
 
 def generate_trajectory_minjerk(sim: SimulationParams, m1_delay: float = 0.0):

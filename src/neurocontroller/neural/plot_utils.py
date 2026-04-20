@@ -5,16 +5,16 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import structlog
-from complete_control.config.core_models import SimulationParams
-from complete_control.config.ResultMeta import ResultMeta
+from neurocontroller.config.core_models import SimulationParams
+from neurocontroller.config.ResultMeta import ResultMeta
 from matplotlib.axis import Axis
 from matplotlib.figure import Figure
-from complete_control.neural.neural_models import SynapseBlock
+from neurocontroller.neural.neural_models import SynapseBlock
 from PIL import Image, ImageDraw
-from complete_control.utils_common.utils import draw_trial_phases
+from neurocontroller.utils_common.utils import draw_trial_phases
 
-from complete_control.config.MasterParams import MasterParams
-from complete_control.utils_common.results import concatenate_neural_results
+from neurocontroller.config.MasterParams import MasterParams
+from neurocontroller.utils_common.results import concatenate_neural_results
 
 from .neural_models import PopulationSpikes
 from .population_utils import (

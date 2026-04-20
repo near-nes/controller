@@ -6,18 +6,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import structlog
 import tqdm
-from complete_control.config.core_models import SimulationParams
-from complete_control.config.paths import RunPaths
-from complete_control.config.plant_config import PlantConfig
-from complete_control.config.ResultMeta import ResultMeta
+from neurocontroller.config.core_models import SimulationParams
+from neurocontroller.config.paths import RunPaths
+from neurocontroller.config.plant_config import PlantConfig
+from neurocontroller.config.ResultMeta import ResultMeta
 from matplotlib.animation import FuncAnimation
 from matplotlib.lines import Line2D
-from complete_control.utils_common.generate_signals import PlannerData
-from complete_control.utils_common.results import (
+from neurocontroller.utils_common.generate_signals import PlannerData
+from neurocontroller.utils_common.results import (
     extract_and_merge_plant_results,
     extract_time_move_trajectories,
 )
-from complete_control.utils_common.utils import draw_trial_phases
+from neurocontroller.utils_common.utils import draw_trial_phases
 
 from .plant_models import JointState, JointStates, PlantPlotData
 
@@ -467,7 +467,7 @@ def generate_video_from_existing_result_single_trial(
     """
     import ffmpeg
     import pybullet
-    from plant.robotic_plant import RoboticPlant
+    from neurocontroller.plant.robotic_plant import RoboticPlant
 
     images_path = plant_config.run_paths.figures_receiver
 

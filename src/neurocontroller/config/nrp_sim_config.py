@@ -30,23 +30,23 @@ class SimulationConfig(BaseModel):
             EngineType="python_grpc",
             EngineName="bullet_simulator",
             ServerAddress="0.0.0.0:1234",
-            PythonFileName="complete_control/nrp_bullet_engine.py",
+            PythonFileName="src/neurocontroller/nrp_bullet_engine.py",
         ),
         EngineConfig(
             EngineType="python_grpc",
             EngineName="nest_client",
             ServerAddress="0.0.0.0:1235",
-            PythonFileName="complete_control/nrp_neural_engine.py",
+            PythonFileName="src/neurocontroller/nrp_neural_engine.py",
         ),
     ]
     DataPackProcessingFunctions: List[DataPackProcessingFunction] = [
         DataPackProcessingFunction(
             Name="to_bullet",
-            FileName="complete_control/nrp_tf_from_nest_to_bullet.py",
+            FileName="src/neurocontroller/nrp_tf_from_nest_to_bullet.py",
         ),
         DataPackProcessingFunction(
             Name="from_bullet",
-            FileName="complete_control/nrp_tf_from_bullet.py",
+            FileName="src/neurocontroller/nrp_tf_from_bullet.py",
         ),
     ]
 

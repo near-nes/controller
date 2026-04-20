@@ -2,16 +2,16 @@
 
 import os
 
-import complete_control.config.paths as project_paths
+import neurocontroller.config.paths as project_paths
 import pybullet as p
 import structlog
-from complete_control.config.plant_config import PlantConfig
-from complete_control.config.ResultMeta import extract_id
+from neurocontroller.config.plant_config import PlantConfig
+from neurocontroller.config.ResultMeta import extract_id
 from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
-from complete_control.plant.plant_simulator import PlantSimulator
-from complete_control.utils_common.utils import TrialSection
-from complete_control.utils_common.profile import Profile
+from neurocontroller.plant.plant_simulator import PlantSimulator
+from neurocontroller.utils_common.utils import TrialSection
+from neurocontroller.utils_common.profile import Profile
 
 
 class Script(GrpcEngineScript):

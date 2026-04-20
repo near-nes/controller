@@ -1,14 +1,14 @@
 from typing import Protocol, Tuple
 
 import structlog
-from complete_control.config.core_models import SimulationParams
-from complete_control.config.module_params import (
+from neurocontroller.config.core_models import SimulationParams
+from neurocontroller.config.module_params import (
     M1MockConfig,
     M1Type,
     MotorCortexModuleConfig,
     PlannerModuleConfig,
 )
-from complete_control.neural.nest_adapter import nest
+from neurocontroller.neural.nest_adapter import nest
 
 from .population_view import PopView
 
@@ -168,7 +168,7 @@ class MotorCortex:
             )
             self.conn_type_m1_to_out = "one_to_one"
         else:
-            from utils_common.generate_signals_minjerk import (
+            from neurocontroller.utils_common.generate_signals_minjerk import (
                 generate_motor_commands_minjerk,
             )
 

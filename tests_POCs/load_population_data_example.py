@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from complete_control.neural.neural_models import PopulationSpikes
+from neurocontroller.neural.neural_models import PopulationSpikes
 
 
 def load_and_display_population_data(filepath: Path):

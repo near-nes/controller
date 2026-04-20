@@ -12,7 +12,7 @@ dependencies = ["numpy"]
 
 [tool.setuptools_scm]
 # path to the git root relative to this pyproject.toml
-root = "../../.."
+root = "../../../.."
 # write version into a module so it is importable at runtime
 version_file = "minjerk_dynamics/_version.py"
 # drop the +gABCDEF local identifier so the version is accepted by PyPI

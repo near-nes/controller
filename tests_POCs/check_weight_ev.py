@@ -1,11 +1,11 @@
 import sys
 
-sys.path.append("/sim/controller/complete_control")
+sys.path.append("/sim/controller/src/neurocontroller")
 
 
-from complete_control.config.ResultMeta import ResultMeta
-from complete_control.neural.neural_models import SynapseBlock
-from complete_control.neural.result_models import NeuralResultManifest
+from neurocontroller.config.ResultMeta import ResultMeta
+from neurocontroller.neural.neural_models import SynapseBlock
+from neurocontroller.neural.result_models import NeuralResultManifest
 
 final_id = "20251125_095918_rygd"
 

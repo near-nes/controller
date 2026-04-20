@@ -1,6 +1,6 @@
-from complete_control.neural.neural_models import PopulationSpikes
-from complete_control.config import paths
-from complete_control.neural.nest_adapter import nest, initialize_nest
+from neurocontroller.neural.neural_models import PopulationSpikes
+from neurocontroller.config import paths
+from neurocontroller.neural.nest_adapter import nest, initialize_nest
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
