@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import structlog
 import tqdm
+from config.core_models import SimulationParams
 from config.paths import RunPaths
 from config.plant_config import PlantConfig
 from config.ResultMeta import ResultMeta
@@ -16,6 +17,7 @@ from utils_common.results import (
     extract_and_merge_plant_results,
     extract_time_move_trajectories,
 )
+from utils_common.utils import draw_trial_phases
 
 from .plant_models import JointState, JointStates, PlantPlotData
 
@@ -158,7 +160,10 @@ def plot_joint_space_animated(
     pth_fig_receiver: Path,
     time_vector_s: np.ndarray,
     pos_j_rad_actual: np.ndarray,
-    desired_trj_joint_rad: np.ndarray,
+    desired_rad: np.ndarray,
+    unshifted_planner_rad: np.ndarray,
+    sim_params: SimulationParams,
+    num_trials: int,
     animated: bool = True,
     video_duration: float = None,
     fps: float = 25,
@@ -169,14 +174,17 @@ def plot_joint_space_animated(
 
     x = time_vector_s
     y1 = np.degrees(pos_j_rad_actual)
-    y2 = np.degrees(desired_trj_joint_rad)
+    y2 = np.degrees(desired_rad)
+    y3 = np.degrees(unshifted_planner_rad)
     filepath = None
 
     MARKERSIZE = 0.8
     COLOR_ACTUAL = "m"
     COLOR_DESIRED = "c"
+    COLOR_PLANNER = "gray"
     LABEL_ACTUAL = "Actual Joint Angle"
     LABEL_DESIRED = "Desired Joint Angle"
+    LABEL_PLANNER = "Planner Trajectory (unshifted)"
 
     fig, ax = plt.subplots()
     ax.set_xlabel("Time (s)")
@@ -207,9 +215,18 @@ def plot_joint_space_animated(
             markersize=4,
             linestyle="None",
         ),
+        Line2D(
+            [0],
+            [0],
+            color=COLOR_PLANNER,
+            label=LABEL_PLANNER,
+            linewidth=1,
+            linestyle=":",
+        ),
     ]
     ax.legend(handles=legend_elements, loc="lower left")
-    fig.tight_layout()
+    draw_trial_phases(ax, sim_params, num_trials=num_trials, time_unit_s=True)
+    ax.plot(x, y3, ":", linewidth=1, color=COLOR_PLANNER)
 
     (line1,) = ax.plot(
         x if not animated else [],
@@ -227,6 +244,7 @@ def plot_joint_space_animated(
         label=LABEL_DESIRED,
         color=COLOR_DESIRED,
     )
+    fig.tight_layout()
 
     if animated:
         n_frames = video_duration * fps
@@ -302,12 +320,13 @@ def plot_rmse(
     save_fig: bool = True,
 ) -> None:
     """Trials' RMSE plotting"""
-    pos_j_actual, des_rad = extract_time_move_trajectories(metas)
+    pos_j_actual, des_rad, des_rad_shifted = extract_time_move_trajectories(metas)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filepath = None
 
     elbow_rmse = [
-        np.sqrt(np.mean(np.square(a - d))) for a, d in zip(pos_j_actual, des_rad)
+        np.sqrt(np.mean(np.square(a - d)))
+        for a, d in zip(pos_j_actual, des_rad_shifted)
     ]
 
     fig, ax = plt.subplots()
@@ -344,11 +363,22 @@ def plot_plant_outputs(
     ref_plant_config = PlantConfig(ref_mp)
     joint_data = plant_data.joint_data[ELBOW]
     trjs = []
-    for rp in run_paths:
+    trjs_shifted = []
+    for rp, p in zip(run_paths, params):
         with open(rp.trajectory, "r") as f:
             planner_data: PlannerData = PlannerData.model_validate_json(f.read())
             trjs.append(planner_data.trajectory)
+            delay_steps = int(p.connections.m1_delay / p.simulation.resolution)
+            trjs_shifted.append(
+                np.concatenate(
+                    [
+                        np.full(delay_steps, planner_data.trajectory[0]),
+                        planner_data.trajectory[:-delay_steps],
+                    ]
+                )
+            )
     desired_trajectory = np.concatenate(trjs, axis=0)
+    desired_shifted = np.concatenate(trjs_shifted, axis=0)
 
     plot_rmse(metas, ref_plant_config.run_paths.figures_receiver)
 
@@ -386,7 +416,10 @@ def plot_plant_outputs(
         pth_fig_receiver=ref_plant_config.run_paths.figures_receiver,
         time_vector_s=time_vector_total_s,
         pos_j_rad_actual=joint_data.pos_rad,
-        desired_trj_joint_rad=desired_trajectory,
+        desired_rad=desired_shifted,
+        unshifted_planner_rad=desired_trajectory,
+        sim_params=ref_mp.simulation,
+        num_trials=len(metas),
         animated=animated_plots,
         video_duration=video_duration,
         fps=framerate,

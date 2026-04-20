@@ -19,6 +19,7 @@ class ConnectionsParams(BaseModel):
     model_config: ClassVar = {"frozen": True}
 
     sensory_delay: float = 150
+    m1_delay: float = 50.0  # ms - M1 processing delay (trajectory → motor commands)
 
     # atm dcn_f->pred : AtoA conn
     dcn_forw_prediction: SingleSynapseParams = Field(
@@ -45,12 +46,6 @@ class ConnectionsParams(BaseModel):
             receptor_type=2,
         )
     )
-    planner_mc_fbk: SingleSynapseParams = Field(
-        default_factory=lambda: SingleSynapseParams(
-            weight=1.0,
-            delay=min_delay,
-        )
-    )
     state_mc_fbk: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=-1.0,  # 1.67,  # -2.75,  # 1.875,  #   -1.2,
@@ -69,14 +64,6 @@ class ConnectionsParams(BaseModel):
             delay=min_delay,
         )
     )
-    """
-    sn_feedback: SingleSynapseParams = Field(
-        default_factory=lambda: SingleSynapseParams(
-            weight=0.005,
-            delay=min_delay,
-        )
-    )
-    """
     error_io_f: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
             weight=0.7,
@@ -98,7 +85,7 @@ class ConnectionsParams(BaseModel):
     )
     planner_error_inv: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.005,  # 0.00166667,
+            weight=0.005,
             delay=min_delay,
         )
     )
@@ -153,6 +140,26 @@ class ConnectionsParams(BaseModel):
             delay=min_delay,
         )
     )
+
+    @computed_field
+    @property
+    def planner_mc_fbk(self) -> SingleSynapseParams:
+        return SingleSynapseParams(weight=1.0, delay=self.m1_delay)
+
+    @computed_field
+    @property
+    def planner_plan_to_inv(self) -> SingleSynapseParams:
+        return SingleSynapseParams(weight=0.25, delay=self.m1_delay)
+
+    @computed_field
+    @property
+    def planner_error_inv(self) -> SingleSynapseParams:
+        return SingleSynapseParams(weight=0.005, delay=self.m1_delay)
+
+    @computed_field
+    @property
+    def sn_fbk_smoothed(self) -> SingleSynapseParams:
+        return SingleSynapseParams(weight=0.005, delay=self.sensory_delay)
 
     @computed_field
     @property

@@ -8,9 +8,3 @@
 [submodule "submodules/pfc_planner"]
 	path = submodules/pfc_planner
 	url = git@github.com:near-nes/pfc-planner.git
-[submodule "submodules/embodiment_sdf_models"]
-	path = submodules/embodiment_sdf_models
-	url = git@github.com:near-nes/embodiment_sdf_models.git
-[submodule "submodules/bullet_muscle_sim"]
-	path = submodules/bullet_muscle_sim
-	url = git@github.com:near-nes/bullet_muscle_sim.git

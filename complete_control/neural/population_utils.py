@@ -18,7 +18,7 @@ class HierarchicalPopulations(BaseModel):
     handler: CerebellumHandlerPopulationsGeneric[str]
 
 
-def create_pop_constants():
+def create_pop_constants() -> tuple[FlatPopulations, HierarchicalPopulations]:
     ctrl_data = {k: k for k in ControllerPopulationsGeneric.model_fields}
     cb_data = {k: k for k in CerebellumPopulationsGeneric.model_fields}
     hdl_data = {k: k for k in CerebellumHandlerPopulationsGeneric.model_fields}
@@ -50,7 +50,7 @@ def create_pop_constants():
 
 
 POPS, POPS_TREE = create_pop_constants()
-POPS_PAIRED = [
+POPS_PAIRED: list[tuple[str, str]] = [
     (POPS.planner_p, POPS.planner_n),
     (POPS.brainstem_p, POPS.brainstem_n),
     (POPS.mc_out_p, POPS.mc_out_n),
@@ -72,7 +72,7 @@ POPS_PAIRED = [
     (POPS.pred_p, POPS.pred_n),
 ]
 
-POPS_SINGLE = [
+POPS_SINGLE: list[str] = [
     POPS.motor_commands,
     POPS.plan_to_inv,
     POPS.forw_bc,
@@ -87,4 +87,13 @@ POPS_SINGLE = [
     POPS.inv_grc,
     POPS.inv_mf,
     POPS.inv_sc,
+]
+
+_CTRL_FIELDS: set[str] = set(ControllerPopulationsGeneric.model_fields)
+
+POPS_PAIRED_NO_CEREB: list[tuple[str, str]] = [
+    (p, n) for p, n in POPS_PAIRED if p in _CTRL_FIELDS
+]
+POPS_SINGLE_NO_CEREB: list[tuple[str, str]] = [
+    p for p in POPS_SINGLE if p in _CTRL_FIELDS
 ]

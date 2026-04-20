@@ -56,6 +56,10 @@ def main():
         sys.exit(1)
 
     current_parent_id = args.parent_id or ""
+    if "/" in current_parent_id or "\\" in current_parent_id:
+        raise ValueError(
+            f"--parent-id should be a run ID, not a path: '{current_parent_id}'"
+        )
 
     script_dir = Path(__file__).parent.resolve()
     os.chdir(script_dir)

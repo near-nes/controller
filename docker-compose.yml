@@ -14,9 +14,8 @@ x-simulation-base: &simulation-base
     ENABLE_VNC: ${ENABLE_VNC:-false}
     TZ: ${TZ:-Europe/Rome}
     PYNEST_QUIET: 0
-  ports:
-  # Map host port 5901 (localhost only) to container port 5901 (VNC display :1)
-  - "127.0.0.1:5901:5901"
+  # ports:
+  # - "127.0.0.1:5901:5901" # (VNC display :1)
   working_dir: /sim/controller
 
 services:

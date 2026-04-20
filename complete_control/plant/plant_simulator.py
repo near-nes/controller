@@ -152,8 +152,6 @@ class PlantSimulator:
                 "Simulation progress", step=step, sim_time_s=current_sim_time_s
             )
 
-        self.plant.update_stats()
-
         if curr_section == TrialSection.TIME_MOVE:
             self.plant.set_elbow_joint_torque([elbow_torque])
         else:
@@ -165,8 +163,7 @@ class PlantSimulator:
         if curr_section == TrialSection.TIME_POST:
             shoulder_torque = self._move_shoulder(self.direction)
 
-        # Step PyBullet simulation
-        self.plant.simulate_step(self.config.RESOLUTION_S)
+        self.plant.simulate_step()
 
         imposed_torques = [hand_torque, elbow_torque, shoulder_torque]
         for torque, (i, state) in zip(

@@ -10,6 +10,7 @@ from config.ResultMeta import ResultMeta, extract_id
 from nrp_client import NrpCore
 from plant.plant_plotting import plot_plant_outputs
 from tqdm import tqdm
+from utils_common.draw_schema_svg import draw_schema
 from utils_common.results import make_trial_id
 
 
@@ -102,7 +103,7 @@ def run_trial(parent_id: str = "", label: str = "") -> str:
         plot_start_time = timer()
         # plot_controller_outputs([result])
         plot_plant_outputs([result])
-        # draw_schema([result])
+        draw_schema([result])
         plot_end_time = timer()
         total_plot_time = datetime.timedelta(seconds=plot_end_time - plot_start_time)
         client_log.info(f"Plotting Finished. {total_plot_time.total_seconds():.1f} s")

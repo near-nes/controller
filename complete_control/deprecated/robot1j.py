@@ -7,8 +7,8 @@ __license__ = "GPL"
 __version__ = "1.0.1"
 
 import numpy as np
-from config.core_models import RobotSpecParams
 
+from ..config.core_models import RobotSpecParams
 from .body import Body
 
 g = 0  # -9.81

@@ -321,24 +321,18 @@ RUN echo 'if [ -d /etc/bashrc.d ]; then for f in /etc/bashrc.d/*; do [ -f "$f" ]
 # (everything else is unsupported)
 RUN echo "export DISPLAY=${VNC_DISPLAY}" >> /etc/bash.bashrc
 
-# >>>>>> temp fix https://github.com/dbbs-lab/cerebellar-models/issues/68
-RUN pip install "bsb-core @ git+https://github.com/dbbs-lab/bsb.git@fix/labelled_ps#subdirectory=packages/bsb-core" "bsb-hdf5 @ git+https://github.com/dbbs-lab/bsb.git@fix/labelled_ps#subdirectory=packages/bsb-hdf5"
-# <<<<<<
-
 # FROM nrp-runtime AS dev
 FROM runtime AS dev
 # In dev, the controller directory is mounted from the host and the user is the same as the host user.
 ENV SIMULATION_MODE=dev
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
 ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
-ENV SDF_MODELS_DIR=${SUBMODULES_PATH}/embodiment_sdf_models
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 
 FROM runtime AS hpc
 # >>>>>>>tmp, move to git-installable packages asap TODO
 ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
 ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
-ENV SDF_MODELS_DIR=${SUBMODULES_PATH}/embodiment_sdf_models
 RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 # <<<<<<<
 
