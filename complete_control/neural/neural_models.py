@@ -10,13 +10,15 @@ T = TypeVar("T")
 def convert_to_recording(
     source: object, target_class: type[T], path: Path, comm=None
 ) -> T:
-    from neural.population_view import PopView
+    from complete_control.neural.population_view import PopView
 
     """Convert a population object to its recording equivalent."""
     dest = target_class()
     for k, v in source.__dict__.items():
         if isinstance(v, PopView):
             setattr(dest, k, v.collect(path, comm))
+        else:
+            raise TypeError(f"expected only {PopView}, found {v}({type(v)})")
     return dest
 
 
