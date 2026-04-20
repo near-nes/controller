@@ -73,18 +73,6 @@ else
     GROUP_ID_TO_USE=$(id -g "$USERNAME")
 fi
 
-# --- Decompress BSB Network File if necessary ---
-echo "Checking for BSB network file: ${BSB_NETWORK_FILE}"
-if [ ! -f "${BSB_NETWORK_FILE}" ]; then
-    echo "Uncompressed network file ${BSB_NETWORK_FILE} not found."
-    mkdir -p "$(dirname "${BSB_NETWORK_FILE}")"
-    echo "Found compressed file ${COMPRESSED_BSB_NETWORK_FILE}. Decompressing..."
-    gzip -d -c "${COMPRESSED_BSB_NETWORK_FILE}" > "${BSB_NETWORK_FILE}"
-    chown "$USER_ID_TO_USE:$GROUP_ID_TO_USE" "$BSB_NETWORK_FILE"
-    echo "Decompression complete."
-else
-    echo "Uncompressed network file ${BSB_NETWORK_FILE} already exists. Skipping decompression."
-fi
 
 # setuptools-scm invokes git during editable installs; container bind-mount ownership
 # often differs from the active user, which triggers git's dubious ownership guard.
