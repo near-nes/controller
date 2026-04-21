@@ -171,7 +171,10 @@ class Script(GrpcEngineScript):
             time_motor=str(self.motor_profile.total_time),
             time_rest=str(self.rest_profile.total_time),
         )
-        from neurocontroller.neural.data_handling import collapse_files, save_conn_weights
+        from neurocontroller.neural.data_handling import (
+            collapse_files,
+            save_conn_weights,
+        )
 
         rec_paths = None
         if self.controller.use_cerebellum and self.master_config.SAVE_WEIGHTS_CEREB:

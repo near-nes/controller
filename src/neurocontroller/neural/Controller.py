@@ -15,7 +15,9 @@ from neurocontroller.config.module_params import (
     StateModuleConfig,
 )
 from neurocontroller.config.population_params import PopulationsParams
-from neurocontroller.neural.CerebellumHandlerPopulations import CerebellumHandlerPopulations
+from neurocontroller.neural.CerebellumHandlerPopulations import (
+    CerebellumHandlerPopulations,
+)
 from neurocontroller.neural.CerebellumPopulations import CerebellumPopulations
 from neurocontroller.neural.nest_adapter import nest
 from neurocontroller.neural.neural_models import Synapse, SynapseBlock, SynapseRecording

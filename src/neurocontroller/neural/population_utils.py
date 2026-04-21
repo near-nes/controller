@@ -1,4 +1,6 @@
-from neurocontroller.neural.CerebellumHandlerPopulations import CerebellumHandlerPopulationsGeneric
+from neurocontroller.neural.CerebellumHandlerPopulations import (
+    CerebellumHandlerPopulationsGeneric,
+)
 from neurocontroller.neural.CerebellumPopulations import CerebellumPopulationsGeneric
 from neurocontroller.neural.ControllerPopulations import ControllerPopulationsGeneric
 from pydantic import BaseModel
