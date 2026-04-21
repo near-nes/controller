@@ -274,9 +274,8 @@ ENV OMPI_MCA_plm=^rsh
 # suppress nest startup message
 ENV PYNEST_QUIET=1
 
-# cerebellum
-ENV COMPRESSED_BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/mouse_abstract_only.hdf5.gz
-ENV BSB_NETWORK_FILE=${CONTROLLER_DIR}/artifacts/mouse_abstract_only.hdf5
+# RUNS_PATH is left unset so it defaults to $CWD/runs (where run-trials is invoked).
+# EMBODIMENT_ASSETS_PATH can be set to override the bundled package assets.
 
 ENV PYTHON_MAJOR_MINOR="python${PYTHON_MAJOR}.${PYTHON_MINOR}"
 
@@ -334,17 +333,10 @@ RUN --mount=type=cache,target=/home/simuser/.cache/uv \
 
 FROM runtime AS prod
 ENV UV_COMPILE_BYTECODE=1
-ENV SUBMODULES_PATH=${CONTROLLER_DIR}/submodules
-ENV PYTHONPATH="${SUBMODULES_PATH}${PYTHONPATH:+:${PYTHONPATH}}"
-RUN echo "Constructed PYTHONPATH: ${PYTHONPATH}"
 ENV SIMULATION_MODE=prod
 
 # In prod, dependencies are already installed (via package_install stage).
-# The package itself and submodules are installed here from the copied source.
-# Do not mount anything on top of artifacts folder, so that the archive is not overwritten.
-ENV BSB_NETWORK_FILE=/tmp/cerebellum_plastic_base.hdf5
-COPY --chown=${USERNAME} artifacts ${CONTROLLER_DIR}/artifacts
-COPY --chown=${USERNAME} cerebellum_configurations ${CONTROLLER_DIR}/cerebellum_configurations
+# The package itself and sibling packages are installed here from the copied source.
 COPY --chown=${USERNAME} submodules ${CONTROLLER_DIR}/submodules
 COPY --chown=${USERNAME} . ${CONTROLLER_DIR}
 WORKDIR ${CONTROLLER_DIR}
@@ -352,7 +344,7 @@ RUN --mount=type=cache,target=/home/simuser/.cache/uv \
     uv pip install . --no-deps --no-build-isolation
 RUN --mount=type=cache,target=/home/simuser/.cache/uv \
     uv pip install --no-deps --no-build-isolation \
-    ./complete_control/shared/minjerk \
+    ./src/neurocontroller/shared/minjerk \
     ./submodules/motor_cortex_eprop \
     ./submodules/pfc_planner
 

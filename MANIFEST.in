@@ -1,8 +1,3 @@
-# Include data directories at the root level
-recursive-include artifacts *
-recursive-include cerebellum_configurations *
-
-# Include README and license files
 include README.md
 include LICENSE
 include INSTALL.md

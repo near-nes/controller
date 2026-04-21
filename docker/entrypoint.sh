@@ -14,8 +14,6 @@ SHARED_DATA_DIR="${SHARED_DATA_DIR}"
 USERNAME="${USERNAME}"
 VENV_PATH="${VIRTUAL_ENV}"
 NEST_MODULE_PATH="${NEST_MODULE_PATH}"
-COMPRESSED_BSB_NETWORK_FILE="${COMPRESSED_BSB_NETWORK_FILE}"
-BSB_NETWORK_FILE="${BSB_NETWORK_FILE}"
 NEST_SERVER_BIN="${NEST_INSTALL_DIR}/bin/nest-server"
 NEST_SERVER_MPI_BIN="${NEST_INSTALL_DIR}/bin/nest-server-mpi"
 
@@ -73,19 +71,8 @@ else
     GROUP_ID_TO_USE=$(id -g "$USERNAME")
 fi
 
-# --- Decompress BSB Network File if necessary ---
-echo "Checking for BSB network file: ${BSB_NETWORK_FILE}"
-if [ ! -f "${BSB_NETWORK_FILE}" ]; then
-    echo "Uncompressed network file ${BSB_NETWORK_FILE} not found."
-    mkdir -p "$(dirname "${BSB_NETWORK_FILE}")"
-    echo "Found compressed file ${COMPRESSED_BSB_NETWORK_FILE}. Decompressing..."
-    gzip -d -c "${COMPRESSED_BSB_NETWORK_FILE}" > "${BSB_NETWORK_FILE}"
-    chown "$USER_ID_TO_USE:$GROUP_ID_TO_USE" "$BSB_NETWORK_FILE"
-    echo "Decompression complete."
-else
-    echo "Uncompressed network file ${BSB_NETWORK_FILE} already exists. Skipping decompression."
-fi
-
+# The BSB network file is decompressed on first use by neurocontroller.artifacts
+# into the OS cache dir. Set BSB_NETWORK_FILE explicitly to override.
 
 # setuptools-scm invokes git during editable installs; container bind-mount ownership
 # often differs from the active user, which triggers git's dubious ownership guard.
@@ -98,17 +85,17 @@ echo "Final LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 echo "Final PATH: $PATH"
 echo "Final PYTHONPATH: $PYTHONPATH"
 
-# --- Install shared packages and near-nes-controller in editable mode (dev mode only) ---
+# --- Install shared packages and neurocontroller in editable mode (dev mode only) ---
 # In prod/hpc these are already baked into the image; deps are guaranteed in the image.
 if [ "$SIMULATION_MODE" = "dev" ]; then
     echo "Installing packages (dev mode)..."
-    uv pip install -e "${CONTROLLER_DIR}/complete_control/shared/minjerk" --no-deps
+    uv pip install -e "${CONTROLLER_DIR}/src/neurocontroller/shared/minjerk" --no-deps
     uv pip install -e "${CONTROLLER_DIR}/submodules/motor_cortex_eprop" --no-deps
     uv pip install -e "${CONTROLLER_DIR}/submodules/pfc_planner" --no-deps
     (cd "${CONTROLLER_DIR}" && uv pip install --group dev) || true
 
     if [ -f "${CONTROLLER_DIR}/pyproject.toml" ]; then
-        echo "Refreshing near-nes-controller package in editable mode as user $USERNAME..."
+        echo "Refreshing neurocontroller package in editable mode as user $USERNAME..."
         # Install with --no-build-isolation and --no-deps: deps are guaranteed in the image.
         gosu "$USERNAME" bash -c "cd ${CONTROLLER_DIR} && uv pip install -e . --no-build-isolation --no-deps" 2>&1 | tail -5 || true
         echo "Package installation completed."

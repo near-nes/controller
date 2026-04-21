@@ -1,10 +1,17 @@
 from enum import Enum
+from importlib.resources import files
 from pathlib import Path
 from typing import ClassVar
 
 from pydantic import BaseModel, Field
 
-from . import paths as p
+
+def _planner_artifacts() -> Path:
+    return Path(str(files("neurocontroller").joinpath("artifacts/pfc_planner")))
+
+
+def _m1_artifacts() -> Path:
+    return Path(str(files("neurocontroller").joinpath("artifacts/m1")))
 
 
 class TrajGeneratorType(str, Enum):
@@ -19,12 +26,12 @@ class M1Type(str, Enum):
 
 
 class GLETrajGeneratorConfig(BaseModel):
-    model_dir: Path = p.ARTIFACTS_PLANNER
+    model_dir: Path = Field(default_factory=_planner_artifacts)
 
 
 class PlannerModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
-    trajgen_type: TrajGeneratorType = Field(default=TrajGeneratorType.MOCKED)
+    trajgen_type: TrajGeneratorType = Field(default=TrajGeneratorType.GLE)
     gle_config: GLETrajGeneratorConfig = Field(
         default_factory=lambda: GLETrajGeneratorConfig()
     )
@@ -39,13 +46,13 @@ class M1MockConfig(BaseModel):
 
 
 class M1EPropConfig(BaseModel):
-    artifacts_dir: Path = p.ARTIFACTS_M1
+    artifacts_dir: Path = Field(default_factory=_m1_artifacts)
     n_out_pop: int = 400
 
 
 class MotorCortexModuleConfig(BaseModel):
     model_config: ClassVar = {"frozen": True}
-    m1_type: M1Type = Field(default=M1Type.MOCKED)
+    m1_type: M1Type = Field(default=M1Type.EPROP)
     m1_mock_config: M1MockConfig = Field(default_factory=lambda: M1MockConfig())
     m1_eprop_config: M1EPropConfig = Field(default_factory=lambda: M1EPropConfig())
     fbk_base_rate: float = 0.0

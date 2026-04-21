@@ -1,72 +1,60 @@
+"""Path resolution for the neurocontroller package.
+
+Package-internal resources (YAML configs, reference data) are located via
+``importlib.resources``, so they work regardless of install mode or CWD.
+Runtime directories (RUNS_DIR, artifact dirs) fall back to ``$CWD`` when no
+environment override is set.
+"""
+
 import os
 from dataclasses import dataclass
+from importlib.resources import files
 from pathlib import Path
-
-
-def _get_root_path() -> Path:
-    """
-    Determine the ROOT path for the controller.
-
-    Priority:
-    1. CONTROLLER_DIR environment variable (for Docker/HPC compatibility)
-    2. Parent directory of installed package (for pip install)
-    3. Falls back to relative path based on current file location
-    """
-    # Check environment variable first (Docker/HPC usage)
-    if "CONTROLLER_DIR" in os.environ:
-        root = Path(os.environ["CONTROLLER_DIR"])
-        if root.exists():
-            return root
-
-    # Fall back to package installation location
-    # This file is at: <package>/complete_control/config/paths.py
-    # We want to go up to: <package>/ which is the root
-    this_file = Path(__file__).resolve()
-    package_root = this_file.parent.parent.parent  # go up 3 levels to controller/
-
-    if (package_root / "complete_control").exists():
-        return package_root
-
-    # Last resort: raise an error with helpful message
-    raise RuntimeError(
-        "Could not determine ROOT path. Either:\n"
-        "1. Set CONTROLLER_DIR environment variable to the controller root directory\n"
-        "2. Install this package properly with pip install\n"
-        f"Expected package structure not found. Package root would be: {package_root}"
-    )
-
-
-ROOT = _get_root_path()
-COMPLETE_CONTROL = ROOT / "complete_control"
-RUNS_DIR = (
-    Path(os.getenv("RUNS_PATH")) if os.getenv("RUNS_PATH") else (ROOT / "runs")
-)  # Base directory for all runs
+from typing import Optional
 
 FOLDER_NAME_NEURAL_FIGS = "figs_neural"
 FOLDER_NAME_ROBOTIC_FIGS = "figs_robotic"
 
-REFERENCE_DATA_DIR = COMPLETE_CONTROL / "reference_data"
 
-CONFIG = COMPLETE_CONTROL / "config"
-ARTIFACTS = ROOT / "artifacts"
-EMBODIMENT_ASSETS = ROOT / "embodiment_assets"
+# --- Package-internal resources --------------------------------------------
 
-CEREBELLUM = ROOT.parent / "cerebellum"
-CEREBELLUM_CONFIGS = ROOT / "cerebellum_configurations"
-FORWARD = CEREBELLUM_CONFIGS / "forward.yaml"
-INVERSE = CEREBELLUM_CONFIGS / "inverse.yaml"
-BASE = CEREBELLUM_CONFIGS / "microzones_complete_nest.yaml"
+_PKG = files("neurocontroller")
 
-# BSB network file path: check environment variable first, then fall back to artifacts
-if "BSB_NETWORK_FILE" in os.environ:
-    PATH_HDF5 = os.environ["BSB_NETWORK_FILE"]
-else:
-    # Fall back to decompressed file in artifacts
-    _hdf5_path = ARTIFACTS / "cerebellum_plastic_base.hdf5"
-    PATH_HDF5 = str(_hdf5_path) if _hdf5_path.exists() else None
 
-ARTIFACTS_M1 = ARTIFACTS / "m1"
-ARTIFACTS_PLANNER = ARTIFACTS / "pfc_planner"
+def _pkg_path(*parts: str) -> Path:
+    """Resolve a path inside the installed package as a concrete Path.
+
+    Editable/flat installs always yield a real filesystem path; we cast to
+    ``Path`` because the rest of the codebase and third-party libs (BSB,
+    pybullet) expect string paths.
+    """
+    return Path(str(_PKG.joinpath(*parts)))
+
+
+_CEREB_CONFIGS = _pkg_path("cerebellum_configurations")
+FORWARD: Path = _CEREB_CONFIGS / "forward.yaml"
+INVERSE: Path = _CEREB_CONFIGS / "inverse.yaml"
+BASE: Path = _CEREB_CONFIGS / "microzones_complete_nest.yaml"
+
+EMBODIMENT_ASSETS: Path = (
+    Path(os.environ["EMBODIMENT_ASSETS_PATH"])
+    if "EMBODIMENT_ASSETS_PATH" in os.environ
+    else _pkg_path("embodiment_assets")
+)
+
+
+# --- Runtime directories ---------------------------------------------------
+
+
+def _env_path(name: str) -> Optional[Path]:
+    v = os.environ.get(name)
+    return Path(v) if v else None
+
+
+RUNS_DIR: Path = _env_path("RUNS_PATH") or (Path.cwd() / "runs")
+
+# Optional: only used to capture the cerebellum repo's git hash in run metadata.
+CEREBELLUM: Optional[Path] = _env_path("CEREBELLUM_PATH")
 
 
 @dataclass(frozen=True)
@@ -87,17 +75,7 @@ class RunPaths:
     video_frames: Path
 
     @classmethod
-    def from_run_id(cls, run_timestamp: str, create_if_not_present=True):
-        """
-        Sets up the directory structure for a single simulation run.
-
-        Args:
-            run_timestamp: A string timestamp (e.g., YYYYMMDD_HHMMSS).
-
-        Returns:
-            RunPaths: A dataclass instance containing Path objects for
-                                'run', 'data', 'figures', 'logs'.
-        """
+    def from_run_id(cls, run_timestamp: str, create_if_not_present: bool = True):
         id = run_timestamp.partition("-")[0]
         run_dir = RUNS_DIR / run_timestamp
         data_dir = run_dir / "data"
@@ -114,6 +92,7 @@ class RunPaths:
         trajectory = run_dir / "traj.npy"
 
         if create_if_not_present:
+            RUNS_DIR.mkdir(parents=True, exist_ok=True, mode=0o775)
             for dir_path in [
                 run_dir,
                 data_nest_dir,
@@ -139,6 +118,3 @@ class RunPaths:
             params_json=params_path,
             trajectory=trajectory,
         )
-
-
-RUNS_DIR.mkdir(parents=True, exist_ok=True)

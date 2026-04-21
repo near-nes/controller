@@ -88,7 +88,14 @@ exclude = ["neurocontroller.deprecated*", "neurocontroller.shared*", "tests*"]
 [tool.setuptools.package-data]
 neurocontroller = [
     "cerebellum_configurations/**/*",
-    "*.gz",
+    "artifacts/**/*.gz",
+    "artifacts/**/*.yaml",
+    "artifacts/**/*.json",
+    "artifacts/**/*.npz",
+    "artifacts/**/*.npy",
+    "artifacts/**/*.pth",
+    "artifacts/**/*.png",
+    "embodiment_assets/**/*",
 ]
 
 [tool.setuptools_scm]

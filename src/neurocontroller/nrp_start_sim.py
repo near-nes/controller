@@ -28,6 +28,10 @@ def _dump_logs(run_paths: RunPaths):
 def run_trial(parent_id: str = "", label: str = "") -> str:
     client_log = structlog.get_logger("nrp_client")
 
+    from neurocontroller.artifacts import get_network_file
+
+    os.environ["BSB_NETWORK_FILE"] = str(get_network_file())
+
     run_id = make_trial_id(label=label)
 
     os.environ["EXEC_TIMESTAMP"] = run_id
