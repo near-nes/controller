@@ -85,7 +85,7 @@ jobs:
           -e UID=$(id -u) -e GID=$(id -g) \
           -v ${{ github.workspace }}:/sim/controller \
           -v ${{ github.workspace }}/results:/sim/controller/runs \
-          ${{ env.IMAGE_TAG }} python -m complete_control.run_trials 1
+          ${{ env.IMAGE_TAG }} run-trials 1
     - name: Show logs
       if: always()
       run: |

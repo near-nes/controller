@@ -16,13 +16,24 @@ from neurocontroller.utils_common.git_utils import get_git_commit_hash
 from . import paths
 
 
+def _controller_commit_hash() -> str:
+    try:
+        from neurocontroller import __version__
+
+        return __version__
+    except ImportError:
+        return "unknown"
+
+
+def _cerebellum_commit_hash() -> str:
+    if paths.CEREBELLUM is None:
+        return "unset"
+    return get_git_commit_hash(paths.CEREBELLUM)
+
+
 class MetaInfo(BaseModel, frozen=True):
-    controller_commit_hash: str = Field(
-        default_factory=lambda: get_git_commit_hash(paths.ROOT)
-    )
-    cerebellum_commit_hash: str = Field(
-        default_factory=lambda: get_git_commit_hash(paths.CEREBELLUM)
-    )
+    controller_commit_hash: str = Field(default_factory=_controller_commit_hash)
+    cerebellum_commit_hash: str = Field(default_factory=_cerebellum_commit_hash)
     run_id: str
 
 

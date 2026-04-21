@@ -57,8 +57,6 @@ def main():
             f"--parent-id should be a run ID, not a path: '{current_parent_id}'"
         )
 
-    script_dir = Path(__file__).parent.resolve()
-    os.chdir(script_dir)
     log.info(f"Working directory: {os.getcwd()}")
     log.info(f"Starting NRP simulation series of {args.num_trials} trials.")
 

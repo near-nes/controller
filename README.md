@@ -9,7 +9,7 @@ As the project involves multiple simulators, the interaction between them is gov
 
 ## NRP
 
-NRP is a simulation coordinator, which expects simulation specifications (called "engines") to implement specific interfaces. Its configuration is replicated in a pydantic model in `complete_control/config/nrp_sim_config.py`, where you can find pointers to the two simulations: `nrp_neural_engine.py` and `nrp_bullet_engine.py`. As the loop component is inside the NRP, these files offer only single step functions. 
+NRP is a simulation coordinator, which expects simulation specifications (called "engines") to implement specific interfaces. Its configuration is replicated in a pydantic model in `src/neurocontroller/config/nrp_sim_config.py`, where you can find pointers to the two simulations: `nrp_neural_engine.py` and `nrp_bullet_engine.py`. As the loop component is inside the NRP, these files offer only single step functions.
 
 ## Simulations
 
@@ -20,54 +20,44 @@ We develop this using a (docker) devcontainer, made to the specifications of `de
 
 ### Using the Pip-Installable Package in Development
 
-The experiment can be installed as a Python package (`near-nes-controller`) for both development and production use.
+The experiment is distributed as a Python package (`neurocontroller`) using a `src/`
+layout.
 
 #### Quick Setup (dev container)
 
-In dev mode, the package is automatically installed in editable mode when the container starts:
+In dev mode, the package is installed in editable mode on container start:
 
 ```bash
-# Just run the container - package installation happens automatically
 docker compose run development
-
-# Inside the container, you can now use:
-run-trials 10 --label "my_experiment"
+# inside the container:
+run-trials 1 --label "my_experiment"
 ```
 
-Changes you make to source files in `complete_control/` are immediately reflected—no reinstall needed.
+Edits to files under `src/neurocontroller/` are picked up immediately.
 
 #### Quick Setup (local venv)
 
-If you already have a virtual environment with dependencies installed locally:
-
 ```bash
-# Install the package in editable (development) mode
 pip install -e .
-
-# Now you can run the experiment
-run-trials 10 --label "my_experiment"
+run-trials 1 --label "my_experiment"
 ```
 
-In editable mode (`-e`), changes you make to source files in `complete_control/` are immediately reflected when you run the package—no reinstall needed.
+The compiled BSB cerebellum network is fetched on first use via `pooch` and cached
+under the user's OS cache directory. Set `BSB_NETWORK_FILE` to point at a local
+file to skip the fetch.
 
-#### Package features
-- **Entry point**: `run-trials` command wraps `complete_control/run_trials.py`
-- **Data files**: Automatically locates `artifacts/` and `cerebellum_configurations/` from the installed package
-- **BSB decompression**: Automatically decompresses `cerebellum_plastic_base.hdf5.gz` on first import
-- **Backward compatible**: Still respects `CONTROLLER_DIR` environment variable if set (for Docker/HPC mounts)
+#### Dependency pins vs. constraints
+
+`pyproject.toml` lists loose, API-level bounds. Exact reproducible pins for the Docker/HPC image live in `docker/constraints.txt` and are applied with `uv pip install -c`.
 
 #### Building the package
 
-To create distributable wheels and source distributions:
-
 ```bash
 python -m pip install build
-python -m build
-
-# Outputs to dist/
-# - near_nes_controller-0.1.0.tar.gz (source distribution)
-# - near_nes_controller-0.1.0-py3-none-any.whl (wheel, if built)
+python -m build  # outputs to dist/
 ```
+
+Version is derived from git tags via `setuptools-scm`.
 
 ## Build and run the container
 `echo -e "UID=$(id -u)\nGID=$(id -g)" > .env && docker compose build`
@@ -90,7 +80,7 @@ Quick notes before a more complete documentation:
 - run it with `sbatch batch_job.sh`
 
 
-Optionally, mount (`--bind`) `complete_control` for "live" code changes. If paired with vscode remote, you can almost have a fully interactive development session on the cluster... Not sure if there's a way to do client vscode -> cineca HPC -> devcontainer, might check [this](https://github.com/microsoft/vscode-remote-release/issues/3066#issuecomment-1019500216)
+Optionally, mount (`--bind`) `src/neurocontroller` for "live" code changes. If paired with vscode remote, you can almost have a fully interactive development session on the cluster... Not sure if there's a way to do client vscode -> cineca HPC -> devcontainer, might check [this](https://github.com/microsoft/vscode-remote-release/issues/3066#issuecomment-1019500216)
 
 
 ## MUSIC - Deprecated
