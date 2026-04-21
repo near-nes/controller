@@ -42,9 +42,15 @@ pip install -e .
 run-trials 1 --label "my_experiment"
 ```
 
-The compiled BSB cerebellum network is fetched on first use via `pooch` and cached
-under the user's OS cache directory. Set `BSB_NETWORK_FILE` to point at a local
-file to skip the fetch.
+All required data is bundled in the wheel:
+
+| Resource | Bundled path | Override env var |
+|---|---|---|
+| Cerebellum YAML configs | `neurocontroller/cerebellum_configurations/` | — |
+| BSB network (decompresses to OS cache on first use) | `neurocontroller/artifacts/mouse_abstract_only.hdf5.gz` | `BSB_NETWORK_FILE` |
+| M1 trained weights | `neurocontroller/artifacts/m1/` | `M1_ARTIFACTS_PATH` |
+| Planner trained weights | `neurocontroller/artifacts/pfc_planner/` | `PLANNER_ARTIFACTS_PATH` |
+| Robot meshes / URDF | `neurocontroller/embodiment_assets/` | `EMBODIMENT_ASSETS_PATH` |
 
 #### Dependency pins vs. constraints
 
