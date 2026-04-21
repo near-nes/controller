@@ -35,7 +35,6 @@ dependencies = [
     "jupyter>=1.1,<2",
     "ffmpeg>=1.4,<2",
     "ffmpeg-python>=0.2,<1",
-    # Flask/REST dependencies
     "Flask>=3.1,<4",
     "flask-cors>=6,<7",
     "gunicorn>=23,<24",
@@ -43,14 +42,17 @@ dependencies = [
     "RestrictedPython>=8,<9",
     "h5py>=3.14,<4",
     "mpilock>=1.1,<2",
+    "platformdirs>=4,<5",
+    "typing-extensions>=4.15,<5",
+    "tqdm",
+    "mpi4py>=4.1,<5",
+    "Cython>=3,<4",
+    "minjerk-dynamics>=0.1,<1",
     # Planner / GLE dependencies
     "pydenticon>=0.3,<1",
     "mnist1d>=0.0.2,<1",
     "Gridspeccer>=0.2,<1",
     "gle-code@git+https://github.com/unibe-cns/gle-code@e0b44082e620a95e9799f75ebece502091ffaa66",
-    "platformdirs>=4,<5",
-    "typing-extensions>=4.15,<5",
-    "tqdm",
 ]
 
 # Direct URLs for PyTorch CPU wheels (requires PEP 440 compliance)
@@ -60,10 +62,6 @@ pytorch = [
     "torch @ https://download.pytorch.org/whl/cpu/torch-2.6.0%2Bcpu-cp310-cp310-linux_x86_64.whl",
     "torchvision @ https://download.pytorch.org/whl/cpu/torchvision-0.21.0%2Bcpu-cp310-cp310-linux_x86_64.whl",
     "torchaudio @ https://download.pytorch.org/whl/cpu/torchaudio-2.6.0%2Bcpu-cp310-cp310-linux_x86_64.whl",
-]
-mpi = [
-    "mpi4py>=4.1,<5",
-    "Cython>=3,<4",
 ]
 
 [dependency-groups]
