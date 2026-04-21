@@ -83,6 +83,7 @@ jobs:
         mkdir -p results
         docker run --rm \
           -e UID=$(id -u) -e GID=$(id -g) \
+          -w /sim/controller \
           -v ${{ github.workspace }}:/sim/controller \
           -v ${{ github.workspace }}/results:/sim/controller/runs \
           ${{ env.IMAGE_TAG }} run-trials 1
