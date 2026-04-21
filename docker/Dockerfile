@@ -213,20 +213,12 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install -r requirements_nrp.txt -c /tmp/constraints.txt --no-build-isolation
 
 ENV NRP_SRC_DIR=/tmp/nrp-core-src
-RUN mkdir -p /tmp/nrp-core-src
 ENV CMAKE_CACHE_FILE=${NRP_SRC_DIR}/.ci/cmake_cache/t3_4.cmake
-# TODO: copy source files more elegant, but without breaking the cache
-# Copying the root (.) immediatly breaks the cache
-COPY --chown=${USERNAME} nrp-core/src ${NRP_SRC_DIR}/src
-COPY --chown=${USERNAME} nrp-core/docs ${NRP_SRC_DIR}/docs
-COPY --chown=${USERNAME} nrp-core/examples ${NRP_SRC_DIR}/examples
-COPY --chown=${USERNAME} nrp-core/cmake ${NRP_SRC_DIR}/cmake
-COPY --chown=${USERNAME} nrp-core/CMakeLists.txt ${NRP_SRC_DIR}/CMakeLists.txt
+RUN git clone https://bitbucket.org/hbpneurorobotics/nrp-core.git ${NRP_SRC_DIR} \
+    && cd ${NRP_SRC_DIR} \
+    && git checkout 6b60824a36919c16601007a122a0527f025809cb
 COPY --chown=${USERNAME} docker/nrp_t3_4.cmake ${CMAKE_CACHE_FILE}
-COPY --chown=${USERNAME} nrp-core/.ci/11-prepare-build.sh ${NRP_SRC_DIR}/.ci/11-prepare-build.sh
-COPY --chown=${USERNAME} nrp-core/.ci/20-build.sh ${NRP_SRC_DIR}/.ci/20-build.sh
-
-RUN cd ${NRP_SRC_DIR} && ls -al && bash .ci/11-prepare-build.sh && bash .ci/20-build.sh
+RUN cd ${NRP_SRC_DIR} && bash .ci/11-prepare-build.sh && bash .ci/20-build.sh
 
 
 ####################### CEREBELLUM+MODELS #######################

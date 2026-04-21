@@ -1,7 +1,3 @@
-[submodule "nrp-core"]
-	path = nrp-core
-	url = https://bitbucket.org/hbpneurorobotics/nrp-core.git
-	branch = t3-4-ebrains2
 [submodule "submodules/motor_cortex_eprop"]
 	path = submodules/motor_cortex_eprop
 	url = git@github.com:near-nes/motor-cortex-eprop.git
