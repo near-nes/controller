@@ -44,6 +44,13 @@ if [[ -n "${REMOTE}" ]]; then
 fi
 echo "================================================="
 
+# --- Submodules ---
+# The prod/hpc Dockerfile stage pip-installs ./submodules/motor_cortex_eprop and
+# ./submodules/pfc_planner; the build fails if they're not checked out.
+echo
+echo ">>> Ensuring submodules are initialized"
+git submodule update --init --recursive
+
 # --- Build ---
 echo
 echo ">>> Building HPC image: ${FULL_IMAGE_NAME}"
