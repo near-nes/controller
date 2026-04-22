@@ -38,8 +38,7 @@ requests~=2.32
 RestrictedPython~=8.0
 h5py~=3.14.0
 
-# gle-code
+# planner
 pydenticon==0.3.1
 mnist1d~=0.0.2
 Gridspeccer==0.2.2
-gle-code@git+https://github.com/unibe-cns/gle-code@e0b44082e620a95e9799f75ebece502091ffaa66
