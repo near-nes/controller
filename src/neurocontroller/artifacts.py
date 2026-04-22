@@ -13,6 +13,7 @@ from __future__ import annotations
 import gzip
 import os
 import shutil
+import tempfile
 from importlib.resources import files
 from pathlib import Path
 
@@ -47,8 +48,19 @@ def get_network_file() -> Path:
 
     dest.parent.mkdir(parents=True, exist_ok=True)
     gz_data = files("neurocontroller").joinpath(_GZ_NAME)
-    with gz_data.open("rb") as f_in, gzip.open(f_in) as gz_in:
-        with open(dest, "wb") as f_out:
-            shutil.copyfileobj(gz_in, f_out)
+    # Decompress to a tmp sibling, then atomically rename. If two processes race,
+    # each writes to its own tmp and the losing rename just replaces the winner's
+    # byte-identical file; no reader ever sees a partially-written dest.
+    tmp_fd, tmp_str = tempfile.mkstemp(
+        dir=dest.parent, prefix=_HDF5_NAME + ".", suffix=".tmp"
+    )
+    tmp_path = Path(tmp_str)
+    try:
+        with os.fdopen(tmp_fd, "wb") as f_out:
+            with gz_data.open("rb") as f_in, gzip.open(f_in) as gz_in:
+                shutil.copyfileobj(gz_in, f_out)
+        os.replace(tmp_path, dest)
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
     return dest
