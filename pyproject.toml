@@ -118,6 +118,7 @@ neurocontroller = [
     "artifacts/**/*.pth",
     "artifacts/**/*.png",
     "embodiment_assets/**/*",
+    "utils_common/**/*.svg",
 ]
 
 [tool.setuptools_scm]
