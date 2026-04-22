@@ -5,10 +5,19 @@ __pycache__/
 logs/
 .env
 **/runs/*
+dist/
+build/
+.mypy_cache/
+.pytest_cache/
+.tox/
+.ipynb_checkpoints/
+*.egg-info/
+_version.py
 
 # docker-specific
 .git
 .gitignore
+.github/
 *.md
 !README.md
 nearnes*.tar

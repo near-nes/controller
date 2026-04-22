@@ -1,4 +1,5 @@
 __pycache__
+**/__pycache__
 
 **/*.hdf5
 logs
@@ -24,3 +25,14 @@ tests_POCs/test_receptor_paolo.py
 *.egg-info
 *.whl
 _version.py
+
+# Packaging & caches
+dist/
+build/
+.mypy_cache/
+.pytest_cache/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints/
+
