@@ -18,7 +18,8 @@
                 "ms-python.debugpy",
                 "ms-python.vscode-pylance",
                 "ms-python.isort",
-                "kennylong.kubernetes-yaml-formatter"
+                "kennylong.kubernetes-yaml-formatter",
+                "ms-toolsai.jupyter"
             ],
             "settings": {
                 "python.defaultInterpreterPath": "/sim/venv/bin/python",
@@ -37,6 +38,8 @@
             }
         }
     },
+    // --no-deps because deps should have been installed in build.
+    // assuming standard path of > Dev Containers: Rebuild Container
     "postCreateCommand": "uv pip install -e . --no-build-isolation --no-deps",
     "waitFor": "postCreateCommand"
     // "overrideCommand": true

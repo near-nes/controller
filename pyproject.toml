@@ -51,7 +51,6 @@ dependencies = [
     "pydantic>=2.11,<3",
     "Pillow>=11,<12",
     "cairosvg>=2.8,<3",
-    "jupyter>=1.1,<2",
     "ffmpeg>=1.4,<2",
     "ffmpeg-python>=0.2,<1",
     "Flask>=3.1,<4",
@@ -88,6 +87,9 @@ pytorch = [
 dev = [
     "black==26.3.1",
     "isort>=6.0.0",
+    "jupyterlab>=4.5,<5",
+    "ipykernel>=7.2,<8",
+    "ipywidgets>=8.1,<9",
 ]
 
 [project.urls]
