@@ -11,9 +11,9 @@
 #   export SINGULARITY_TMPDIR="${CINECA_SCRATCH:-$HOME}/.singularity-tmp"
 #   export SINGULARITY_CACHEDIR="${CINECA_SCRATCH:-$HOME}/.singularity-cache"
 #   mkdir -p "$SINGULARITY_TMPDIR" "$SINGULARITY_CACHEDIR"
-#   singularity build --force sim.sif sim.def
+#   singularity build --force sim.sif scripts/hpc/sim.def
 #
-# Resulting sim.sif pairs with launch_hpc.sh at the repo root.
+# Resulting sim.sif pairs with scripts/hpc/sim.slurm.
 
 Bootstrap: docker-archive
 From: ./controller-hpc.tar
