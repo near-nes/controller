@@ -1,0 +1,23 @@
+# Singularity recipe for the controller HPC image.
+#
+# Input: a docker archive produced by scripts/utilities/build_and_export.sh,
+# decompressed (.tar, not .tar.gz) and symlinked/renamed to ./controller-hpc.tar.
+#
+# Usage (on the HPC login node, after scp'ing the archive):
+#
+#   gunzip nearnes-controller-hpc-latest-*.tar.gz
+#   ln -sf nearnes-controller-hpc-latest-*.tar controller-hpc.tar
+#   # Route temp+cache to scratch so the build doesn't eat HOME quota:
+#   export SINGULARITY_TMPDIR="${CINECA_SCRATCH:-$HOME}/.singularity-tmp"
+#   export SINGULARITY_CACHEDIR="${CINECA_SCRATCH:-$HOME}/.singularity-cache"
+#   mkdir -p "$SINGULARITY_TMPDIR" "$SINGULARITY_CACHEDIR"
+#   singularity build --force sim.sif sim.def
+#
+# Resulting sim.sif pairs with launch_hpc.sh at the repo root.
+
+Bootstrap: docker-archive
+From: ./controller-hpc.tar
+
+%labels
+    Maintainer near-nes
+    Description Controller HPC image (NEST 3.9 + nrp-core + neurocontroller)
