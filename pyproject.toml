@@ -16,6 +16,25 @@ maintainers = [
     {name = "vvorobjov"}
 ]
 license = {text = "MIT"}
+keywords = [
+    "neuroscience",
+    "cerebellum",
+    "motor-control",
+    "nest-simulator",
+    "pybullet",
+    "robotics",
+    "closed-loop",
+    "ebrains",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
 
 # Loose, API-level bounds for pip installs. Exact reproducible pins for the
 # Docker/HPC build live in docker/constraints.txt instead; see README.
