@@ -27,6 +27,7 @@ ffmpeg~=1.4
 ffmpeg-python~=0.2.0
 typing-extensions==4.15
 platformdirs~=4.9
+tqdm~=4.66.5
 
 # parallel
 mpi4py~=4.1
