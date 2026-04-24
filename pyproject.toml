@@ -66,9 +66,9 @@ dependencies = [
     "mpi4py>=4.1,<5",
     "Cython>=3,<4",
     "minjerk-dynamics>=0.1,<1",
-    "motor_controller_model @ git+https://github.com/near-nes/motor-cortex-eprop.git@refs/pull/2/head",
+    "motor_controller_model @ git+https://github.com/near-nes/motor-cortex-eprop.git@main",
     # Planner / GLE dependencies
-    "pfc_planner @ git+https://github.com/near-nes/pfc-planner.git@refs/pull/6/head",
+    "pfc_planner @ git+https://github.com/near-nes/pfc-planner.git@main",
     "pydenticon>=0.3,<1",
     "mnist1d>=0.0.2,<1",
     "Gridspeccer>=0.2,<1",
