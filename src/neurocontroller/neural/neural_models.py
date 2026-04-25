@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List, TypeVar
 
 from pydantic import BaseModel
+
 from neurocontroller.utils_common.custom_types import NdArray
 
 T = TypeVar("T")
@@ -38,8 +39,7 @@ class PopulationSpikes(BaseModel):
     population_size: int
     neuron_model: str
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
 
 class Synapse(BaseModel):
@@ -56,8 +56,7 @@ class SynapseRecording(BaseModel):
     syn: Synapse
     weight: float
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
 
 class SynapseBlock(BaseModel):

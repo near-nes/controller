@@ -5,6 +5,7 @@ from typing import ClassVar, Iterator, List
 import numpy as np
 import structlog
 from pydantic import BaseModel
+
 from neurocontroller.utils_common.custom_types import NdArray
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
@@ -38,8 +39,7 @@ class EEData(BaseModel):
     pos_ee: NdArray
     vel_ee: NdArray
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
     @classmethod
     def empty(cls, num_total_steps: int):
@@ -67,8 +67,7 @@ class JointData(BaseModel):
     vel_rad_s: NdArray
     input_cmd_torque: NdArray
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
     @classmethod
     def empty(cls, num_total_steps: int):

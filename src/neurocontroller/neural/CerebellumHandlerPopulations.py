@@ -1,7 +1,8 @@
 from typing import Generic, Optional, TypeVar
 
-from neurocontroller.neural.neural_models import PopulationSpikes, convert_to_recording
 from pydantic import BaseModel
+
+from neurocontroller.neural.neural_models import PopulationSpikes, convert_to_recording
 
 from .population_view import PopView
 
@@ -35,8 +36,7 @@ class CerebellumHandlerPopulationsGeneric(BaseModel, Generic[T]):
     motor_prediction_p: Optional[T] = None
     motor_prediction_n: Optional[T] = None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
 
 class CerebellumHandlerPopulationsRecordings(

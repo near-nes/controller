@@ -1,11 +1,12 @@
 from pathlib import Path
 
+from pydantic import BaseModel
+
 from neurocontroller.config import paths
 from neurocontroller.config.MasterParams import MasterParams
 from neurocontroller.config.paths import RunPaths
 from neurocontroller.neural.result_models import NeuralResultManifest
 from neurocontroller.plant.plant_models import PlantPlotData
-from pydantic import BaseModel
 
 
 def extract_id(id: str):
@@ -56,5 +57,4 @@ class ResultMeta(BaseModel):
         with open(rp.meta_result, "r") as f:
             return ResultMeta.model_validate_json(f.read())
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
