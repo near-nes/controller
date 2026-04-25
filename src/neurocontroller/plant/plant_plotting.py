@@ -6,12 +6,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import structlog
 import tqdm
+from matplotlib.animation import FuncAnimation
+from matplotlib.lines import Line2D
+
 from neurocontroller.config.core_models import SimulationParams
 from neurocontroller.config.paths import RunPaths
 from neurocontroller.config.plant_config import PlantConfig
 from neurocontroller.config.ResultMeta import ResultMeta
-from matplotlib.animation import FuncAnimation
-from matplotlib.lines import Line2D
 from neurocontroller.utils_common.generate_signals import PlannerData
 from neurocontroller.utils_common.results import (
     extract_and_merge_plant_results,
@@ -406,11 +407,17 @@ def plot_plant_outputs(
                 import ffmpeg
 
                 ffmpeg.input(
-                    f"{run_paths.video_frames / ax}/*.jpg",
+                    f"{ref_plant_config.run_paths.video_frames / ax}/*.jpg",
                     pattern_type="glob",
                     framerate=framerate,
                     loglevel="warning",
-                ).output(str((run_paths.figures / f"task_{ax}.mp4").absolute())).run()
+                ).output(
+                    str(
+                        (
+                            ref_plant_config.run_paths.figures / f"task_{ax}.mp4"
+                        ).absolute()
+                    )
+                ).run()
 
     f, a, filepath = plot_joint_space_animated(
         pth_fig_receiver=ref_plant_config.run_paths.figures_receiver,
@@ -467,6 +474,7 @@ def generate_video_from_existing_result_single_trial(
     """
     import ffmpeg
     import pybullet
+
     from neurocontroller.plant.robotic_plant import RoboticPlant
 
     images_path = plant_config.run_paths.figures_receiver
@@ -479,7 +487,7 @@ def generate_video_from_existing_result_single_trial(
     )
     start = trial * steps_single_trial
     end = (trial + 1) * steps_single_trial
-    steps = start - end
+    steps = end - start
     len_max_frame_name = len(str(steps))
     [
         (images_path / axis).mkdir(parents=True, exist_ok=True)
@@ -505,7 +513,7 @@ def generate_video_from_existing_result_single_trial(
                 images_path / axis / f"<{step:0{len_max_frame_name}d}>.jpg"
             )
             plant._capture_state_and_save(image_path, axis)
-        if (step % start) > plant_config.master_config.simulation.neural_control_steps:
+        if (step - start) > plant_config.master_config.simulation.neural_control_steps:
             plant.update_ball_position()
 
     plant.p.resetSimulation()
