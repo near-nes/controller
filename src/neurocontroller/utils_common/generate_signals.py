@@ -1,9 +1,10 @@
 from pathlib import Path
 
 import structlog
+from pydantic import BaseModel
+
 from neurocontroller.config.core_models import SimulationParams, TargetColor
 from neurocontroller.config.module_params import PlannerModuleConfig, TrajGeneratorType
-from pydantic import BaseModel
 from neurocontroller.utils_common.custom_types import NdArray
 
 
@@ -13,8 +14,7 @@ class PlannerData(BaseModel):
     trajectory: NdArray
     choice: TargetColor
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
 
 def generate_traj(
