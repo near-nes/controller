@@ -32,6 +32,7 @@ build/
 .mypy_cache/
 .pytest_cache/
 .tox/
+tests/training/artifacts
 
 # Jupyter
 .ipynb_checkpoints/
