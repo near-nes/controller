@@ -1,18 +1,17 @@
-import nest
 import json
+import os
+
+import nest
 from validation_synapse_alpha import (
+    correct_spike_times,
     plot_synaptic_weight,
     reformat_weights,
-    plot_synaptic_matrix,
-    correct_spike_times,
-    plot_LTP,
 )
-import sys
 
 
 def test_general_alpha():
     TEST_NUMBER = 1
-    f = open("tests_plasticity/eglif_params.json")
+    f = open(os.path.join(os.path.dirname(__file__), "eglif_params.json"))
     params = json.load(f)
     f.close()
 

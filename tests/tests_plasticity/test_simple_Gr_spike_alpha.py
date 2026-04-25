@@ -1,19 +1,19 @@
+import json
+import os
+import sys
+
 import nest
 import numpy as np
-import json
 from validation_synapse_alpha import (
-    plot_synaptic_weight,
-    reformat_weights,
-    plot_synaptic_matrix,
-    plot_simple_spike,
     correct_spike_times,
+    plot_simple_spike,
+    reformat_weights,
 )
-import sys
 
 
 def test_simple_Gr_spike_alpha():
     TEST_NUMBER = 3
-    f = open("tests_plasticity/eglif_params.json")
+    f = open(os.path.join(os.path.dirname(__file__), "eglif_params.json"))
     params = json.load(f)
     f.close()
 

@@ -138,6 +138,7 @@ profile = "black"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
+norecursedirs = ["tests_plasticity"]
 
 [tool.mypy]
 python_version = "3.10"
