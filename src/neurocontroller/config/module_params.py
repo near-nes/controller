@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from importlib.resources import files
 from pathlib import Path
@@ -7,10 +8,14 @@ from pydantic import BaseModel, Field
 
 
 def _planner_artifacts() -> Path:
+    if env := os.getenv("NEUROCONTROLLER_PLANNER_ARTIFACTS_DIR"):
+        return Path(env)
     return Path(str(files("neurocontroller").joinpath("artifacts/pfc_planner")))
 
 
 def _m1_artifacts() -> Path:
+    if env := os.getenv("NEUROCONTROLLER_M1_ARTIFACTS_DIR"):
+        return Path(env)
     return Path(str(files("neurocontroller").joinpath("artifacts/m1")))
 
 
