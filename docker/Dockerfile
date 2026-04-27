@@ -198,15 +198,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     pkg-config
 
-# Install MQTT (to NRP_DEPS_INSTALL_DIR)
-RUN git clone https://github.com/eclipse/paho.mqtt.cpp \
-    && cd paho.mqtt.cpp \
-    && git checkout v1.4.0 \
-    && git submodule init \
-    && git submodule update \
-    && cmake -Bbuild -H. -DPAHO_BUILD_STATIC=OFF -DPAHO_BUILD_SHARED=ON -DCMAKE_INSTALL_PREFIX="${NRP_DEPS_INSTALL_DIR}" -DCMAKE_PREFIX_PATH="${NRP_DEPS_INSTALL_DIR}" -DPAHO_WITH_MQTT_C=ON \
-    && cmake --build build/ --target install \
-    && sudo ldconfig && cd .. && rm -rf paho.mqtt.cpp
 
 COPY ./docker/requirements_nrp.txt .
 RUN --mount=type=cache,target=/root/.cache/uv \
@@ -214,9 +205,11 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV NRP_SRC_DIR=/tmp/nrp-core-src
 ENV CMAKE_CACHE_FILE=${NRP_SRC_DIR}/.ci/cmake_cache/t3_4.cmake
+ARG NRP_CORE_SHA=25a73b5a711bec034cac353f7f583f840e51f817
 RUN git clone https://bitbucket.org/hbpneurorobotics/nrp-core.git ${NRP_SRC_DIR} \
     && cd ${NRP_SRC_DIR} \
-    && git checkout 6b60824a36919c16601007a122a0527f025809cb
+    && git fetch origin ${NRP_CORE_SHA} \
+    && git checkout ${NRP_CORE_SHA}
 COPY --chown=${USERNAME} docker/nrp_t3_4.cmake ${CMAKE_CACHE_FILE}
 RUN cd ${NRP_SRC_DIR} && bash .ci/11-prepare-build.sh && bash .ci/20-build.sh
 
