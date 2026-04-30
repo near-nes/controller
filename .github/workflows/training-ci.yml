@@ -69,10 +69,7 @@ jobs:
           -e NEUROCONTROLLER_M1_ARTIFACTS_DIR=/sim/controller/m1-artifacts \
           -w /sim/controller \
           -v ${{ github.workspace }}:/sim/controller \
-          ${{ env.IMAGE_TAG }} bash -c "
-            uv pip install --no-deps --force-reinstall -e ./submodules/motor_cortex_eprop \
-            && pytest tests/training/test_train_m1.py -v -s
-          "
+          ${{ env.IMAGE_TAG }} pytest tests/training/test_train_m1.py -v -s
     - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: m1-artifacts
@@ -111,10 +108,7 @@ jobs:
           -e NEUROCONTROLLER_PLANNER_ARTIFACTS_DIR=/sim/controller/planner-artifacts \
           -w /sim/controller \
           -v ${{ github.workspace }}:/sim/controller \
-          ${{ env.IMAGE_TAG }} bash -c "
-            uv pip install --no-deps --force-reinstall -e ./submodules/pfc_planner \
-            && pytest tests/training/test_train_planner.py -v -s
-          "
+          ${{ env.IMAGE_TAG }} pytest tests/training/test_train_planner.py -v -s
     - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: planner-artifacts
