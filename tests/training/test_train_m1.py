@@ -16,7 +16,6 @@ from motor_controller_model.m1_factory import get_m1_or_train
 # does not cause a mismatch when the trial job loads the saved weights.
 M1_OVERRIDES = {
     "task": {"n_iter": 2},
-    "plotting": {"do_plotting": False},
 }
 
 _FALLBACK = Path(__file__).parent / "artifacts" / "m1"

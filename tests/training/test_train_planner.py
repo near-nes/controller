@@ -41,7 +41,7 @@ def _seed_vision_artifacts(pfc_dir: Path) -> None:
         shutil.copy2(shipped / fname, pfc_dir / fname)
 
 
-def test_train_planner(tmp_path):
+def test_train_planner():
     pfc_dir = _artifacts_dir()
     pfc_dir.mkdir(parents=True, exist_ok=True)
 
@@ -52,7 +52,7 @@ def test_train_planner(tmp_path):
     train_trajectory_generator(
         PlannerParams(),
         generator_type="gle",
-        project_root=tmp_path,
+        project_root=pfc_dir,
         model_dir=pfc_dir,
         **PFC_TRAJ_OVERRIDES,
     )
