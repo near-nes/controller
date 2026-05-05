@@ -51,13 +51,11 @@ dependencies = [
     "pydantic>=2.11,<3",
     "Pillow>=11,<12",
     "cairosvg>=2.8,<3",
-    "ffmpeg>=1.4,<2",
     "ffmpeg-python>=0.2,<1",
     "Flask>=3.1,<4",
     "flask-cors>=6,<7",
     "gunicorn>=23,<24",
     "requests>=2.32,<3",
-    "RestrictedPython>=8,<9",
     "h5py>=3.14,<4",
     "mpilock>=1.1,<2",
     "platformdirs>=4,<5",
@@ -68,10 +66,7 @@ dependencies = [
     "minjerk-dynamics>=0.1,<1",
     "motor_controller_model @ git+https://github.com/near-nes/motor-cortex-eprop.git@main",
     # Planner / GLE dependencies
-    "pfc_planner @ git+https://github.com/near-nes/pfc-planner.git@main",
-    "pydenticon>=0.3,<1",
-    "mnist1d>=0.0.2,<1",
-    "Gridspeccer>=0.2,<1",
+    "pfc_planner @ git+https://github.com/near-nes/pfc-planner.git@main"
 ]
 
 # Direct URLs for PyTorch CPU wheels (requires PEP 440 compliance)
