@@ -1,0 +1,7 @@
+{
+  "reason": "diverged",
+  "detail": "mean recurrent firing rate 110.84 Hz exceeds max_firing_rate_hz=50.0 Hz",
+  "mean_firing_rate_hz": 110.83666666666667,
+  "min_firing_rate_hz": 5.0,
+  "max_firing_rate_hz": 50.0
+}

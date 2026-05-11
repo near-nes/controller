@@ -1,6 +1,7 @@
 from typing import Protocol, Tuple
 
 import structlog
+
 from neurocontroller.config.core_models import SimulationParams
 from neurocontroller.config.module_params import (
     M1MockConfig,
@@ -157,12 +158,8 @@ class MotorCortex:
                 output_neuron_params={
                     # TODO: this needs to become standard configuration once it stabilizes
                     "simulation_steps": self.sim.sim_steps,
-                    "kp": 0.001,
-                    "buffer_size": 50,  # 5 for downwards, 50 for upwards
-                    # "tau_m": m1_config.neurons.out.tau_m,
-                    # "C_m": m1_config.neurons.out.C_m,
-                    # "E_L": m1_config.neurons.out.E_L,
-                    # "V_th": 70.0,  # tuning knob
+                    "kp": 0.02,
+                    "buffer_size": 5,
                 },
                 n_out=params.m1_eprop_config.n_out_pop,
             )
