@@ -348,6 +348,7 @@ def plot_plant_outputs(
     metas: list[ResultMeta],
     animated_task: bool = False,
     animated_plots: bool = False,
+    video_duration: float = 5,
 ):
     """Loads all plant-related data and generates all plots."""
     log.info("Generating plant plots...")
@@ -384,40 +385,13 @@ def plot_plant_outputs(
     plot_rmse(metas, ref_plant_config.run_paths.figures_receiver)
 
     framerate = 25
-    video_duration = 5
     if animated_task:
         generate_video_from_existing_result_single_trial(
             ref_plant_config,
             plant_data,
+            framerate=framerate,
+            video_duration=video_duration,
         )
-        if (
-            ref_mp.plotting.CAPTURE_VIDEO is None
-            or len(ref_mp.plotting.CAPTURE_VIDEO) == 0
-        ):
-            log.warning(
-                "Asked to generate task video but no frames were generated during run. Animated plots will use default time."
-            )
-        else:
-            for ax in ref_mp.plotting.CAPTURE_VIDEO:
-                video_duration = int(
-                    len(ref_plant_config.time_vector_single_trial_s)
-                    / ref_mp.plotting.NUM_STEPS_CAPTURE_VIDEO
-                    / framerate
-                )
-                import ffmpeg
-
-                ffmpeg.input(
-                    f"{ref_plant_config.run_paths.video_frames / ax}/*.jpg",
-                    pattern_type="glob",
-                    framerate=framerate,
-                    loglevel="warning",
-                ).output(
-                    str(
-                        (
-                            ref_plant_config.run_paths.figures / f"task_{ax}.mp4"
-                        ).absolute()
-                    )
-                ).run()
 
     f, a, filepath = plot_joint_space_animated(
         pth_fig_receiver=ref_plant_config.run_paths.figures_receiver,
@@ -458,16 +432,17 @@ def generate_video_from_existing_result_single_trial(
     plant_config: PlantConfig,
     plant_data: PlantPlotData,
     framerate: int = 25,
+    video_duration: float = 5,
     trial=0,
     AXES_TO_CAPTURE: list[str] = ["y"],
     complete_video_filename: str = "complete.mp4",
 ):
     """Creates animated video from AXES_TO_CAPTURE angles for a single trial
 
-    Uses the series of JointStates recorded in plotting data to step through a
-    single trial's worth of screenshots, every NUM_STEPS_CAPTURE_VIDEO. Has no
-     reset capabilities, so it only generates a single trial (`trial`). Generated
-     screenshots are included in `plant_config.run_paths.figures_receiver/{axis}`
+    Uses the series of JointStates recorded in plotting data to render a
+    single trial into `video_duration` seconds of frames. Has no reset
+    capabilities, so it only generates a single trial (`trial`). Generated
+    screenshots are included in `plant_config.run_paths.figures_receiver/{axis}`
 
     If multiple axes are provided, composite video is generated in
     `plant_config.run_paths.figures_receiver/{complete_video_filename}`
@@ -489,16 +464,14 @@ def generate_video_from_existing_result_single_trial(
     end = (trial + 1) * steps_single_trial
     steps = end - start
     len_max_frame_name = len(str(steps))
+    frame_count = max(1, int(video_duration * framerate))
+    frame_steps = np.linspace(start, end - 1, frame_count, dtype=int)
     [
         (images_path / axis).mkdir(parents=True, exist_ok=True)
         for axis in AXES_TO_CAPTURE
     ]
     for step in tqdm.tqdm(
-        range(
-            start,
-            end,
-            plant_config.master_config.plotting.NUM_STEPS_CAPTURE_VIDEO,
-        ),
+        frame_steps,
         desc="Frame generation:",
     ):
         state = JointStates(

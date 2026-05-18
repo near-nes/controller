@@ -72,7 +72,6 @@ class RunPaths:
     logs: Path
     params_json: Path
     trajectory: Path
-    video_frames: Path
 
     @classmethod
     def from_run_id(cls, run_timestamp: str, create_if_not_present: bool = True):
@@ -85,7 +84,6 @@ class RunPaths:
         meta_result = run_dir / f"{id}.json"
         figures_dir = run_dir / FOLDER_NAME_NEURAL_FIGS
         figures_receiver_dir = run_dir / FOLDER_NAME_ROBOTIC_FIGS
-        video_frames = run_dir / "video_frames"
         logs_dir = run_dir / "logs"
         params_path = run_dir / f"params{id}.json"
         input_image = run_dir / "input_image.bmp"
@@ -99,7 +97,6 @@ class RunPaths:
                 robot_result.parent,
                 figures_dir,
                 figures_receiver_dir,
-                video_frames,
                 logs_dir,
             ]:
                 dir_path.mkdir(parents=True, exist_ok=True, mode=0o775)
@@ -113,7 +110,6 @@ class RunPaths:
             robot_result=robot_result,
             figures=figures_dir,
             figures_receiver=figures_receiver_dir,
-            video_frames=video_frames,
             logs=logs_dir,
             params_json=params_path,
             trajectory=trajectory,

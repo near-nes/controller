@@ -58,9 +58,6 @@ class PlantSimulator:
         self.checked_proximity = False
         self.shoulder_moving = False
 
-        for ax in self.config.master_config.plotting.CAPTURE_VIDEO:
-            (self.config.run_paths.video_frames / ax).mkdir(exist_ok=True, parents=True)
-
         # TODO this has to be saved from planner, and currently it's not. mock it!
         if (
             self.config.master_config.simulation.oracle.target_color
@@ -69,10 +66,6 @@ class PlantSimulator:
             self.direction = 0.1
         else:
             self.direction = -0.1
-
-        self.max_len_frame_name = len(
-            str(self.config.TOTAL_SIM_DURATION_S * 1000 * self.config.RESOLUTION_MS)
-        )
 
         self.log.info("PlantSimulator initialization complete.")
 
@@ -135,17 +128,6 @@ class PlantSimulator:
         net_rate_hz = rate_pos_hz - rate_neg_hz
         elbow_torque = net_rate_hz / self.config.SCALE_TORQUE
         hand_torque = shoulder_torque = 0
-
-        if self.config.master_config.plotting.CAPTURE_VIDEO and not (
-            step % self.config.master_config.plotting.NUM_STEPS_CAPTURE_VIDEO
-        ):
-            for ax in self.config.master_config.plotting.CAPTURE_VIDEO:
-                self.plant._capture_state_and_save(
-                    self.config.run_paths.video_frames
-                    / ax
-                    / f"{step:0{self.max_len_frame_name}d}.jpg",
-                    axis=ax,
-                )
 
         if not (step % 500):
             self.log.debug(
