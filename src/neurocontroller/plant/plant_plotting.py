@@ -434,7 +434,7 @@ def generate_video_from_existing_result_single_trial(
     framerate: int = 25,
     video_duration: float = 5,
     trial=0,
-    AXES_TO_CAPTURE: list[str] = ["y"],
+    AXES_TO_CAPTURE: list[str] = ["top"],
     complete_video_filename: str = "complete.mp4",
 ):
     """Creates animated video from AXES_TO_CAPTURE angles for a single trial

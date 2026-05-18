@@ -1,6 +1,6 @@
 from dataclasses import astuple, dataclass
 from pathlib import Path
-from typing import ClassVar, Iterator, List
+from typing import ClassVar, Iterator, List, Tuple
 
 import numpy as np
 import structlog
@@ -31,6 +31,35 @@ class JointStates:
         yield self.shoulder
         yield self.elbow
         yield self.hand
+
+
+@dataclass(frozen=True)
+class CameraSpec:
+    name: str
+    camera_position: Tuple[float, float, float]
+    camera_target_position: Tuple[float, float, float]
+    up_vector: Tuple[float, float, float]
+    fov: float = 60.0
+    near: float = 0.1
+    far: float = 100.0
+    width: int = 1024
+    height: int = 768
+
+
+SIDE_VIEW_CAMERA = CameraSpec(
+    name="side",
+    camera_position=(0.0, -1.0, 1.7),
+    camera_target_position=(0.3, 0.3, 1.5),
+    up_vector=(0.0, 0.0, 1.0),
+)
+
+TOP_VIEW_CAMERA = CameraSpec(
+    name="top",
+    camera_position=(0.34413, 0.01923, 2.49861),
+    camera_target_position=(0.34413, 0.01923, 1.79861),
+    up_vector=(1.0, 0.0, 0.0),
+    near=0.01,
+)
 
 
 class EEData(BaseModel):
