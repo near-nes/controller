@@ -6,7 +6,12 @@ import numpy as np
 import structlog
 from neurocontroller.config.paths import EMBODIMENT_ASSETS
 from neurocontroller.config.plant_config import PlantConfig
-from neurocontroller.plant.plant_models import JointState, JointStates
+from neurocontroller.plant.plant_models import (
+    SIDE_VIEW_CAMERA,
+    TOP_VIEW_CAMERA,
+    JointState,
+    JointStates,
+)
 
 
 class RoboticPlant:
@@ -53,13 +58,14 @@ class RoboticPlant:
         self.elbow_joint_locked = False
         self.ball = None
         self.ball_hand_rel_pos = self.ball_hand_rel_orn = None
+        self.shoulder_joint_start_position_rad = 0
 
+        self._reset_shoulder_joint_to_start_position()
         self.target_position = self._set_rad_elbow(
             config.target_joint_pos_rad
             + config.master_config.simulation.oracle.tgt_visual_offset_rad
         )
         self.reset_target()
-        self.shoulder_joint_start_position_rad = 0
         self.log.info("PyBullet initialized and robot loaded", robot_id=self.robot_id)
 
         # not sure if config should be "consumed" into properties or if should be kept as is
@@ -136,6 +142,15 @@ class RoboticPlant:
             physicsClientId=self._server_id,
         )
 
+    def _reset_shoulder_joint_to_start_position(self) -> None:
+        self.p.resetJointState(
+            bodyUniqueId=self.robot_id,
+            jointIndex=self.shoulder_joint_id,
+            targetValue=self.shoulder_joint_start_position_rad,
+            targetVelocity=0.0,
+            physicsClientId=self._server_id,
+        )
+
     def _load_target(self, target_position, target_color=(1, 0, 0, 1)):
         """Create a visual sphere at target_position."""
         ball_shape = self.p.createVisualShape(
@@ -188,37 +203,37 @@ class RoboticPlant:
         )
         return self.p.getLinkState(self.robot_id, self.SHOULDER_A_JOINT_ID)[0]
 
-    def _capture_state_and_save(self, image_path: Path, axis="y") -> None:
+    _CAMERA_SPECS = {
+        "side": SIDE_VIEW_CAMERA,
+        "y": SIDE_VIEW_CAMERA,
+        "top": TOP_VIEW_CAMERA,
+        "above": TOP_VIEW_CAMERA,
+    }
+
+    def _capture_state_and_save(self, image_path: Path, axis="top") -> None:
         from PIL import Image
 
-        if axis == "y":
-            camera_target_position = [0.3, 0.3, 1.5]
-            camera_position = [0, -1, 1.7]
-        elif axis == "x":
-            camera_target_position = [0, 0, 1.5]
-            camera_position = [1, 0, 1.7]
-        elif axis == "z":
-            camera_target_position = [0, 0, -1]
-            camera_position = [0.1, 0, 2.5]
-        else:
-            raise ValueError("axis possible values: [x,y,z]")
-        up_vector = [0, 0, 1]
-        width = 1024
-        height = 768
-        fov = 60
-        aspect = width / height
-        near = 0.1
-        far = 100
-        projection_matrix = self.p.computeProjectionMatrixFOV(fov, aspect, near, far)
+        try:
+            camera = self._CAMERA_SPECS[axis]
+        except KeyError as e:
+            raise ValueError("axis possible values: [top, side, y, above]") from e
+
+        aspect = camera.width / camera.height
+        projection_matrix = self.p.computeProjectionMatrixFOV(
+            camera.fov, aspect, camera.near, camera.far
+        )
         view_matrix = self.p.computeViewMatrix(
-            camera_position, camera_target_position, up_vector
+            camera.camera_position,
+            camera.camera_target_position,
+            camera.up_vector,
         )
         img_arr = self.p.getCameraImage(
-            width,
-            height,
+            camera.width,
+            camera.height,
             viewMatrix=view_matrix,
             projectionMatrix=projection_matrix,
             renderer=self.p.ER_BULLET_HARDWARE_OPENGL,
+            physicsClientId=self._server_id,
         )
 
         rgb_buffer = np.array(img_arr[2])
@@ -320,12 +335,7 @@ class RoboticPlant:
             targetValue=self.initial_joint_position_rad,
             targetVelocity=0.0,
         )
-        self.p.resetJointState(
-            bodyUniqueId=self.robot_id,
-            jointIndex=self.shoulder_joint_id,
-            targetValue=self.shoulder_joint_start_position_rad,
-            targetVelocity=0.0,
-        )
+        self._reset_shoulder_joint_to_start_position()
         self.p.setJointMotorControl2(
             self.robot_id,
             self.SHOULDER_A_JOINT_ID,
