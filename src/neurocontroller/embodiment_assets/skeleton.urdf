@@ -3,9 +3,9 @@
   <joint name="skeleton__shoulder_joint" type="revolute">
     <parent link="skeleton__skeleton"/>
     <child link="skeleton__upper_arm"/>
-    <origin xyz="-0.01754 -0.17     1.793" rpy="1.59151 1.57079 0.02072"/>
-    <axis xyz="1 0 0"/>
-    <limit lower="-1" upper="0.7853981852531433" effort="0.0" velocity="0.0"/>
+    <origin xyz="-0.01754 -0.17     1.793" rpy="-0.17453292519943295 0 0"/>
+    <axis xyz="0 -0.17364817766693033 0.984807753012208"/>
+    <limit lower="-1.5707963705062866" upper="1.5707963705062866" effort="0.0" velocity="0.0"/>
   </joint>
   <joint name="skeleton__elbow_joint" type="revolute">
     <parent link="skeleton__upper_arm"/>

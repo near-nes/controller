@@ -53,13 +53,14 @@ class RoboticPlant:
         self.elbow_joint_locked = False
         self.ball = None
         self.ball_hand_rel_pos = self.ball_hand_rel_orn = None
+        self.shoulder_joint_start_position_rad = 0
 
+        self._reset_shoulder_joint_to_start_position()
         self.target_position = self._set_rad_elbow(
             config.target_joint_pos_rad
             + config.master_config.simulation.oracle.tgt_visual_offset_rad
         )
         self.reset_target()
-        self.shoulder_joint_start_position_rad = 0
         self.log.info("PyBullet initialized and robot loaded", robot_id=self.robot_id)
 
         # not sure if config should be "consumed" into properties or if should be kept as is
@@ -133,6 +134,15 @@ class RoboticPlant:
             plane_id,
             new_position,
             rotation_quaternion,
+            physicsClientId=self._server_id,
+        )
+
+    def _reset_shoulder_joint_to_start_position(self) -> None:
+        self.p.resetJointState(
+            bodyUniqueId=self.robot_id,
+            jointIndex=self.shoulder_joint_id,
+            targetValue=self.shoulder_joint_start_position_rad,
+            targetVelocity=0.0,
             physicsClientId=self._server_id,
         )
 
@@ -320,12 +330,7 @@ class RoboticPlant:
             targetValue=self.initial_joint_position_rad,
             targetVelocity=0.0,
         )
-        self.p.resetJointState(
-            bodyUniqueId=self.robot_id,
-            jointIndex=self.shoulder_joint_id,
-            targetValue=self.shoulder_joint_start_position_rad,
-            targetVelocity=0.0,
-        )
+        self._reset_shoulder_joint_to_start_position()
         self.p.setJointMotorControl2(
             self.robot_id,
             self.SHOULDER_A_JOINT_ID,
