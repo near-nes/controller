@@ -7,7 +7,7 @@ from neurocontroller.config.plant_config import PlantConfig
 from neurocontroller.utils_common.utils import TrialSection, get_current_section
 
 from .plant_models import EEData, JointData, PlantPlotData
-from .robotic_plant import RoboticPlant
+from .plant_interface import PlantInterface
 
 
 class PlantSimulator:
@@ -20,24 +20,22 @@ class PlantSimulator:
     def __init__(
         self,
         config: PlantConfig,
-        pybullet_instance,
+        plant: PlantInterface,
     ):
         """
         Initializes the PlantSimulator.
 
         Args:
             config: a PlantConfig object.
-            pybullet_instance: The initialized PyBullet instance (e.g., p from `import pybullet as p`).
+            plant: A PlantInterface implementation (PyBullet, MuJoCo, etc.).
         """
         self.log: structlog.stdlib.BoundLogger = structlog.get_logger(
             type(self).__name__
         )
         self.log.info("Initializing PlantSimulator...")
         self.config: PlantConfig = config
-        self.p = pybullet_instance
-
-        self.plant = RoboticPlant(config=self.config, pybullet_instance=self.p)
-        self.log.debug("RoboticPlant initialized.")
+        self.plant: PlantInterface = plant
+        self.log.debug("Plant engine initialized.")
 
         self.num_total_steps = len(self.config.time_vector_total_s)
         total_num_joints = (

@@ -10,6 +10,7 @@ from neurocontroller.config.ResultMeta import extract_id
 from nrp_core.engines.python_grpc import GrpcEngineScript
 from nrp_protobuf import nrpgenericproto_pb2, wrappers_pb2
 from neurocontroller.plant.plant_simulator import PlantSimulator
+from neurocontroller.plant.pybullet_plant import PyBulletRoboticPlant
 from neurocontroller.utils_common.utils import TrialSection
 from neurocontroller.utils_common.profile import Profile
 
@@ -29,9 +30,13 @@ class Script(GrpcEngineScript):
         self.run_paths = project_paths.RunPaths.from_run_id(run_timestamp_str)
         self.config = PlantConfig.from_runpaths(self.run_paths, parent_id=parent_id)
 
-        self.simulator = PlantSimulator(
+        plant = PyBulletRoboticPlant(
             config=self.config,
             pybullet_instance=p,
+        )
+        self.simulator = PlantSimulator(
+            config=self.config,
+            plant=plant,
         )
         self.current_sim_time_s = 0
         self.step = 0
