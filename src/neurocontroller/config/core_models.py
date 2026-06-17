@@ -72,6 +72,7 @@ class OracleData(BaseModel):
 
 
 class SimulationParams(BaseModel, frozen=True):
+    engine: str = "bullet"  # or "mujoco"
     resolution: float = 1.0  # ms
     time_prep: float = 650.0  # ms
     time_move: float = 500.0  # ms
@@ -130,6 +131,6 @@ class BrainParams(BaseModel, frozen=True):
 
 
 class PlottingParams(BaseModel, frozen=True):
-    PLOT_AFTER_SIMULATE: bool = True
+    PLOT_AFTER_SIMULATE: bool = False
     CAPTURE_VIDEO: list[str] = []  # ["x", "y", "z"]
     NUM_STEPS_CAPTURE_VIDEO: int = 10
