@@ -41,37 +41,24 @@ classifiers = [
 dependencies = [
     "bsb>=7,<8",
     "bsb-nest>=7,<8",
-    "pandas>=2.2,<3",
-    "scipy>=1.15,<2",
     "numpy>=1.26,<2",
-    "plotly>=6,<7",
-    "matplotlib>=3.9,<4",
+    "pandas>=2",
+    "matplotlib>=3.7,<4",
     "pybullet>=3.2,<4",
-    "structlog>=25,<26",
-    "pydantic>=2.11,<3",
-    "Pillow>=11,<12",
-    "cairosvg>=2.8,<3",
-    "ffmpeg>=1.4,<2",
-    "ffmpeg-python>=0.2,<1",
-    "Flask>=3.1,<4",
-    "flask-cors>=6,<7",
-    "gunicorn>=23,<24",
-    "requests>=2.32,<3",
-    "RestrictedPython>=8,<9",
-    "h5py>=3.14,<4",
-    "mpilock>=1.1,<2",
-    "platformdirs>=4,<5",
-    "typing-extensions>=4.15,<5",
+    "structlog>=24",
+    "pydantic>=2",
+    "Pillow>=10",
+    "cairosvg>=2.5",
+    "ffmpeg-python>=0.2",
+    "requests>=2.28",
+    "Werkzeug>=2",
+    "platformdirs>=4",
     "tqdm",
-    "mpi4py>=4.1,<5",
-    "Cython>=3,<4",
+    "mpi4py>=4",
     "minjerk-dynamics>=0.1,<1",
     "motor_controller_model @ git+https://github.com/near-nes/motor-cortex-eprop.git@main",
     # Planner / GLE dependencies
     "pfc_planner @ git+https://github.com/near-nes/pfc-planner.git@main",
-    "pydenticon>=0.3,<1",
-    "mnist1d>=0.0.2,<1",
-    "Gridspeccer>=0.2,<1",
 ]
 
 # Direct URLs for PyTorch CPU wheels (requires PEP 440 compliance)
@@ -85,11 +72,11 @@ pytorch = [
 
 [dependency-groups]
 dev = [
-    "black==26.3.1",
-    "isort>=6.0.0",
-    "jupyterlab>=4.5,<5",
-    "ipykernel>=7.2,<8",
-    "ipywidgets>=8.1,<9",
+    "black>=24",
+    "isort>=5",
+    "jupyterlab>=4",
+    "ipykernel>=6",
+    "ipywidgets>=8",
 ]
 
 [project.urls]
