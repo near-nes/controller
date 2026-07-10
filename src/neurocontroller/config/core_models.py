@@ -73,9 +73,9 @@ class OracleData(BaseModel):
 
 class SimulationParams(BaseModel, frozen=True):
     resolution: float = 1.0  # ms
-    time_prep: float = 600.0  # ms
+    time_prep: float = 650.0  # ms
     time_move: float = 500.0  # ms
-    time_locked_with_feedback: float = 200.0  # ms - MUST BE KEPT SAME AS SENSORY_DELAY
+    time_locked_with_feedback: float = 150.0  # ms - MUST BE KEPT SAME AS SENSORY_DELAY
     time_grasp: float = 100.0  # ms
     time_post: float = 100.0  # ms
 
