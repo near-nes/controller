@@ -18,13 +18,13 @@ class SingleSynapseParams(BaseModel):
 class ConnectionsParams(BaseModel):
     model_config: ClassVar = {"frozen": True}
 
-    sensory_delay: float = 150
-    m1_delay: float = 100.0  # ms - M1 processing delay (trajectory → motor commands)
+    sensory_delay: float = 100
+    m1_delay: float = 50.0  # ms - M1 processing delay (trajectory → motor commands)
 
     # atm dcn_f->pred : AtoA conn
     dcn_forw_prediction: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.046,  # (1/65)*3
+            weight=0.075,  # (1/65)*kp
             delay=min_delay,
         )
     )
@@ -66,7 +66,7 @@ class ConnectionsParams(BaseModel):
     )
     error_io_f: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.7,
+            weight=0.83,
             delay=min_delay,
             receptor_type=1,
         )
@@ -97,7 +97,7 @@ class ConnectionsParams(BaseModel):
     )
     motor_pre_brain_stem: SingleSynapseParams = Field(
         default_factory=lambda: SingleSynapseParams(
-            weight=0.005,
+            weight=0.006,
             delay=min_delay,
         )
     )

@@ -5,9 +5,10 @@ import numpy as np
 import structlog
 from bsb import SimulationData, config, from_storage, get_simulation_adapter, options
 from bsb_nest.adapter import NestAdapter, NestResult
+from mpi4py import MPI
+
 from neurocontroller.config.bsb_models import BSBConfigPaths
 from neurocontroller.config.connection_params import ConnectionsParams
-from mpi4py import MPI
 from neurocontroller.neural.nest_adapter import nest
 from neurocontroller.neural.neural_models import SynapseBlock, SynapseRecording
 from neurocontroller.utils_common.profile import Profile
@@ -90,6 +91,12 @@ class Cerebellum:
         )
         self.log.debug(
             f"resolution: FWD:{simulation_forw.resolution}; INV{simulation_inv.resolution}"
+        )
+
+        # set t_0 in stdp_sinexp_synapse to 150 to center the LTD effect to -100ms (= sensory_delay)
+        nest.SetDefaults("stdp_synapse_sinexp", {"t_0": 150.0})
+        self.log.debug(
+            f"set t_0 in stdp_synapse_sinexp to: {nest.GetDefaults('stdp_synapse_sinexp')['t_0']}"
         )
 
         adapter.create_neurons(simulation_forw)
