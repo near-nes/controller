@@ -319,7 +319,7 @@ void basic_neuron_nestml::update(nest::Time const & origin,const long from, cons
     }
     S_.in_rate = (1000.0 * ((1000.0 * std::abs(S_.spike_count_in)) / P_.buffer_size));
     S_.out_rate = P_.base_rate + P_.kp * S_.in_rate;
-    S_.lambda_poisson = S_.out_rate * __resolution * 0.001;
+    S_.lambda_poisson = -std::log(1.0 - S_.out_rate * __resolution * 0.001);
     S_.spike_count_out = ([&]() -> int { nest::poisson_distribution::param_type poisson_params(S_.lambda_poisson); int sample = poisson_dev_( nest::get_vp_specific_rng( get_thread() ), poisson_params); return sample; })();
     if (S_.spike_count_out > 0)
     {  
