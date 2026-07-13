@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import structlog
+
 from neurocontroller.config.core_models import SimulationParams
 from neurocontroller.config.MasterParams import MasterParams
 from neurocontroller.config.module_params import TrajGeneratorType
@@ -20,16 +21,23 @@ def setup_environment(master_config: MasterParams):
     os.environ["OMP_NUM_THREADS"] = str(master_config.total_num_virtual_procs)
 
     try:
-        # Check if module is already installed to prevent errors on reset
+        # Check if modules are already installed to prevent errors on reset
         if "eglif_cond_alpha_multisyn" not in nest.Models(mtype="nodes"):
             nest.Install("custom_stdp_module")
             log.info("Installed NESTML module", module="custom_stdp_module")
         else:
             log.debug("NESTML module already installed", module="custom_stdp_module")
+        if "tracking_neuron_nestml" not in nest.Models(mtype="nodes"):
+            nest.Install("controller_neurons_module")
+            log.info("Installed NESTML module", module="controller_neurons_module")
+        else:
+            log.debug(
+                "NESTML module already installed", module="controller_neurons_module"
+            )
     except Exception as e:
         log.error(
             "Error installing NESTML module",
-            module="custom_stdp_module",
+            # module="custom_stdp_module",
             error=str(e),
             exc_info=True,
         )

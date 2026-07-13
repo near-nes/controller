@@ -226,6 +226,14 @@ RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
 # allow all users to run git commands here
 RUN git config --global --add safe.directory $CEREBELLUM_PATH 
 
+####################### CONTROLLER NEURON MODELS #######################
+COPY --chown=${USERNAME} ./controller_nest_module /tmp/controller_nest_module
+RUN mkdir -p /tmp/controller_nest_module/build \
+    && cd /tmp/controller_nest_module/build \
+    && cmake .. \
+    && make \
+    && make install
+
 FROM builder AS package_install
 WORKDIR /tmp/pkg
 # Copy only files needed for dependency resolution.
