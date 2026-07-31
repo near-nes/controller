@@ -180,6 +180,9 @@ RUN mkdir -p nest-build \
     && make -j$(nproc) \
     && make install
 
+# Install Nestml  8.1.0 (need to install after NEST 3.9)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install nestml -c /tmp/constraints.txt
 
 ####################### NRP #######################
 ENV NRP_INSTALL_DIR=${INSTALL_DIR}/nrp
@@ -228,11 +231,29 @@ RUN git config --global --add safe.directory $CEREBELLUM_PATH
 
 ####################### CONTROLLER NEURON MODELS #######################
 COPY --chown=${USERNAME} ./controller_nest_module /tmp/controller_nest_module
-RUN mkdir -p /tmp/controller_nest_module/build \
-    && cd /tmp/controller_nest_module/build \
-    && cmake .. \
-    && make \
-    && make install
+
+RUN mkdir -p /tmp/nest_stub && cat > /tmp/nest_stub/nest.py << EOF
+__version__ = "${NEST_VERSION}.0"
+class _Dummy:
+    def get(self):
+        return {}
+def Create(*a, **k):
+    return _Dummy()
+def Connect(*a, **k):
+    return None
+def GetConnections(*a, **k):
+    return _Dummy()
+EOF
+
+RUN echo "{\"nest_path\": \"${NEST_INSTALL_DIR}\"}" > /tmp/nestml_codegen_opts.json \
+    && PYTHONPATH=/tmp/nest_stub nestml \
+       --input_path /tmp/controller_nest_module/controller_module.nestml \
+       --target_path /tmp/controller_nest_module \
+       --target_platform NEST \
+       --module_name controller_neurons_module \
+       --codegen_opts /tmp/nestml_codegen_opts.json
+
+### ancora fa fare parte per rendere ispezionabile files .cpp/.h
 
 FROM builder AS package_install
 WORKDIR /tmp/pkg
@@ -255,10 +276,11 @@ COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=builder ${CEREBELLUM_PATH} ${CEREBELLUM_PATH}
 COPY --from=package_install ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY --from=builder /tmp/controller_nest_module /sim/generated/controller_nest_module
 # install dirs world-readable (venv writable so users can pip install)
 USER 0
 RUN chmod -R a+rX ${INSTALL_DIR} ${CEREBELLUM_PATH} \
-    && chmod -R a+rwX ${VIRTUAL_ENV}
+    && chmod -R a+rwX ${VIRTUAL_ENV} /sim/generated
 USER $USERNAME
 ENV MPLCONFIGDIR=/tmp/matplotlib
 # openMPI needs this if no ssh/rsh available
