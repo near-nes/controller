@@ -6,9 +6,9 @@
     [
         {
             "EngineType": "python_grpc",
-            "EngineName": "bullet_simulator",
+            "EngineName": "simulation_engine",
             "ServerAddress":"127.0.0.1:1234",
-            "PythonFileName": "src/neurocontroller/nrp_bullet_engine.py",
+            "PythonFileName": "src/neurocontroller/nrp_plant_engine.py",
             "ProtobufPackages": ["Wrappers", "NrpGenericProto"],
             "EngineTimestep" : 0.0001
         },
@@ -24,12 +24,12 @@
     "DataPackProcessingFunctions":
     [
         {
-            "Name": "to_bullet",
-            "FileName": "src/neurocontroller/nrp_tf_from_nest_to_bullet.py"
+            "Name": "to_simulation_engine",
+            "FileName": "src/neurocontroller/nrp_tf_from_nest_to_plant.py"
         },
         {
-            "Name": "from_bullet",
-            "FileName": "src/neurocontroller/nrp_tf_from_bullet.py"
+            "Name": "from_simulation_engine",
+            "FileName": "src/neurocontroller/nrp_tf_from_plant.py"
         }
     ]
 }

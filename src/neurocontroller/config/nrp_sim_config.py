@@ -39,9 +39,9 @@ class SimulationConfig(BaseModel):
         return [
             EngineConfig(
                 EngineType="python_grpc",
-                EngineName=self.SimulationEngine + "_simulator",
+                EngineName="simulation_engine",
                 ServerAddress="0.0.0.0:1234",
-                PythonFileName="src/neurocontroller/nrp_" + self.SimulationEngine + "_engine.py",
+                PythonFileName="src/neurocontroller/nrp_plant_engine.py",
             ),
             EngineConfig(
                 EngineType="python_grpc",
@@ -56,12 +56,12 @@ class SimulationConfig(BaseModel):
     def DataPackProcessingFunctions(self) -> List[DataPackProcessingFunction]:
         return [
             DataPackProcessingFunction(
-                Name="to_" + self.SimulationEngine,
-                FileName="src/neurocontroller/nrp_tf_from_nest_to_" + self.SimulationEngine + ".py",
+                Name="to_simulation_engine",
+                FileName="src/neurocontroller/nrp_tf_from_nest_to_plant.py",
             ),
             DataPackProcessingFunction(
-                Name="from_" + self.SimulationEngine,
-                FileName="src/neurocontroller/nrp_tf_from_" + self.SimulationEngine + ".py",
+                Name="from_simulation_engine",
+                FileName="src/neurocontroller/nrp_tf_from_plant.py",
             ),
         ]
 

@@ -72,7 +72,7 @@ class OracleData(BaseModel):
 
 
 class SimulationParams(BaseModel, frozen=True):
-    engine: str = "bullet"  # or "mujoco"
+    engine: str = "PyBullet"  # or "MuJoCo"
     resolution: float = 1.0  # ms
     time_prep: float = 650.0  # ms
     time_move: float = 500.0  # ms
