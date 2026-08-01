@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 from . import MasterParams
 
@@ -20,39 +20,55 @@ class DataPackProcessingFunction(BaseModel):
 
 
 class SimulationConfig(BaseModel):
-    SimulationName: str = "test_bullet"
-    SimulationDescription: str = (
-        "Launch a py_sim engine to run a Bullet simulation and a python engine to control the simulation"
-    )
+    SimulationEngine: str
     SimulationTimeout: float
-    EngineConfigs: List[EngineConfig] = [
-        EngineConfig(
-            EngineType="python_grpc",
-            EngineName="bullet_simulator",
-            ServerAddress="0.0.0.0:1234",
-            PythonFileName="src/neurocontroller/nrp_bullet_engine.py",
-        ),
-        EngineConfig(
-            EngineType="python_grpc",
-            EngineName="nest_client",
-            ServerAddress="0.0.0.0:1235",
-            PythonFileName="src/neurocontroller/nrp_neural_engine.py",
-        ),
-    ]
-    DataPackProcessingFunctions: List[DataPackProcessingFunction] = [
-        DataPackProcessingFunction(
-            Name="to_bullet",
-            FileName="src/neurocontroller/nrp_tf_from_nest_to_bullet.py",
-        ),
-        DataPackProcessingFunction(
-            Name="from_bullet",
-            FileName="src/neurocontroller/nrp_tf_from_bullet.py",
-        ),
-    ]
+
+    @computed_field
+    @property
+    def SimulationName(self) -> str:
+        return "test_" + self.SimulationEngine
+
+    @computed_field
+    @property
+    def SimulationDescription(self) -> str:
+        return "Launch a py_sim engine to run a" + self.SimulationEngine + " simulation and a python engine to control the simulation"
+
+    @computed_field
+    @property
+    def EngineConfigs(self) -> List[EngineConfig]:
+        return [
+            EngineConfig(
+                EngineType="python_grpc",
+                EngineName="simulation_engine",
+                ServerAddress="0.0.0.0:1234",
+                PythonFileName="src/neurocontroller/nrp_plant_engine.py",
+            ),
+            EngineConfig(
+                EngineType="python_grpc",
+                EngineName="nest_client",
+                ServerAddress="0.0.0.0:1235",
+                PythonFileName="src/neurocontroller/nrp_neural_engine.py",
+            )
+        ]
+
+    @computed_field
+    @property
+    def DataPackProcessingFunctions(self) -> List[DataPackProcessingFunction]:
+        return [
+            DataPackProcessingFunction(
+                Name="to_simulation_engine",
+                FileName="src/neurocontroller/nrp_tf_from_nest_to_plant.py",
+            ),
+            DataPackProcessingFunction(
+                Name="from_simulation_engine",
+                FileName="src/neurocontroller/nrp_tf_from_plant.py",
+            ),
+        ]
 
     @classmethod
     def from_masterparams(cls, mp: MasterParams, **kwargs):
         return SimulationConfig(
             SimulationTimeout=mp.simulation.duration_ms / 1000,
-            **kwargs,
+            SimulationEngine=mp.simulation.engine,
+            **kwargs
         )

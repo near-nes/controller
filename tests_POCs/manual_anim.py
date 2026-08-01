@@ -20,7 +20,7 @@ from neurocontroller.config.core_models import (
 )
 from neurocontroller.config.paths import RunPaths
 from neurocontroller.config.plant_config import PlantConfig
-from neurocontroller.plant.robotic_plant import RoboticPlant
+from neurocontroller.plant.pybullet_plant import PyBulletPlant
 
 AXES_TO_CAPTURE = [
     # "x",
@@ -74,7 +74,7 @@ if __name__ == "__main__":
             )
         ),
     )
-    plant = RoboticPlant(config, pybullet)
+    plant = PyBulletPlant(config, pybullet)
 
     current_angle_elbow = np.deg2rad(START_ANGLE_ELBOW)
 

@@ -7,11 +7,13 @@ import structlog
 from neurocontroller.config.paths import EMBODIMENT_ASSETS
 from neurocontroller.config.plant_config import PlantConfig
 from neurocontroller.plant.plant_models import JointState, JointStates
+from neurocontroller.plant.plant_interface import PlantInterface
 
 
-class RoboticPlant:
+class PyBulletRoboticPlant(PlantInterface):
     """
-    Abstracts all PyBullet interactions for the 1-DOF robotic arm.
+    PyBullet implementation of the plant interface.
+    Abstracts all PyBullet interactions for the 3-DOF robotic arm.
     Initializes the PyBullet environment, loads the robot, manages its state,
     applies commands, and implements plant reset functionality.
     """

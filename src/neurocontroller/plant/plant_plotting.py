@@ -475,11 +475,11 @@ def generate_video_from_existing_result_single_trial(
     import ffmpeg
     import pybullet
 
-    from neurocontroller.plant.robotic_plant import RoboticPlant
+    from neurocontroller.plant.pybullet_plant import PyBulletRoboticPlant
 
     images_path = plant_config.run_paths.figures_receiver
 
-    plant = RoboticPlant(plant_config, pybullet)
+    plant = PyBulletRoboticPlant(plant_config, pybullet)
     data = plant_data.joint_data
     steps_single_trial = int(
         plant_config.master_config.simulation.duration_ms
