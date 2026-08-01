@@ -330,7 +330,7 @@ model state_neuron_nestml:
                 for m in 0 ... (N_pred-1) step 1:
                     var_pred += (pred_counts[m]- mean_pred)**2
                 var_pred /= N_pred
-                CV_pred = (var_pred/mean_pred)
+                CV_pred = ((var_pred**(1/2))/mean_pred)
             else:
                 CV_pred = 3.0
 
