@@ -1,6 +1,10 @@
 # needed for the pkg-config
 setuptools<80
 
+# packaging 26 adds __slots__ to Requirement; bsb-core's PackageRequirement
+# sets a custom attribute on it and crashes with AttributeError
+packaging<26
+
 numpy==1.26.0
 cython==3.0.12
 
