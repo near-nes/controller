@@ -216,9 +216,11 @@ RUN cd ${NRP_SRC_DIR} && bash .ci/11-prepare-build.sh && bash .ci/20-build.sh
 
 
 ####################### CEREBELLUM+MODELS #######################
-RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
+# TEMPORARY: vvorobjov fork carries the NEST 3.10 port of custom_stdp;
+# point back at near-nes/cerebellar-models once the upstream PR merges
+RUN git clone https://github.com/vvorobjov/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
-    && git checkout 4403f7e6c91063e6737cc410410d342df9598fa9 \
+    && git checkout 222bf7d93d82668b2a841e4c98d8b3e43fc8ac7e \
     && pip install --no-deps . \
     && cd custom_stdp \
     && cmake . \
