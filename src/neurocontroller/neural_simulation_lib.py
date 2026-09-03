@@ -56,7 +56,7 @@ def setup_nest_kernel(
     kernel_params["total_num_virtual_procs"] = master_params.total_num_virtual_procs
 
     nest.SetKernelStatus(kernel_params)
-    nest.set_verbosity("M_ERROR")
+    nest.verbosity = nest.VerbosityLevel.ERROR
     log.info(
         f"NEST Kernel: Resolution: {nest.GetKernelStatus('resolution')}ms, Seed: {nest.GetKernelStatus('rng_seed')}, Data path: {nest.GetKernelStatus('data_path')}"
     )

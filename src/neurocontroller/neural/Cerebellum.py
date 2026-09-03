@@ -290,7 +290,7 @@ class Cerebellum:
                     )
 
                 # apply sorted weights according to the existing SynapseCollection
-                nest.SetStatus(conn_nest, [{"weight": w} for w in weights_sorted])
+                conn_nest.set([{"weight": w} for w in weights_sorted])
                 applied_weights += len(weights_sorted)
         self.log.warning(f"applying all weights took: {create_plastic.total_time}")
         if applied_weights != num_conns_curr_proc:
