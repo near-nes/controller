@@ -205,7 +205,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV NRP_SRC_DIR=/tmp/nrp-core-src
 ENV CMAKE_CACHE_FILE=${NRP_SRC_DIR}/.ci/cmake_cache/t3_4.cmake
-ARG NRP_CORE_SHA=25a73b5a711bec034cac353f7f583f840e51f817
+# nrp-core 1.5.2
+ARG NRP_CORE_SHA=ac8a47cadbf19cc424963a387aee8b9a28f95be2
 RUN git clone https://bitbucket.org/hbpneurorobotics/nrp-core.git ${NRP_SRC_DIR} \
     && cd ${NRP_SRC_DIR} \
     && git fetch origin ${NRP_CORE_SHA} \
