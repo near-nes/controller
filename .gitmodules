@@ -1,6 +1,6 @@
 [submodule "submodules/motor_cortex_eprop"]
 	path = submodules/motor_cortex_eprop
-	url = git@github.com:near-nes/motor-cortex-eprop.git
+	url = https://github.com/vvorobjov/motor-cortex-eprop.git
 [submodule "submodules/pfc_planner"]
 	path = submodules/pfc_planner
 	url = git@github.com:near-nes/pfc-planner.git
