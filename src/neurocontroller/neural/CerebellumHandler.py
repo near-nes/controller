@@ -166,9 +166,9 @@ class CerebellumHandler:
         signal_sensibility = np.linspace(
             -params.freq_max, params.freq_max, self.N_mossy_inv
         )
-        nest.SetStatus(motor_commands, pop_params)
+        motor_commands.set(pop_params)
         for i, neuron in enumerate(motor_commands):
-            nest.SetStatus(neuron, {"desired": signal_sensibility[i]})
+            neuron.set({"desired": signal_sensibility[i]})
         self.interface_pops.motor_commands = self._pop_view(motor_commands)
 
         # Forward Error Calculation (Input to Fwd IO)
@@ -180,10 +180,10 @@ class CerebellumHandler:
             "simulation_steps": len(self.total_time_vect),
         }
         error_fwd_p = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(error_fwd_p, {**pop_params, "pos": True})
+        error_fwd_p.set({**pop_params, "pos": True})
         self.interface_pops.error_fwd_p = self._pop_view(error_fwd_p)
         error_fwd_n = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(error_fwd_n, {**pop_params, "pos": False})
+        error_fwd_n.set({**pop_params, "pos": False})
         self.interface_pops.error_fwd_n = self._pop_view(error_fwd_n)
 
         # Planner Relay (Input to Inv MFs) - Size N_mossy_inv
@@ -198,9 +198,9 @@ class CerebellumHandler:
 
         plan_to_inv = nest.Create("rb_neuron_nestml", self.N_mossy_inv)
         signal_sensibility = np.linspace(0, params.freq_max, self.N_mossy_inv)
-        nest.SetStatus(plan_to_inv, pop_params)
+        plan_to_inv.set(pop_params)
         for i, neuron in enumerate(plan_to_inv):
-            nest.SetStatus(neuron, {"desired": signal_sensibility[i]})
+            neuron.set({"desired": signal_sensibility[i]})
 
         self.interface_pops.plan_to_inv = self._pop_view(plan_to_inv)
 
@@ -213,10 +213,10 @@ class CerebellumHandler:
             "simulation_steps": len(self.total_time_vect),
         }
         error_inv_p = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(error_inv_p, {**pop_params, "pos": True})
+        error_inv_p.set({**pop_params, "pos": True})
         self.interface_pops.error_inv_p = self._pop_view(error_inv_p)
         error_inv_n = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(error_inv_n, {**pop_params, "pos": False})
+        error_inv_n.set({**pop_params, "pos": False})
         self.interface_pops.error_inv_n = self._pop_view(error_inv_n)
 
         # Motor Prediction Scaling (Output from Inv DCN)
@@ -228,10 +228,10 @@ class CerebellumHandler:
             "simulation_steps": len(self.total_time_vect),
         }
         motor_prediction_p = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(motor_prediction_p, {**pop_params, "pos": True})
+        motor_prediction_p.set({**pop_params, "pos": True})
         self.interface_pops.motor_prediction_p = self._pop_view(motor_prediction_p)
         motor_prediction_n = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(motor_prediction_n, {**pop_params, "pos": False})
+        motor_prediction_n.set({**pop_params, "pos": False})
         self.interface_pops.motor_prediction_n = self._pop_view(motor_prediction_n)
 
     def _pop_view(self, nest_pop) -> PopView:
@@ -693,45 +693,35 @@ class CerebellumHandler:
                 self.log.debug("[neural] Applying blocking window to IO-MF-PRED")
                 # BLOCKING WINDOW ON - FORWARD
                 # block io_fwd
-                nest.SetStatus(self.blocking_window_io_fwd_pos_conns, {"weight": 0.0})
-                nest.SetStatus(self.blocking_window_io_fwd_neg_conns, {"weight": 0.0})
+                self.blocking_window_io_fwd_pos_conns.set({"weight": 0.0})
+                self.blocking_window_io_fwd_neg_conns.set({"weight": 0.0})
 
                 # block mf_fwd
-                nest.SetStatus(
-                    self.interface_pops.motor_commands.pop,
-                    {"max_peak_rate": 0.0, "base_rate": 0.0},
+                self.interface_pops.motor_commands.pop.set(
+                    {"max_peak_rate": 0.0, "base_rate": 0.0}
                 )
 
                 # block pred
-                nest.SetStatus(self.blocking_window_pred_pos_pos_conns, {"weight": 0.0})
-                nest.SetStatus(self.blocking_window_pred_neg_neg_conns, {"weight": 0.0})
-                nest.SetStatus(self.blocking_window_pred_pos_neg_conns, {"weight": 0.0})
-                nest.SetStatus(self.blocking_window_pred_neg_pos_conns, {"weight": 0.0})
+                self.blocking_window_pred_pos_pos_conns.set({"weight": 0.0})
+                self.blocking_window_pred_neg_neg_conns.set({"weight": 0.0})
+                self.blocking_window_pred_pos_neg_conns.set({"weight": 0.0})
+                self.blocking_window_pred_neg_pos_conns.set({"weight": 0.0})
 
                 # BLOCKING WINDOW ON - INVERSE
                 # block io_inv
-                nest.SetStatus(self.blocking_window_io_inv_pos_conns, {"weight": 0.0})
-                nest.SetStatus(self.blocking_window_io_inv_neg_conns, {"weight": 0.0})
+                self.blocking_window_io_inv_pos_conns.set({"weight": 0.0})
+                self.blocking_window_io_inv_neg_conns.set({"weight": 0.0})
 
                 # block mf_inv
-                nest.SetStatus(
-                    self.interface_pops.plan_to_inv.pop,
-                    {"max_peak_rate": 0.0, "base_rate": 0.0},
+                self.interface_pops.plan_to_inv.pop.set(
+                    {"max_peak_rate": 0.0, "base_rate": 0.0}
                 )
 
                 # block motor_pred
-                nest.SetStatus(
-                    self.blocking_window_motor_pred_pos_pos_conns, {"weight": 0.0}
-                )
-                nest.SetStatus(
-                    self.blocking_window_motor_pred_neg_neg_conns, {"weight": 0.0}
-                )
-                nest.SetStatus(
-                    self.blocking_window_motor_pred_pos_neg_conns, {"weight": 0.0}
-                )
-                nest.SetStatus(
-                    self.blocking_window_motor_pred_neg_pos_conns, {"weight": 0.0}
-                )
+                self.blocking_window_motor_pred_pos_pos_conns.set({"weight": 0.0})
+                self.blocking_window_motor_pred_neg_neg_conns.set({"weight": 0.0})
+                self.blocking_window_motor_pred_pos_neg_conns.set({"weight": 0.0})
+                self.blocking_window_motor_pred_neg_pos_conns.set({"weight": 0.0})
 
                 self.blocking_window_is_applied = True
 
@@ -741,49 +731,39 @@ class CerebellumHandler:
                 # BLOCKING WINDOW OFF - FORWARD
                 # active  io_fwd
                 w = self.conn_params.error_io_f.weight
-                nest.SetStatus(self.blocking_window_io_fwd_pos_conns, {"weight": w})
-                nest.SetStatus(self.blocking_window_io_fwd_neg_conns, {"weight": -w})
+                self.blocking_window_io_fwd_pos_conns.set({"weight": w})
+                self.blocking_window_io_fwd_neg_conns.set({"weight": -w})
 
                 # active mf_fwd
                 base_rate_mc = self.pops_params.motor_commands.base_rate
-                nest.SetStatus(
-                    self.interface_pops.motor_commands.pop,
-                    {"max_peak_rate": 300.0, "base_rate": base_rate_mc},
+                self.interface_pops.motor_commands.pop.set(
+                    {"max_peak_rate": 300.0, "base_rate": base_rate_mc}
                 )
 
                 # active pred
                 w = self.conn_params.dcn_forw_prediction.weight
-                nest.SetStatus(self.blocking_window_pred_pos_pos_conns, {"weight": w})
-                nest.SetStatus(self.blocking_window_pred_pos_neg_conns, {"weight": w})
-                nest.SetStatus(self.blocking_window_pred_neg_pos_conns, {"weight": -w})
-                nest.SetStatus(self.blocking_window_pred_neg_neg_conns, {"weight": -w})
+                self.blocking_window_pred_pos_pos_conns.set({"weight": w})
+                self.blocking_window_pred_pos_neg_conns.set({"weight": w})
+                self.blocking_window_pred_neg_pos_conns.set({"weight": -w})
+                self.blocking_window_pred_neg_neg_conns.set({"weight": -w})
 
                 # BLOCKING WINDOW OFF - INVERSE
                 # active  io_inv
                 w = self.conn_params.error_inv_io_i.weight
-                nest.SetStatus(self.blocking_window_io_inv_pos_conns, {"weight": w})
-                nest.SetStatus(self.blocking_window_io_inv_neg_conns, {"weight": -w})
+                self.blocking_window_io_inv_pos_conns.set({"weight": w})
+                self.blocking_window_io_inv_neg_conns.set({"weight": -w})
 
                 # active mf_inv
                 base_rate_mc = self.pops_params.plan_to_inv.base_rate
-                nest.SetStatus(
-                    self.interface_pops.plan_to_inv.pop,
-                    {"max_peak_rate": 300.0, "base_rate": base_rate_mc},
+                self.interface_pops.plan_to_inv.pop.set(
+                    {"max_peak_rate": 300.0, "base_rate": base_rate_mc}
                 )
 
                 # active motor_pred
                 w = self.conn_params.dcn_i_motor_pred.weight
-                nest.SetStatus(
-                    self.blocking_window_motor_pred_pos_pos_conns, {"weight": w}
-                )
-                nest.SetStatus(
-                    self.blocking_window_motor_pred_pos_neg_conns, {"weight": w}
-                )
-                nest.SetStatus(
-                    self.blocking_window_motor_pred_neg_pos_conns, {"weight": -w}
-                )
-                nest.SetStatus(
-                    self.blocking_window_motor_pred_neg_neg_conns, {"weight": -w}
-                )
+                self.blocking_window_motor_pred_pos_pos_conns.set({"weight": w})
+                self.blocking_window_motor_pred_pos_neg_conns.set({"weight": w})
+                self.blocking_window_motor_pred_neg_pos_conns.set({"weight": -w})
+                self.blocking_window_motor_pred_neg_neg_conns.set({"weight": -w})
 
                 self.blocking_window_is_applied = False

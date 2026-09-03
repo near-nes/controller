@@ -157,10 +157,10 @@ ENV CFLAGS=
 
 WORKDIR $DEPS_DIR
 
-####################### NEST 3.9 #######################
-ENV NEST_VERSION=3.9
+####################### NEST 3.10 #######################
+ENV NEST_VERSION=3.10
 
-# Install NEST 3.9
+# Install NEST 3.10
 WORKDIR $DEPS_DIR
 RUN git clone --depth 1 --branch v${NEST_VERSION} https://github.com/nest/nest-simulator/
 WORKDIR ${DEPS_DIR}/nest-simulator
@@ -205,7 +205,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV NRP_SRC_DIR=/tmp/nrp-core-src
 ENV CMAKE_CACHE_FILE=${NRP_SRC_DIR}/.ci/cmake_cache/t3_4.cmake
-ARG NRP_CORE_SHA=25a73b5a711bec034cac353f7f583f840e51f817
+# nrp-core 1.5.2
+ARG NRP_CORE_SHA=ac8a47cadbf19cc424963a387aee8b9a28f95be2
 RUN git clone https://bitbucket.org/hbpneurorobotics/nrp-core.git ${NRP_SRC_DIR} \
     && cd ${NRP_SRC_DIR} \
     && git fetch origin ${NRP_CORE_SHA} \
@@ -215,9 +216,11 @@ RUN cd ${NRP_SRC_DIR} && bash .ci/11-prepare-build.sh && bash .ci/20-build.sh
 
 
 ####################### CEREBELLUM+MODELS #######################
-RUN git clone https://github.com/near-nes/cerebellar-models $CEREBELLUM_PATH \
+# TEMPORARY: vvorobjov fork carries the NEST 3.10 port of custom_stdp;
+# point back at near-nes/cerebellar-models once the upstream PR merges
+RUN git clone https://github.com/vvorobjov/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
-    && git checkout 4403f7e6c91063e6737cc410410d342df9598fa9 \
+    && git checkout 55c9b49081436ac4cb61a7c79fdda3249ad3afa5 \
     && pip install --no-deps . \
     && cd custom_stdp \
     && cmake . \

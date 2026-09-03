@@ -172,8 +172,11 @@ class Controller:
             recs = []
             self.log.debug(f"saving {pre_pop}>{post_pop}...")
             for conn in conns:
-                st = nest.GetStatus(
-                    conn,
+                if len(conn) != 1:
+                    raise ValueError(
+                        f"Multiple ({len(conn)}) connections found where one was expected"
+                    )
+                st = conn.get(
                     [
                         "source",
                         "target",
@@ -183,22 +186,15 @@ class Controller:
                         "weight",
                         "port",
                         # "receptor", see https://github.com/near-nes/controller/issues/102#issuecomment-3558895210
-                    ],
+                    ]
                 )
-                if len(st) != 1:
-                    raise ValueError(
-                        f"Multiple ({len(st)}) statuses found for a single connection ({st})"
-                    )
-                (
-                    source_neur,
-                    target_neur,
-                    synapse_id,
-                    delay,
-                    synapse_model,
-                    weight,
-                    port,
-                    # receptor_type, see https://github.com/near-nes/controller/issues/102#issuecomment-3558895210
-                ) = st[0]
+                source_neur = st["source"]
+                target_neur = st["target"]
+                synapse_id = st["synapse_id"]
+                delay = st["delay"]
+                synapse_model = st["synapse_model"]
+                weight = st["weight"]
+                port = st["port"]
                 recs.append(
                     SynapseRecording(
                         syn=Synapse(
@@ -356,11 +352,11 @@ class Controller:
         self.log.debug("Creating state as basic adder", **pop_params)
 
         pop_p = nest.Create("basic_neuron_nestml", self.N)
-        nest.SetStatus(pop_p, {**pop_params, "pos": True})
+        pop_p.set({**pop_params, "pos": True})
         self.pops.state_p = self._pop_view(pop_p)
 
         pop_n = nest.Create("basic_neuron_nestml", self.N)
-        nest.SetStatus(pop_n, {**pop_params, "pos": False})
+        pop_n.set({**pop_params, "pos": False})
         self.pops.state_n = self._pop_view(pop_n)
 
     def _build_sensory_neurons(self):
@@ -387,11 +383,11 @@ class Controller:
         }
 
         pop_p = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(pop_p, {**pop_params, "pos": True})
+        pop_p.set({**pop_params, "pos": True})
         self.pops.pred_p = self._pop_view(pop_p)
 
         pop_n = nest.Create("diff_neuron_nestml", self.N)
-        nest.SetStatus(pop_n, {**pop_params, "pos": False})
+        pop_n.set({**pop_params, "pos": False})
         self.pops.pred_n = self._pop_view(pop_n)
 
     def _build_sensory_delayed_neurons(self):
@@ -406,11 +402,11 @@ class Controller:
         self.log.debug("Creating feedback neurons", **pop_params)
 
         pop_p = nest.Create("basic_neuron_nestml", self.N)
-        nest.SetStatus(pop_p, {**pop_params, "pos": True})
+        pop_p.set({**pop_params, "pos": True})
         self.pops.sensory_delayed_p = self._pop_view(pop_p)
 
         pop_n = nest.Create("basic_neuron_nestml", self.N)
-        nest.SetStatus(pop_n, {**pop_params, "pos": False})
+        pop_n.set({**pop_params, "pos": False})
         self.pops.sensory_delayed_n = self._pop_view(pop_n)
 
     def _build_brainstem(self):
@@ -425,11 +421,11 @@ class Controller:
         self.log.debug("Creating output neurons (brainstem)", **pop_params)
 
         pop_p = nest.Create("basic_neuron_nestml", self.N)
-        nest.SetStatus(pop_p, {**pop_params, "pos": True})
+        pop_p.set({**pop_params, "pos": True})
         self.pops.brainstem_p = self._pop_view(pop_p)
 
         pop_n = nest.Create("basic_neuron_nestml", self.N)
-        nest.SetStatus(pop_n, {**pop_params, "pos": False})
+        pop_n.set({**pop_params, "pos": False})
         self.pops.brainstem_n = self._pop_view(pop_n)
 
     # --- 2. Block Connection ---
@@ -633,15 +629,14 @@ class Controller:
             "weight": 1,
         }
         self.proxy_out = nest.Create("basic_neuron_nestml", 2)
-        nest.SetStatus(
-            self.proxy_out,
+        self.proxy_out.set(
             {
                 "kp": 0,
                 "buffer_size": buffer_len,
                 "base_rate": 0,
                 "simulation_steps": self.sim_params.sim_steps,
                 "pos": True,
-            },
+            }
         )
 
         nest.Connect(
@@ -687,18 +682,15 @@ class Controller:
     def update_sensory_info_from_NRP(self, angle: float, sim_time: float):
         pos = self.proxy_in_p.lam(angle)
         neg = self.proxy_in_n.lam(angle)
-        nest.SetStatus(
-            self.proxy_in_gen,
+        self.proxy_in_gen.set(
             [
                 {"rate_times": [sim_time], "rate_values": [pos]},
                 {"rate_times": [sim_time], "rate_values": [neg]},
-            ],
+            ]
         )
 
     def extract_motor_command_NRP(self):
-        rate_pos, rate_neg = [
-            i / self.N for i in nest.GetStatus(self.proxy_out, "in_rate")[0:2]
-        ]
+        rate_pos, rate_neg = [i / self.N for i in self.proxy_out.get("in_rate")[0:2]]
 
         return rate_pos, rate_neg
 

@@ -34,8 +34,8 @@ class PopView:
         else:  # to_file=False
             self.detector = self._create_connect_spike_detector(pop)
 
-        self.neuron_model = nest.GetStatus(pop, "model")[0]
-        self.gids = nest.GetStatus(pop, "global_id")
+        self.neuron_model = pop[:1].get("model")
+        self.gids = pop.tolist()
 
     def _initialize_detector(self, label):
         param_file = {"record_to": "ascii", "label": label}
@@ -105,7 +105,7 @@ class PopView:
 
     def _create_connect_spike_detector(self, pop, **kwargs):
         spike_detector = nest.Create("spike_recorder")
-        nest.SetStatus(spike_detector, params=kwargs)
+        spike_detector.set(kwargs)
         nest.Connect(pop, spike_detector)
         return spike_detector
 
@@ -115,10 +115,10 @@ class PopView:
     def get_spike_events(self):
         spike_detector = self.detector
         # Get metadata about the recorder
-        metadata = nest.GetStatus(spike_detector)
+        metadata = spike_detector.get()
 
         if metadata.get("record_to") == "memory":
-            dSD = nest.GetStatus(spike_detector, "events")
+            dSD = spike_detector.get("events")
             evs = dSD["senders"]
             ts = dSD["times"]
             return evs, ts
