@@ -157,10 +157,10 @@ ENV CFLAGS=
 
 WORKDIR $DEPS_DIR
 
-####################### NEST 3.9 #######################
-ENV NEST_VERSION=3.9
+####################### NEST 3.10 #######################
+ENV NEST_VERSION=3.10
 
-# Install NEST 3.9
+# Install NEST 3.10
 WORKDIR $DEPS_DIR
 RUN git clone --depth 1 --branch v${NEST_VERSION} https://github.com/nest/nest-simulator/
 WORKDIR ${DEPS_DIR}/nest-simulator
