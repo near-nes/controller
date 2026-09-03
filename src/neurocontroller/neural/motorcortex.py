@@ -56,20 +56,24 @@ class M1Mock:
     def create_network(self):
         par_m1 = {"base_rate": self.params.m1_base_rate, "kp": self.params.m1_kp}
         self.output_p = nest.Create("tracking_neuron_nestml", n=self.N)
-        self.output_p.set({
+        self.output_p.set(
+            {
                 **par_m1,
                 "pos": True,
                 "traj": self.motorCommands,
                 "simulation_steps": self.sim_steps,
-            })
+            }
+        )
 
         self.output_n = nest.Create("tracking_neuron_nestml", n=self.N)
-        self.output_n.set({
+        self.output_n.set(
+            {
                 **par_m1,
                 "pos": False,
                 "traj": self.motorCommands,
                 "simulation_steps": self.sim_steps,
-            })
+            }
+        )
         # self.output_n = PopView(n, to_file=True, label="mc_m1_n")
 
     def connect(self, source):
@@ -188,36 +192,44 @@ class MotorCortex:
 
         ############ FEEDBACK ############
         tmp_pop_p = nest.Create("diff_neuron_nestml", n=numNeurons, params=par_fbk)
-        tmp_pop_p.set({
+        tmp_pop_p.set(
+            {
                 "pos": True,
                 "buffer_size": buf_sz,
                 "simulation_steps": self.sim.sim_steps,
-            })
+            }
+        )
         self.fbk_p = PopView(tmp_pop_p, to_file=True, label="mc_fbk_p")
 
         tmp_pop_n = nest.Create("diff_neuron_nestml", n=numNeurons, params=par_fbk)
-        tmp_pop_n.set({
+        tmp_pop_n.set(
+            {
                 "pos": False,
                 "buffer_size": buf_sz,
                 "simulation_steps": self.sim.sim_steps,
-            })
+            }
+        )
         self.fbk_n = PopView(tmp_pop_n, to_file=True, label="mc_fbk_n")
 
         ############ OUTPUT ############
         tmp_pop_p = nest.Create("basic_neuron_nestml", n=numNeurons, params=par_out)
-        tmp_pop_p.set({
+        tmp_pop_p.set(
+            {
                 "pos": True,
                 "buffer_size": buf_sz,
                 "simulation_steps": self.sim.sim_steps,
-            })
+            }
+        )
         self.out_p = PopView(tmp_pop_p, to_file=True, label="mc_out_p")
 
         tmp_pop_n = nest.Create("basic_neuron_nestml", n=numNeurons, params=par_out)
-        tmp_pop_n.set({
+        tmp_pop_n.set(
+            {
                 "pos": False,
                 "buffer_size": buf_sz,
                 "simulation_steps": self.sim.sim_steps,
-            })
+            }
+        )
         self.out_n = PopView(tmp_pop_n, to_file=True, label="mc_out_n")
         # self.connect_m1_to_out()
 

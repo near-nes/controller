@@ -697,7 +697,9 @@ class CerebellumHandler:
                 self.blocking_window_io_fwd_neg_conns.set({"weight": 0.0})
 
                 # block mf_fwd
-                self.interface_pops.motor_commands.pop.set({"max_peak_rate": 0.0, "base_rate": 0.0})
+                self.interface_pops.motor_commands.pop.set(
+                    {"max_peak_rate": 0.0, "base_rate": 0.0}
+                )
 
                 # block pred
                 self.blocking_window_pred_pos_pos_conns.set({"weight": 0.0})
@@ -711,7 +713,9 @@ class CerebellumHandler:
                 self.blocking_window_io_inv_neg_conns.set({"weight": 0.0})
 
                 # block mf_inv
-                self.interface_pops.plan_to_inv.pop.set({"max_peak_rate": 0.0, "base_rate": 0.0})
+                self.interface_pops.plan_to_inv.pop.set(
+                    {"max_peak_rate": 0.0, "base_rate": 0.0}
+                )
 
                 # block motor_pred
                 self.blocking_window_motor_pred_pos_pos_conns.set({"weight": 0.0})
@@ -732,7 +736,9 @@ class CerebellumHandler:
 
                 # active mf_fwd
                 base_rate_mc = self.pops_params.motor_commands.base_rate
-                self.interface_pops.motor_commands.pop.set({"max_peak_rate": 300.0, "base_rate": base_rate_mc})
+                self.interface_pops.motor_commands.pop.set(
+                    {"max_peak_rate": 300.0, "base_rate": base_rate_mc}
+                )
 
                 # active pred
                 w = self.conn_params.dcn_forw_prediction.weight
@@ -749,7 +755,9 @@ class CerebellumHandler:
 
                 # active mf_inv
                 base_rate_mc = self.pops_params.plan_to_inv.base_rate
-                self.interface_pops.plan_to_inv.pop.set({"max_peak_rate": 300.0, "base_rate": base_rate_mc})
+                self.interface_pops.plan_to_inv.pop.set(
+                    {"max_peak_rate": 300.0, "base_rate": base_rate_mc}
+                )
 
                 # active motor_pred
                 w = self.conn_params.dcn_i_motor_pred.weight

@@ -629,13 +629,15 @@ class Controller:
             "weight": 1,
         }
         self.proxy_out = nest.Create("basic_neuron_nestml", 2)
-        self.proxy_out.set({
+        self.proxy_out.set(
+            {
                 "kp": 0,
                 "buffer_size": buffer_len,
                 "base_rate": 0,
                 "simulation_steps": self.sim_params.sim_steps,
                 "pos": True,
-            })
+            }
+        )
 
         nest.Connect(
             self.pops.brainstem_p.pop, self.proxy_out[0], "all_to_all", conn_spec
@@ -680,15 +682,15 @@ class Controller:
     def update_sensory_info_from_NRP(self, angle: float, sim_time: float):
         pos = self.proxy_in_p.lam(angle)
         neg = self.proxy_in_n.lam(angle)
-        self.proxy_in_gen.set([
+        self.proxy_in_gen.set(
+            [
                 {"rate_times": [sim_time], "rate_values": [pos]},
                 {"rate_times": [sim_time], "rate_values": [neg]},
-            ])
+            ]
+        )
 
     def extract_motor_command_NRP(self):
-        rate_pos, rate_neg = [
-            i / self.N for i in self.proxy_out.get("in_rate")[0:2]
-        ]
+        rate_pos, rate_neg = [i / self.N for i in self.proxy_out.get("in_rate")[0:2]]
 
         return rate_pos, rate_neg
 
