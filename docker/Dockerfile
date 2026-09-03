@@ -220,7 +220,7 @@ RUN cd ${NRP_SRC_DIR} && bash .ci/11-prepare-build.sh && bash .ci/20-build.sh
 # point back at near-nes/cerebellar-models once the upstream PR merges
 RUN git clone https://github.com/vvorobjov/cerebellar-models $CEREBELLUM_PATH \
     && cd $CEREBELLUM_PATH \
-    && git checkout 222bf7d93d82668b2a841e4c98d8b3e43fc8ac7e \
+    && git checkout 55c9b49081436ac4cb61a7c79fdda3249ad3afa5 \
     && pip install --no-deps . \
     && cd custom_stdp \
     && cmake . \
